@@ -1,0 +1,18 @@
+node_modules/
+.next/
+.expo/
+dist/
+build/
+coverage/
+
+.env
+.env.*
+!.env.example
+
+# Local secrets — never commit
+ADMIN_CREDENTIALS.md
+
+*.log
+.DS_Store
+Thumbs.db
+*.tsbuildinfo

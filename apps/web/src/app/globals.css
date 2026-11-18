@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f7fafd;
+  --paper-2: #e8f0fa;
+  --ink: #0a1d33;
+  --forest: #0e2a4a;
+  --moss: #1d4ed8;
+  --clay: #2563eb;
+  --clay-soft: #60a5fa;
+  --sage: #9db9d9;
+  --sand: #d7e6f6;
+  --line: rgba(10, 29, 51, 0.14);
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-ink: var(--ink);
+  --color-forest: var(--forest);
+  --color-moss: var(--moss);
+  --color-clay: var(--clay);
+  --color-clay-soft: var(--clay-soft);
+  --color-sage: var(--sage);
+  --color-sand: var(--sand);
+  --color-line: var(--line);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-instrument-serif);
+  --font-display-italic: var(--font-instrument-serif-italic);
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 96px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Film-grain overlay — keeps the flat colour fields from feeling digital. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+:focus-visible {
+  outline: 2px solid var(--clay);
+  outline-offset: 3px;
+}
+
+/* Hairline rules used throughout the page. */
+.rule {
+  height: 1px;
+  background: var(--line);
+}
+
+.rule-light {
+  height: 1px;
+  background: rgba(247, 250, 253, 0.18);
+}
+
+/* Editorial eyebrow / index label. */
+.label {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Underline that draws in from the left on hover. */
+.link-line {
+  position: relative;
+}
+.link-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.link-line:hover::after,
+.link-line:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Marquee */
+.marquee {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+}
+.marquee-track {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 3rem;
+  padding-right: 3rem;
+  min-width: 100%;
+  animation: marquee 38s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.6);
+    opacity: 0.35;
+  }
+}
+.live-dot {
+  animation: breathe 2.6s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+  }
+  50% {
+    transform: translateY(-10px) rotate(var(--rot, 0deg));
+  }
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Range input, styled as a thin editorial rule. */
+input[type="range"].ledger-range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: grab;
+}
+input[type="range"].ledger-range:active {
+  cursor: grabbing;
+}
+input[type="range"].ledger-range::-webkit-slider-runnable-track {
+  height: 2px;
+  background: linear-gradient(
+    to right,
+    var(--clay) 0%,
+    var(--clay) var(--fill, 20%),
+    rgba(247, 250, 253, 0.22) var(--fill, 20%),
+    rgba(247, 250, 253, 0.22) 100%
+  );
+}
+input[type="range"].ledger-range::-moz-range-track {
+  height: 2px;
+  background: rgba(247, 250, 253, 0.22);
+}
+input[type="range"].ledger-range::-moz-range-progress {
+  height: 2px;
+  background: var(--clay);
+}
+input[type="range"].ledger-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -9px;
+  height: 20px;
+  width: 20px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--clay);
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.16);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="range"].ledger-range:hover::-webkit-slider-thumb {
+  transform: scale(1.1);
+  box-shadow: 0 0 0 7px rgba(37, 99, 235, 0.2);
+}
+input[type="range"].ledger-range::-moz-range-thumb {
+  height: 20px;
+  width: 20px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--clay);
+  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.16);
+}
+
+/* Hide number input spinners. */
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbar hidden until the containing card (group) is hovered. */
+.scrollbar-on-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.scrollbar-on-hover::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-on-hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-on-hover::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 999px;
+}
+.group:hover .scrollbar-on-hover {
+  scrollbar-color: rgba(20, 30, 25, 0.25) transparent;
+}
+.group:hover .scrollbar-on-hover::-webkit-scrollbar-thumb {
+  background-color: rgba(20, 30, 25, 0.25);
+}

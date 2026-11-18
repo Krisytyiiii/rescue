@@ -1,0 +1,991 @@
+// =============================================================================
+// FurRescue — Prisma schema
+// Target: Supabase PostgreSQL
+//
+// Conventions
+//   • Tables/columns: snake_case (@map / @@map)
+//   • Primary keys:    UUID (v4) unless a small reference table
+//   • Timestamps:      timestamptz(6), created_at / updated_at everywhere
+//   • Soft delete:     deleted_at on main aggregate tables
+//   • Coordinates:     DECIMAL(10,7) — see docs/ARCHITECTURE.md for PostGIS path
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../packages/core/src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum RoleName {
+  community_user
+  rescuer
+  admin
+
+  @@map("role_name")
+}
+
+enum AccountStatus {
+  pending
+  active
+  suspended
+  deactivated
+
+  @@map("account_status")
+}
+
+enum Species {
+  dog
+  cat
+
+  @@map("species")
+}
+
+enum ReportSpecies {
+  dog
+  cat
+  unknown
+
+  @@map("report_species")
+}
+
+enum BreedType {
+  aspin
+  puspin
+  mixed
+  other
+
+  @@map("breed_type")
+}
+
+enum Sex {
+  male
+  female
+  unknown
+
+  @@map("sex")
+}
+
+enum AnimalSize {
+  small
+  medium
+  large
+
+  @@map("animal_size")
+}
+
+enum OriginType {
+  rescue_report
+  community_post
+  surrender
+  born_in_care
+
+  @@map("origin_type")
+}
+
+enum LifecycleStatus {
+  reported
+  rescued
+  under_care
+  available
+  adoption_pending
+  adopted
+  returned_to_owner
+  deceased
+
+  @@map("lifecycle_status")
+}
+
+enum ListingStatus {
+  draft
+  pending_review
+  published
+  rejected
+  archived
+
+  @@map("listing_status")
+}
+
+enum MediaType {
+  photo
+  video
+
+  @@map("media_type")
+}
+
+enum HealthRecordType {
+  checkup
+  illness
+  injury
+  treatment
+  surgery
+  deworming
+  spay_neuter
+  other
+
+  @@map("health_record_type")
+}
+
+enum VaccinationStatus {
+  completed
+  due
+  overdue
+
+  @@map("vaccination_status")
+}
+
+enum MeasurementContext {
+  resting
+  post_activity
+  under_stress
+  during_exam
+
+  @@map("measurement_context")
+}
+
+enum ReportType {
+  stray
+  injured
+  abandoned
+
+  @@map("report_type")
+}
+
+enum UrgencyLevel {
+  low
+  medium
+  high
+  critical
+
+  @@map("urgency_level")
+}
+
+enum ReportStatus {
+  submitted
+  verified
+  assigned
+  in_progress
+  rescued
+  unable_to_locate
+  rejected
+  closed
+
+  @@map("report_status")
+}
+
+enum AssignmentStatus {
+  pending
+  accepted
+  declined
+  en_route
+  on_site
+  completed
+  failed
+
+  @@map("assignment_status")
+}
+
+enum HousingType {
+  house
+  apartment
+  boarding
+  other
+
+  @@map("housing_type")
+}
+
+enum AdoptionStatus {
+  submitted
+  under_review
+  interview_scheduled
+  approved
+  rejected
+  withdrawn
+  completed
+
+  @@map("adoption_status")
+}
+
+enum FollowupMethod {
+  in_app
+  phone
+  visit
+
+  @@map("followup_method")
+}
+
+enum ConversationContextType {
+  report
+  adoption_request
+  general
+
+  @@map("conversation_context_type")
+}
+
+enum ConversationStatus {
+  open
+  closed
+
+  @@map("conversation_status")
+}
+
+enum NotificationType {
+  report_status
+  rescue_assignment
+  adoption_status
+  new_message
+  vaccination_due
+  announcement
+  system
+
+  @@map("notification_type")
+}
+
+enum NotificationChannel {
+  in_app
+  push
+  email
+
+  @@map("notification_channel")
+}
+
+enum LearningCategory {
+  dog_behavior
+  cat_behavior
+  basic_training
+  responsible_ownership
+  health_care
+
+  @@map("learning_category")
+}
+
+enum LessonContentType {
+  text
+  video
+  image
+  pdf
+
+  @@map("lesson_content_type")
+}
+
+enum ProgressStatus {
+  not_started
+  in_progress
+  completed
+
+  @@map("progress_status")
+}
+
+enum AnalyticsSpecies {
+  dog
+  cat
+  all
+
+  @@map("analytics_species")
+}
+
+enum GeneratedReportKind {
+  adoption_trends
+  rescue_efficiency
+  geographic_distribution
+  health_summary
+
+  @@map("generated_report_kind")
+}
+
+enum GeneratedReportFormat {
+  pdf
+  xlsx
+  csv
+
+  @@map("generated_report_format")
+}
+
+// ---------------------------------------------------------------------------
+// 2.1 Access and Users
+// ---------------------------------------------------------------------------
+
+model Role {
+  id          Int      @id @default(autoincrement()) @db.SmallInt
+  roleName    RoleName @unique @map("role_name")
+  description String?  @db.VarChar(150)
+
+  users User[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("roles")
+}
+
+model Barangay {
+  id              Int      @id @default(autoincrement())
+  name            String   @unique @map("barangay_name") @db.VarChar(80)
+  centerLatitude  Decimal? @map("center_latitude") @db.Decimal(10, 7)
+  centerLongitude Decimal? @map("center_longitude") @db.Decimal(10, 7)
+  boundaryGeojson Json?    @map("boundary_geojson")
+
+  users              User[]
+  reports            Report[]
+  analyticsSnapshots AnalyticsSnapshot[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("barangays")
+}
+
+model User {
+  id              String        @id @default(uuid()) @db.Uuid
+  roleId          Int           @map("role_id") @db.SmallInt
+  barangayId      Int?          @map("barangay_id")
+  firstName       String        @map("first_name") @db.VarChar(60)
+  middleName      String?       @map("middle_name") @db.VarChar(60)
+  lastName        String        @map("last_name") @db.VarChar(60)
+  email           String        @unique @db.VarChar(120)
+  phoneNumber     String?       @unique @map("phone_number") @db.VarChar(15)
+  passwordHash    String        @map("password_hash") @db.VarChar(255)
+  addressLine     String?       @map("address_line") @db.VarChar(255)
+  profilePhotoUrl String?       @map("profile_photo_url") @db.VarChar(255)
+  emailVerifiedAt DateTime?     @map("email_verified_at") @db.Timestamptz(6)
+  accountStatus   AccountStatus @default(active) @map("account_status")
+  lastLoginAt     DateTime?     @map("last_login_at") @db.Timestamptz(6)
+
+  role     Role      @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  barangay Barangay? @relation(fields: [barangayId], references: [id], onDelete: SetNull)
+
+  passwordResets           PasswordReset[]
+  reports                  Report[]                  @relation("ReportReporter")
+  verifiedReports          Report[]                  @relation("ReportVerifier")
+  reportStatusChanges      ReportStatusHistory[]     @relation("ReportStatusChanger")
+  animalsPosted            Animal[]                  @relation("AnimalPoster")
+  animalMediaUploaded      AnimalMedia[]             @relation("AnimalMediaUploader")
+  healthRecordsAttended    HealthRecord[]            @relation("HealthAttendant")
+  vaccinationsAdministered Vaccination[]             @relation("VaccinationAdmin")
+  heartRateLogsRecorded    HeartRateLog[]            @relation("HeartRateRecorder")
+  rescueAssignments        RescueOperation[]         @relation("RescueRescuer")
+  rescueAssignmentsMade    RescueOperation[]         @relation("RescueAssigner")
+  adoptionRequests         AdoptionRequest[]         @relation("AdoptionAdopter")
+  adoptionRequestsReviewed AdoptionRequest[]         @relation("AdoptionReviewer")
+  followupsConducted       AdoptionFollowup[]        @relation("FollowupConductor")
+  favorites                Favorite[]
+  conversationParticipants ConversationParticipant[]
+  messagesSent             Message[]
+  notifications            Notification[]
+  learningModulesCreated   LearningModule[]          @relation("LearningModuleAuthor")
+  learningProgress         UserLearningProgress[]
+  quizAttempts             QuizAttempt[]
+  generatedReports         GeneratedReport[]         @relation("GeneratedReportAuthor")
+  auditLogs                AuditLog[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([roleId])
+  @@index([barangayId])
+  @@index([accountStatus])
+  @@map("users")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("password_resets")
+}
+
+// ---------------------------------------------------------------------------
+// 2.2 Animals and Health
+// ---------------------------------------------------------------------------
+
+model Animal {
+  id                  String          @id @default(uuid()) @db.Uuid
+  animalCode          String          @unique @map("animal_code") @db.VarChar(20)
+  name                String?         @db.VarChar(60)
+  species             Species
+  breedType           BreedType       @map("breed_type")
+  sex                 Sex
+  estimatedAgeMonths  Int?            @map("estimated_age_months") @db.SmallInt
+  size                AnimalSize?
+  colorMarkings       String?         @map("color_markings") @db.VarChar(150)
+  temperament         String?         @db.VarChar(255)
+  weightKg            Decimal?        @map("weight_kg") @db.Decimal(5, 2)
+  isNeutered          Boolean         @default(false) @map("is_neutered")
+  microchipNo         String?         @unique @map("microchip_no") @db.VarChar(30)
+  originType          OriginType      @map("origin_type")
+  sourceReportId      String?         @unique @map("source_report_id") @db.Uuid
+  postedByUserId      String?         @map("posted_by_user_id") @db.Uuid
+  lifecycleStatus     LifecycleStatus @map("lifecycle_status")
+  listingStatus       ListingStatus   @default(draft) @map("listing_status")
+  intakeDate          DateTime?       @map("intake_date") @db.Date
+  adoptedDate         DateTime?       @map("adopted_date") @db.Date
+  primaryPhotoUrl     String?         @map("primary_photo_url") @db.VarChar(255)
+  model3dUrl          String?         @map("model_3d_url") @db.VarChar(255)
+  model3dThumbnailUrl String?         @map("model_3d_thumbnail_url") @db.VarChar(255)
+  description         String?
+
+  sourceReport Report? @relation("ReportAnimal", fields: [sourceReportId], references: [id], onDelete: SetNull)
+  postedBy     User?   @relation("AnimalPoster", fields: [postedByUserId], references: [id], onDelete: SetNull)
+
+  media            AnimalMedia[]
+  healthRecords    HealthRecord[]
+  vaccinations     Vaccination[]
+  heartRateLogs    HeartRateLog[]
+  adoptionRequests AdoptionRequest[]
+  favorites        Favorite[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([lifecycleStatus, species])
+  @@index([listingStatus, species])
+  @@index([postedByUserId])
+  @@map("animals")
+}
+
+model AnimalMedia {
+  id         String    @id @default(uuid()) @db.Uuid
+  animalId   String    @map("animal_id") @db.Uuid
+  mediaType  MediaType @map("media_type")
+  fileUrl    String    @map("file_url") @db.VarChar(255)
+  caption    String?   @db.VarChar(150)
+  sortOrder  Int?      @map("sort_order") @db.SmallInt
+  uploadedBy String?   @map("uploaded_by") @db.Uuid
+
+  animal   Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  uploader User?  @relation("AnimalMediaUploader", fields: [uploadedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([animalId, sortOrder])
+  @@map("animal_media")
+}
+
+model HealthRecord {
+  id           String           @id @default(uuid()) @db.Uuid
+  animalId     String           @map("animal_id") @db.Uuid
+  recordType   HealthRecordType @map("record_type")
+  recordDate   DateTime         @map("record_date") @db.Date
+  diagnosis    String?          @db.VarChar(255)
+  treatment    String?
+  medication   String?          @db.VarChar(255)
+  weightKg     Decimal?         @map("weight_kg") @db.Decimal(5, 2)
+  attendedBy   String?          @map("attended_by") @db.Uuid
+  followUpDate DateTime?        @map("follow_up_date") @db.Date
+  remarks      String?
+
+  animal       Animal         @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  attendedUser User?          @relation("HealthAttendant", fields: [attendedBy], references: [id], onDelete: SetNull)
+  heartRates   HeartRateLog[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([animalId, recordDate])
+  @@index([recordType])
+  @@map("health_records")
+}
+
+model Vaccination {
+  id             String             @id @default(uuid()) @db.Uuid
+  animalId       String             @map("animal_id") @db.Uuid
+  vaccineName    String             @map("vaccine_name") @db.VarChar(100)
+  doseNumber     Int?               @map("dose_number") @db.SmallInt
+  dateGiven      DateTime           @map("date_given") @db.Date
+  nextDueDate    DateTime?          @map("next_due_date") @db.Date
+  batchLotNo     String?            @map("batch_lot_no") @db.VarChar(40)
+  administeredBy String?            @map("administered_by") @db.Uuid
+  status         VaccinationStatus?
+
+  animal       Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  administered User?  @relation("VaccinationAdmin", fields: [administeredBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([animalId, dateGiven])
+  @@index([nextDueDate, status])
+  @@map("vaccinations")
+}
+
+model HeartRateLog {
+  id                 String              @id @default(uuid()) @db.Uuid
+  animalId           String              @map("animal_id") @db.Uuid
+  healthRecordId     String?             @map("health_record_id") @db.Uuid
+  heartRateBpm       Int                 @map("heart_rate_bpm") @db.SmallInt
+  measurementContext MeasurementContext? @map("measurement_context")
+  measuredAt         DateTime            @map("measured_at") @db.Timestamptz(6)
+  recordedBy         String?             @map("recorded_by") @db.Uuid
+  isFlagged          Boolean             @default(false) @map("is_flagged")
+  notes              String?             @db.VarChar(255)
+
+  animal       Animal        @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  healthRecord HealthRecord? @relation(fields: [healthRecordId], references: [id], onDelete: SetNull)
+  recorder     User?         @relation("HeartRateRecorder", fields: [recordedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([animalId, measuredAt])
+  @@index([isFlagged])
+  @@map("heart_rate_logs")
+}
+
+// ---------------------------------------------------------------------------
+// 2.3 Reports and Rescue
+// ---------------------------------------------------------------------------
+
+model Report {
+  id                  String        @id @default(uuid()) @db.Uuid
+  reportCode          String        @unique @map("report_code") @db.VarChar(20)
+  reporterUserId      String?       @map("reporter_user_id") @db.Uuid
+  reportType          ReportType    @map("report_type")
+  species             ReportSpecies
+  description         String
+  urgencyLevel        UrgencyLevel  @map("urgency_level")
+  animalCount         Int           @default(1) @map("animal_count") @db.SmallInt
+  latitude            Decimal       @db.Decimal(10, 7)
+  longitude           Decimal       @db.Decimal(10, 7)
+  barangayId          Int?          @map("barangay_id")
+  locationLandmark    String?       @map("location_landmark") @db.VarChar(255)
+  status              ReportStatus  @default(submitted)
+  rejectionReason     String?       @map("rejection_reason") @db.VarChar(255)
+  duplicateOfReportId String?       @map("duplicate_of_report_id") @db.Uuid
+  verifiedBy          String?       @map("verified_by") @db.Uuid
+  verifiedAt          DateTime?     @map("verified_at") @db.Timestamptz(6)
+  submittedAt         DateTime      @map("submitted_at") @db.Timestamptz(6)
+  syncedAt            DateTime?     @map("synced_at") @db.Timestamptz(6)
+
+  reporter    User?     @relation("ReportReporter", fields: [reporterUserId], references: [id], onDelete: SetNull)
+  verifier    User?     @relation("ReportVerifier", fields: [verifiedBy], references: [id], onDelete: SetNull)
+  barangay    Barangay? @relation(fields: [barangayId], references: [id], onDelete: SetNull)
+  duplicateOf Report?   @relation("ReportDuplicates", fields: [duplicateOfReportId], references: [id], onDelete: SetNull)
+  duplicates  Report[]  @relation("ReportDuplicates")
+
+  resultingAnimal  Animal?               @relation("ReportAnimal")
+  media            ReportMedia[]
+  statusHistory    ReportStatusHistory[]
+  rescueOperations RescueOperation[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([status, barangayId, submittedAt])
+  @@index([reporterUserId, submittedAt])
+  @@index([duplicateOfReportId])
+  @@map("reports")
+}
+
+model ReportMedia {
+  id         String    @id @default(uuid()) @db.Uuid
+  reportId   String    @map("report_id") @db.Uuid
+  mediaType  MediaType @map("media_type")
+  fileUrl    String    @map("file_url") @db.VarChar(255)
+  fileSizeKb Int?      @map("file_size_kb")
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([reportId])
+  @@map("report_media")
+}
+
+model ReportStatusHistory {
+  id        String   @id @default(uuid()) @db.Uuid
+  reportId  String   @map("report_id") @db.Uuid
+  oldStatus String?  @map("old_status") @db.VarChar(30)
+  newStatus String   @map("new_status") @db.VarChar(30)
+  changedBy String?  @map("changed_by") @db.Uuid
+  remarks   String?  @db.VarChar(255)
+  changedAt DateTime @map("changed_at") @db.Timestamptz(6)
+
+  report  Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  changer User?  @relation("ReportStatusChanger", fields: [changedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([reportId, changedAt])
+  @@map("report_status_history")
+}
+
+model RescueOperation {
+  id               String           @id @default(uuid()) @db.Uuid
+  reportId         String           @map("report_id") @db.Uuid
+  rescuerUserId    String           @map("rescuer_user_id") @db.Uuid
+  assignedBy       String           @map("assigned_by") @db.Uuid
+  assignmentStatus AssignmentStatus @map("assignment_status")
+  assignedAt       DateTime         @map("assigned_at") @db.Timestamptz(6)
+  acceptedAt       DateTime?        @map("accepted_at") @db.Timestamptz(6)
+  arrivedAt        DateTime?        @map("arrived_at") @db.Timestamptz(6)
+  completedAt      DateTime?        @map("completed_at") @db.Timestamptz(6)
+  outcomeNotes     String?          @map("outcome_notes")
+  animalsRescued   Int?             @map("animals_rescued") @db.SmallInt
+
+  report   Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  rescuer  User   @relation("RescueRescuer", fields: [rescuerUserId], references: [id], onDelete: Restrict)
+  assigner User   @relation("RescueAssigner", fields: [assignedBy], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([reportId, assignmentStatus])
+  @@index([rescuerUserId, assignmentStatus])
+  @@map("rescue_operations")
+}
+
+// ---------------------------------------------------------------------------
+// 2.4 Adoption
+// ---------------------------------------------------------------------------
+
+model AdoptionRequest {
+  id                 String         @id @default(uuid()) @db.Uuid
+  requestCode        String         @unique @map("request_code") @db.VarChar(20)
+  animalId           String         @map("animal_id") @db.Uuid
+  adopterUserId      String         @map("adopter_user_id") @db.Uuid
+  housingType        HousingType    @map("housing_type")
+  isOwnedProperty    Boolean?       @map("is_owned_property")
+  hasFencedArea      Boolean?       @map("has_fenced_area")
+  householdMembers   Int?           @map("household_members") @db.SmallInt
+  hasOtherPets       Boolean?       @map("has_other_pets")
+  otherPetsDetails   String?        @map("other_pets_details") @db.VarChar(255)
+  priorPetExperience String?        @map("prior_pet_experience")
+  reasonForAdopting  String         @map("reason_for_adopting")
+  validIdUrl         String         @map("valid_id_url") @db.VarChar(255)
+  homePhotoUrl       String?        @map("home_photo_url") @db.VarChar(255)
+  status             AdoptionStatus @default(submitted)
+  reviewedBy         String?        @map("reviewed_by") @db.Uuid
+  reviewedAt         DateTime?      @map("reviewed_at") @db.Timestamptz(6)
+  decisionRemarks    String?        @map("decision_remarks") @db.VarChar(255)
+  interviewSchedule  DateTime?      @map("interview_schedule") @db.Timestamptz(6)
+  releaseDate        DateTime?      @map("release_date") @db.Date
+  receiptReferenceNo String?        @map("receipt_reference_no") @db.VarChar(60)
+
+  animal   Animal @relation(fields: [animalId], references: [id], onDelete: Restrict)
+  adopter  User   @relation("AdoptionAdopter", fields: [adopterUserId], references: [id], onDelete: Restrict)
+  reviewer User?  @relation("AdoptionReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  followups AdoptionFollowup[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([animalId, status])
+  @@index([adopterUserId, status])
+  @@map("adoption_requests")
+}
+
+model AdoptionFollowup {
+  id              String          @id @default(uuid()) @db.Uuid
+  requestId       String          @map("request_id") @db.Uuid
+  followupDate    DateTime        @map("followup_date") @db.Date
+  method          FollowupMethod?
+  animalCondition String?         @map("animal_condition") @db.VarChar(255)
+  remarks         String?
+  conductedBy     String?         @map("conducted_by") @db.Uuid
+
+  request   AdoptionRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  conductor User?           @relation("FollowupConductor", fields: [conductedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([requestId, followupDate])
+  @@map("adoption_followups")
+}
+
+model Favorite {
+  userId   String @map("user_id") @db.Uuid
+  animalId String @map("animal_id") @db.Uuid
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([userId, animalId])
+  @@index([animalId])
+  @@map("favorites")
+}
+
+// ---------------------------------------------------------------------------
+// 2.5 Communication and Notifications
+// ---------------------------------------------------------------------------
+
+model Conversation {
+  id          String                  @id @default(uuid()) @db.Uuid
+  contextType ConversationContextType @map("context_type")
+  contextId   String?                 @map("context_id") @db.Uuid
+  subject     String?                 @db.VarChar(150)
+  status      ConversationStatus      @default(open)
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([contextType, contextId])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String    @map("conversation_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  lastReadAt     DateTime? @map("last_read_at") @db.Timestamptz(6)
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@id([conversationId, userId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  senderUserId   String   @map("sender_user_id") @db.Uuid
+  messageBody    String   @map("message_body")
+  attachmentUrl  String?  @map("attachment_url") @db.VarChar(255)
+  sentAt         DateTime @default(now()) @map("sent_at") @db.Timestamptz(6)
+  isDeleted      Boolean  @default(false) @map("is_deleted")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderUserId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([conversationId, sentAt])
+  @@index([senderUserId])
+  @@map("messages")
+}
+
+model Notification {
+  id               String              @id @default(uuid()) @db.Uuid
+  recipientUserId  String              @map("recipient_user_id") @db.Uuid
+  notificationType NotificationType    @map("notification_type")
+  title            String              @db.VarChar(120)
+  body             String              @db.VarChar(255)
+  referenceType    String?             @map("reference_type") @db.VarChar(30)
+  referenceId      String?             @map("reference_id") @db.Uuid
+  channel          NotificationChannel @default(in_app)
+  isRead           Boolean             @default(false) @map("is_read")
+  readAt           DateTime?           @map("read_at") @db.Timestamptz(6)
+  sentAt           DateTime            @default(now()) @map("sent_at") @db.Timestamptz(6)
+
+  recipient User @relation(fields: [recipientUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([recipientUserId, isRead])
+  @@index([referenceType, referenceId])
+  @@map("notifications")
+}
+
+// ---------------------------------------------------------------------------
+// 2.6 E-Learning
+// ---------------------------------------------------------------------------
+
+model LearningModule {
+  id            Int              @id @default(autoincrement())
+  title         String           @db.VarChar(150)
+  category      LearningCategory
+  description   String?
+  coverImageUrl String?          @map("cover_image_url") @db.VarChar(255)
+  isPublished   Boolean          @default(false) @map("is_published")
+  createdBy     String?          @map("created_by") @db.Uuid
+
+  author  User?    @relation("LearningModuleAuthor", fields: [createdBy], references: [id], onDelete: SetNull)
+  lessons Lesson[]
+  quizzes Quiz[]
+
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  @@index([category, isPublished])
+  @@map("learning_modules")
+}
+
+model Lesson {
+  id              Int               @id @default(autoincrement())
+  moduleId        Int               @map("module_id")
+  title           String            @db.VarChar(150)
+  contentType     LessonContentType @map("content_type")
+  contentBody     String?           @map("content_body")
+  mediaUrl        String?           @map("media_url") @db.VarChar(255)
+  durationMinutes Int?              @map("duration_minutes") @db.SmallInt
+  sortOrder       Int?              @map("sort_order") @db.SmallInt
+
+  module   LearningModule         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress UserLearningProgress[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([moduleId, sortOrder])
+  @@map("lessons")
+}
+
+model Quiz {
+  id           Int    @id @default(autoincrement())
+  moduleId     Int    @map("module_id")
+  title        String @db.VarChar(150)
+  passingScore Int    @default(70) @map("passing_score") @db.SmallInt
+
+  module    LearningModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([moduleId])
+  @@map("quizzes")
+}
+
+model QuizQuestion {
+  id            Int     @id @default(autoincrement())
+  quizId        Int     @map("quiz_id")
+  questionText  String  @map("question_text") @db.VarChar(500)
+  optionsJson   Json    @map("options_json")
+  correctOption Int     @map("correct_option") @db.SmallInt
+  explanation   String? @db.VarChar(255)
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([quizId])
+  @@map("quiz_questions")
+}
+
+model UserLearningProgress {
+  id          String         @id @default(uuid()) @db.Uuid
+  userId      String         @map("user_id") @db.Uuid
+  lessonId    Int            @map("lesson_id")
+  status      ProgressStatus @default(not_started)
+  completedAt DateTime?      @map("completed_at") @db.Timestamptz(6)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+  @@map("user_learning_progress")
+}
+
+model QuizAttempt {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  quizId       Int      @map("quiz_id")
+  scorePercent Int      @map("score_percent") @db.SmallInt
+  isPassed     Boolean  @map("is_passed")
+  attemptedAt  DateTime @map("attempted_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([userId, quizId, attemptedAt])
+  @@map("quiz_attempts")
+}
+
+// ---------------------------------------------------------------------------
+// 2.7 Analytics, Security, and System
+// ---------------------------------------------------------------------------
+
+model AnalyticsSnapshot {
+  id                       String            @id @default(uuid()) @db.Uuid
+  snapshotDate             DateTime          @map("snapshot_date") @db.Date
+  barangayId               Int?              @map("barangay_id")
+  species                  AnalyticsSpecies?
+  reportsReceived          Int?              @map("reports_received")
+  reportsResolved          Int?              @map("reports_resolved")
+  animalsRescued           Int?              @map("animals_rescued")
+  animalsAdopted           Int?              @map("animals_adopted")
+  adoptionRequestsReceived Int?              @map("adoption_requests_received")
+  avgResponseHours         Decimal?          @map("avg_response_hours") @db.Decimal(6, 2)
+  avgResolutionHours       Decimal?          @map("avg_resolution_hours") @db.Decimal(6, 2)
+
+  barangay Barangay? @relation(fields: [barangayId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([snapshotDate, barangayId, species])
+  @@index([snapshotDate])
+  @@map("analytics_snapshots")
+}
+
+model GeneratedReport {
+  id          String                 @id @default(uuid()) @db.Uuid
+  reportKind  GeneratedReportKind    @map("report_kind")
+  dateFrom    DateTime               @map("date_from") @db.Date
+  dateTo      DateTime               @map("date_to") @db.Date
+  format      GeneratedReportFormat?
+  fileUrl     String?                @map("file_url") @db.VarChar(255)
+  generatedBy String?                @map("generated_by") @db.Uuid
+
+  author User? @relation("GeneratedReportAuthor", fields: [generatedBy], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([reportKind, dateFrom, dateTo])
+  @@map("generated_reports")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String   @db.VarChar(50)
+  entityType String?  @map("entity_type") @db.VarChar(30)
+  entityId   String?  @map("entity_id") @db.Uuid
+  oldValue   Json?    @map("old_value")
+  newValue   Json?    @map("new_value")
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
+  @@map("audit_logs")
+}

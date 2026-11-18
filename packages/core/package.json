@@ -1,0 +1,31 @@
+{
+  "name": "@furescue/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "FurRescue modular-monolith domain core: config, database, modules, services, repositories and types.",
+  "exports": {
+    ".": "./src/index.ts",
+    "./env": "./src/config/env.ts",
+    "./db": "./src/db/prisma.ts",
+    "./shared/*": "./src/shared/*.ts",
+    "./modules/*": "./src/modules/*/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.1",
+    "@prisma/client": "7.10.1",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^18.0.10",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/pg": "^8.15.6",
+    "typescript": "^5"
+  }
+}
