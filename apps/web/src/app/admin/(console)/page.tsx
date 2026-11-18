@@ -1,11 +1,8 @@
 import {
   ArrowUpRight,
-  BarChart3,
   CalendarDays,
-  Clock3,
   FileWarning,
   HeartHandshake,
-  History,
   PawPrint,
   Siren,
   Stethoscope,
@@ -17,6 +14,7 @@ import { AnimalPopulationCard } from "@/components/admin/charts/animal-populatio
 import { ReportsActivityCard, type TrendPoint } from "@/components/admin/charts/reports-activity-card";
 import { PendingRescuerList } from "@/components/pending-rescuer-list";
 import { StatCard } from "@/components/ui/stat-card";
+import { Tooltip } from "@/components/ui/tooltip";
 import { authService, prisma } from "@furescue/core";
 
 import { readSession } from "@/lib/auth/session";
@@ -115,9 +113,11 @@ function humanize(value: string): string {
 function Breakdown({
   stages,
   counts,
+  unit,
 }: {
   stages: { status: string; label: string; tone: string }[];
   counts: Record<string, number>;
+  unit: { one: string; many: string };
 }) {
   const max = Math.max(1, ...stages.map((stage) => counts[stage.status] ?? 0));
 
@@ -131,12 +131,25 @@ function Breakdown({
               <span className="text-[0.75rem] text-ink/60">{stage.label}</span>
               <span className="font-mono text-[0.6875rem] tabular-nums text-ink/45">{value}</span>
             </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-              <div
-                className={`h-full rounded-full ${stage.tone} transition-[width]`}
-                style={{ width: `${value === 0 ? 0 : Math.max(6, (value / max) * 100)}%` }}
-              />
-            </div>
+            <Tooltip
+              content={
+                <>
+                  <span className="block text-[0.625rem] font-medium uppercase tracking-[0.08em] text-paper/50">
+                    {stage.label}
+                  </span>
+                  <span className="block text-[0.8125rem] font-semibold text-paper">
+                    {value} {value === 1 ? unit.one : unit.many}
+                  </span>
+                </>
+              }
+            >
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
+                <div
+                  className={`h-full rounded-full ${stage.tone} transition-[width]`}
+                  style={{ width: `${value === 0 ? 0 : Math.max(6, (value / max) * 100)}%` }}
+                />
+              </div>
+            </Tooltip>
           </li>
         );
       })}
@@ -161,7 +174,6 @@ export default async function AdminDashboardPage() {
     roleRows,
     barangayCount,
     recentReports,
-    activity,
   ] = await Promise.all([
     authService.listPendingRescuers(),
     prisma.report.groupBy({ by: ["status"], _count: { _all: true } }),
@@ -178,17 +190,6 @@ export default async function AdminDashboardPage() {
     prisma.report.findMany({
       where: { createdAt: { gte: trendStart } },
       select: { createdAt: true },
-    }),
-    prisma.auditLog.findMany({
-      take: 6,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        action: true,
-        entityType: true,
-        createdAt: true,
-        user: { select: { firstName: true, lastName: true } },
-      },
     }),
   ]);
 
@@ -241,19 +242,15 @@ export default async function AdminDashboardPage() {
     email: user.email,
     appliedAt: user.createdAt?.toISOString() ?? new Date().toISOString(),
   }));
+  const latestRescuers = [...rescuers]
+    .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt))
+    .slice(0, 3);
 
   const today = new Intl.DateTimeFormat("en-PH", {
     weekday: "long",
     month: "long",
     day: "numeric",
   }).format(new Date());
-
-  const timeFormatter = new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 
   return (
     <div className="w-full">
@@ -331,62 +328,37 @@ export default async function AdminDashboardPage() {
         />
       </div>
 
-      {/* Queue + glance */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
+      {/* Program at a glance */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.07] px-4 py-3.5">
-            <div className="flex items-center gap-2.5">
-              <h2 className="text-[0.9375rem] font-semibold text-ink">Rescuer approvals</h2>
-              {rescuers.length > 0 && (
-                <span className="rounded-full bg-clay/10 px-2 py-0.5 text-[0.625rem] font-semibold text-clay">
-                  {rescuers.length} waiting
-                </span>
-              )}
-            </div>
+          <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
+            <h3 className="text-[0.9375rem] font-semibold text-ink">Report pipeline</h3>
             <Link
-              href="/admin/users"
-              className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-ink/50 transition-colors hover:text-clay"
+              href="/admin/reports"
+              aria-label="Open reports"
+              className="grid h-7 w-7 place-items-center rounded-full border border-ink/[0.07] text-ink/25 transition-all duration-200 hover:border-clay/30 hover:bg-clay/[0.05] hover:text-clay"
             >
-              View all
-              <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
             </Link>
           </div>
-
-          <div className="px-4 py-3.5">
-            <PendingRescuerList rescuers={rescuers} />
+          <div className="px-4 py-4">
+            <Breakdown stages={REPORT_STAGES} counts={reports} unit={{ one: "report", many: "reports" }} />
           </div>
-
-          <p className="border-t border-ink/[0.07] px-4 py-2.5 text-[0.6875rem] leading-[1.5] text-ink/40">
-            Approved volunteers can sign in immediately and accept field assignments.
-          </p>
         </section>
 
         <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
           <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
-            <h2 className="text-[0.9375rem] font-semibold text-ink">Program at a glance</h2>
+            <h3 className="text-[0.9375rem] font-semibold text-ink">Animal lifecycle</h3>
             <Link
-              href="/admin/analytics"
-              aria-label="Open analytics"
-              className="grid h-7 w-7 place-items-center rounded-md text-ink/35 transition-colors hover:bg-ink/5 hover:text-ink"
+              href="/admin/animals"
+              aria-label="Open animals"
+              className="grid h-7 w-7 place-items-center rounded-full border border-ink/[0.07] text-ink/25 transition-all duration-200 hover:border-clay/30 hover:bg-clay/[0.05] hover:text-clay"
             >
-              <BarChart3 className="h-3.5 w-3.5" strokeWidth={1.8} />
+              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2} />
             </Link>
           </div>
-
-          <div className="divide-y divide-ink/[0.07]">
-            <div className="px-4 py-3.5">
-              <p className="mb-3 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
-                Report pipeline
-              </p>
-              <Breakdown stages={REPORT_STAGES} counts={reports} />
-            </div>
-
-            <div className="px-4 py-3.5">
-              <p className="mb-3 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
-                Animal lifecycle
-              </p>
-              <Breakdown stages={CARE_STAGES} counts={lifecycle} />
-            </div>
+          <div className="px-4 py-4">
+            <Breakdown stages={CARE_STAGES} counts={lifecycle} unit={{ one: "animal", many: "animals" }} />
           </div>
         </section>
       </div>
@@ -402,93 +374,72 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-          {WORKSPACE.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="group flex items-start gap-3 rounded-xl border border-ink/[0.08] bg-white p-4 transition-colors hover:border-clay/30 hover:bg-clay/[0.02]"
-              >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ink/[0.04] text-ink/55 transition-colors group-hover:bg-clay/10 group-hover:text-clay">
-                  <Icon className="h-4 w-4" strokeWidth={1.8} />
-                </span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-1 text-[0.8125rem] font-medium text-ink">
-                    {item.label}
-                    <ArrowUpRight
-                      className="h-3 w-3 text-ink/20 transition-colors group-hover:text-clay"
-                      strokeWidth={2}
-                    />
-                  </span>
-                  <span className="mt-1 block text-[0.75rem] leading-[1.5] text-ink/50">
-                    {item.copy}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Activity + team */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
-          <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
-            <h2 className="text-[0.9375rem] font-semibold text-ink">Recent activity</h2>
-            <Link
-              href="/admin/audit"
-              className="inline-flex items-center gap-1 text-[0.75rem] font-medium text-ink/50 transition-colors hover:text-clay"
-            >
-              Audit logs
-              <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
-            </Link>
-          </div>
-
-          {activity.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-6 py-10 text-center">
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-ink/[0.04] text-ink/35">
-                <History className="h-4 w-4" strokeWidth={1.8} />
-              </span>
-              <p className="mt-3 text-[0.8125rem] font-medium text-ink">No activity yet</p>
-              <p className="mt-1 max-w-[38ch] text-[0.75rem] leading-[1.55] text-ink/45">
-                Administrative actions, approvals, and record changes will appear here.
-              </p>
+        <div className="mt-3 grid gap-4 lg:grid-cols-3">
+          {/* Quick actions */}
+          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+            <div className="flex h-[52px] items-center border-b border-ink/[0.07] px-4">
+              <h2 className="text-[0.9375rem] font-semibold text-ink">Quick actions</h2>
             </div>
-          ) : (
-            <ul className="divide-y divide-ink/[0.07]">
-              {activity.map((entry) => (
-                <li key={entry.id} className="flex items-start gap-3 px-4 py-3">
-                  <span
-                    aria-hidden="true"
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-clay/60"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[0.8125rem] leading-snug text-ink">
-                      <span className="font-medium">{humanize(entry.action)}</span>
-                      {entry.entityType && (
-                        <span className="text-ink/50"> · {humanize(entry.entityType)}</span>
-                      )}
-                    </p>
-                    <p className="mt-0.5 truncate text-[0.6875rem] text-ink/40">
-                      {entry.user
-                        ? `${entry.user.firstName} ${entry.user.lastName}`
-                        : "System"}
-                    </p>
-                  </div>
-                  <span className="flex shrink-0 items-center gap-1 text-[0.6875rem] text-ink/35">
-                    <Clock3 className="h-3 w-3" strokeWidth={1.8} />
-                    {timeFormatter.format(entry.createdAt)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+            <div className="flex-1 p-3">
+              <ul className="grid h-full auto-rows-fr grid-cols-2 gap-2">
+                {WORKSPACE.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className="group flex h-full items-center gap-2.5 rounded-lg border border-ink/[0.06] bg-ink/[0.015] px-2.5 py-2.5 transition-colors hover:border-clay/30 hover:bg-clay/[0.04]"
+                      >
+                        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-ink/50 shadow-[0_1px_2px_rgba(20,30,25,0.06)] transition-colors group-hover:text-clay">
+                          <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
+                        </span>
+                        <span className="min-w-0 flex-1 text-[0.75rem] font-medium leading-tight text-ink">
+                          {item.label}
+                        </span>
+                        <ArrowUpRight
+                          className="h-3 w-3 shrink-0 text-ink/20 transition-colors group-hover:text-clay"
+                          strokeWidth={2}
+                        />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
 
-        <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
-          <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
+          {/* Rescuer approvals */}
+          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+            <div className="flex h-[52px] items-center justify-between gap-3 border-b border-ink/[0.07] px-4">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <h2 className="truncate text-[0.9375rem] font-semibold text-ink">Rescuer approvals</h2>
+                {rescuers.length > 0 && (
+                  <span className="shrink-0 rounded-full bg-clay/10 px-2 py-0.5 text-[0.625rem] font-semibold text-clay">
+                    {rescuers.length} waiting
+                  </span>
+                )}
+              </div>
+              <Link
+                href="/admin/users"
+                className="inline-flex shrink-0 items-center gap-1 text-[0.75rem] font-medium text-ink/50 transition-colors hover:text-clay"
+              >
+                View all
+                <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
+              </Link>
+            </div>
+
+            <div className="flex flex-1 flex-col justify-center px-4 py-3.5">
+              <PendingRescuerList rescuers={latestRescuers} />
+            </div>
+
+            <p className="border-t border-ink/[0.07] px-4 py-2.5 text-[0.6875rem] leading-[1.5] text-ink/40">
+              Showing the latest applications. Approved volunteers can sign in immediately.
+            </p>
+          </section>
+
+          {/* Team & coverage */}
+          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+          <div className="flex h-[52px] items-center justify-between border-b border-ink/[0.07] px-4">
             <h2 className="text-[0.9375rem] font-semibold text-ink">Team &amp; coverage</h2>
             <Link
               href="/admin/users"
@@ -499,7 +450,7 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
 
-          <div className="px-4 py-3.5">
+          <div className="flex-1 px-4 py-3.5">
             <div className="mb-3 flex items-baseline justify-between">
               <span className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink/35">
                 Accounts by role
@@ -508,7 +459,7 @@ export default async function AdminDashboardPage() {
                 {totalUsers}
               </span>
             </div>
-            <Breakdown stages={roleStages} counts={roleCounts} />
+            <Breakdown stages={roleStages} counts={roleCounts} unit={{ one: "account", many: "accounts" }} />
           </div>
 
           <div className="grid grid-cols-2 divide-x divide-ink/[0.07] border-t border-ink/[0.07]">
@@ -521,8 +472,9 @@ export default async function AdminDashboardPage() {
               <p className="mt-1 text-[0.6875rem] text-ink/45">Animals on record</p>
             </div>
           </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      </section>
     </div>
   );
 }

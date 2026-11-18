@@ -78,7 +78,7 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
     <div>
       <FormAlert message={error} className="mb-3 mt-0" />
 
-      <ul className="divide-y divide-ink/[0.08]">
+      <ul className="space-y-2.5">
         {rescuers.map((rescuer) => {
           const isApproved = approved.includes(rescuer.id);
           const isBusy = approving === rescuer.id;
@@ -86,50 +86,58 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
           return (
             <li
               key={rescuer.id}
-              className="flex flex-wrap items-center gap-x-4 gap-y-3 py-3.5 first:pt-0 last:pb-0"
+              className="rounded-xl border border-ink/[0.07] bg-ink/[0.012] p-3 transition-colors hover:border-ink/[0.12] hover:bg-ink/[0.02]"
             >
-              <span
-                aria-hidden="true"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink/[0.05] text-[0.6875rem] font-semibold uppercase tracking-wide text-ink/55"
-              >
-                {initials(rescuer.fullName)}
-              </span>
+              <div className="flex items-start gap-3">
+                <span
+                  aria-hidden="true"
+                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.75rem] font-semibold uppercase tracking-wide text-ink/55"
+                >
+                  {initials(rescuer.fullName)}
+                </span>
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[0.875rem] font-medium leading-tight text-ink">
-                  {rescuer.fullName}
-                </p>
-                <p className="mt-1 truncate text-[0.75rem] leading-tight text-ink/50">
-                  {rescuer.email}
-                </p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[0.875rem] font-semibold leading-tight text-ink">
+                    {rescuer.fullName}
+                  </p>
+                  <p className="mt-1 truncate text-[0.75rem] leading-tight text-ink/50">
+                    {rescuer.email}
+                  </p>
+                </div>
+
+                <span className="shrink-0 rounded-full bg-clay/10 px-2 py-0.5 text-[0.5625rem] font-semibold uppercase tracking-[0.08em] text-clay">
+                  Pending
+                </span>
               </div>
 
-              <div className="hidden shrink-0 text-right sm:block">
-                <p className="text-[0.625rem] font-medium uppercase tracking-[0.1em] text-ink/35">
-                  Applied
-                </p>
-                <p className="mt-1 text-[0.75rem] text-ink/60">
-                  {formatApplied(rescuer.appliedAt)}
-                </p>
-              </div>
+              <div className="mt-3 flex items-center justify-between gap-3 border-t border-ink/[0.07] pt-2.5">
+                <div className="min-w-0">
+                  <p className="text-[0.5625rem] font-medium uppercase tracking-[0.1em] text-ink/35">
+                    Applied
+                  </p>
+                  <p className="mt-0.5 text-[0.75rem] leading-tight text-ink/60">
+                    {formatApplied(rescuer.appliedAt)}
+                  </p>
+                </div>
 
-              <button
-                type="button"
-                disabled={isBusy || isApproved}
-                onClick={() => approve(rescuer.id)}
-                className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.75rem] font-medium transition-colors disabled:cursor-not-allowed ${
-                  isApproved
-                    ? "bg-moss/10 text-moss"
-                    : "bg-ink text-paper hover:bg-moss disabled:opacity-70"
-                }`}
-              >
-                {isBusy ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                ) : (
-                  <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
-                )}
-                {isApproved ? "Approved" : "Approve"}
-              </button>
+                <button
+                  type="button"
+                  disabled={isBusy || isApproved}
+                  onClick={() => approve(rescuer.id)}
+                  className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.75rem] font-medium transition-colors disabled:cursor-not-allowed ${
+                    isApproved
+                      ? "bg-moss/10 text-moss"
+                      : "bg-ink text-paper hover:bg-moss disabled:opacity-70"
+                  }`}
+                >
+                  {isBusy ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
+                  ) : (
+                    <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
+                  )}
+                  {isApproved ? "Approved" : "Approve"}
+                </button>
+              </div>
             </li>
           );
         })}
