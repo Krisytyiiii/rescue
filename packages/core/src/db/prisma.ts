@@ -21,13 +21,16 @@ function createPrismaClient(): PrismaClient {
   const adapter = new PrismaPg({
     connectionString: url.toString(),
     ssl: { rejectUnauthorized: false },
-    max: env.NODE_ENV === "production" ? 10 : 5,
+    max: env.NODE_ENV === "production" ? 10 : 8,
     idleTimeoutMillis: 30_000,
     connectionTimeoutMillis: 10_000,
   });
 
   return new PrismaClient({
     adapter,
+    // Wait longer for a free pooled connection before starting a transaction;
+    // Supabase's pooler can briefly saturate under dashboard refresh bursts.
+    transactionOptions: { maxWait: 10_000, timeout: 15_000 },
     log: env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 }

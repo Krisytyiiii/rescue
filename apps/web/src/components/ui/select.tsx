@@ -15,6 +15,8 @@ interface SelectProps {
   placeholder?: string;
   defaultValue?: string;
   className?: string;
+  size?: "default" | "compact";
+  onChange?: (value: string) => void;
 }
 
 /**
@@ -29,6 +31,8 @@ export function Select({
   placeholder = "Select an option",
   defaultValue = "",
   className = "",
+  size = "default",
+  onChange,
 }: SelectProps) {
   const generatedId = useId();
   const selectId = id ?? generatedId;
@@ -45,6 +49,7 @@ export function Select({
 
   const selected = options.find((option) => option.value === value);
   const showSearch = options.length > 8;
+  const compact = size === "compact";
 
   const filtered = query.trim()
     ? options.filter((option) =>
@@ -77,6 +82,7 @@ export function Select({
   function choose(option: SelectOption) {
     setValue(option.value);
     setOpen(false);
+    onChange?.(option.value);
   }
 
   function move(delta: number) {
@@ -145,7 +151,11 @@ export function Select({
         aria-controls={listboxId}
         onClick={() => setOpen((current) => !current)}
         onKeyDown={handleTriggerKeyDown}
-        className="mt-2 flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-ink/15 bg-white px-4 text-left text-[0.9375rem] text-ink outline-none transition-colors focus:border-clay focus:ring-4 focus:ring-clay/15"
+        className={
+          compact
+            ? "flex h-8 w-full items-center justify-between gap-2 rounded-lg border border-ink/15 bg-white px-2.5 text-left text-[0.75rem] text-ink outline-none transition-colors focus:border-clay focus:ring-2 focus:ring-clay/15"
+            : "mt-2 flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-ink/15 bg-white px-4 text-left text-[0.9375rem] text-ink outline-none transition-colors focus:border-clay focus:ring-4 focus:ring-clay/15"
+        }
       >
         <span className={selected ? "text-ink" : "text-ink/35"}>
           {selected?.label ?? placeholder}
@@ -153,12 +163,18 @@ export function Select({
         <ChevronDown
           aria-hidden="true"
           strokeWidth={1.7}
-          className={`h-4 w-4 shrink-0 text-ink/45 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-ink/45 transition-transform duration-200 ${
+            compact ? "h-3 w-3" : "h-4 w-4"
+          } ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <div className="absolute z-30 mt-2 w-full rounded-xl border border-ink/15 bg-white p-1.5 shadow-[0_16px_40px_-12px_rgba(20,30,25,0.25)]">
+        <div
+          className={`absolute z-30 w-full border border-ink/15 bg-white shadow-[0_16px_40px_-12px_rgba(20,30,25,0.25)] ${
+            compact ? "mt-1 rounded-lg p-1" : "mt-2 rounded-xl p-1.5"
+          }`}
+        >
           {showSearch && (
             <div className="relative mb-1">
               <Search
@@ -177,7 +193,9 @@ export function Select({
                 onKeyDown={handleListKeyDown}
                 placeholder="Search barangay"
                 aria-label="Search options"
-                className="h-9 w-full rounded-lg border border-ink/10 bg-ink/[0.02] pl-9 pr-3 text-[0.8125rem] text-ink outline-none placeholder:text-ink/35 focus:border-clay focus:bg-white"
+                className={`w-full rounded-lg border border-ink/10 bg-ink/[0.02] pl-9 pr-3 text-ink outline-none placeholder:text-ink/35 focus:border-clay focus:bg-white ${
+                  compact ? "h-7 text-[0.75rem]" : "h-9 text-[0.8125rem]"
+                }`}
               />
             </div>
           )}
@@ -207,9 +225,13 @@ export function Select({
                   aria-selected={isSelected}
                   onPointerEnter={() => setActiveIndex(index)}
                   onClick={() => choose(option)}
-                  className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg px-3 py-2 text-[0.875rem] transition-colors ${
-                    isActive ? "bg-ink/[0.05] text-ink" : "text-ink/75"
-                  } ${isSelected ? "font-medium text-ink" : ""}`}
+                  className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg transition-colors ${
+                    compact
+                      ? "px-2 py-1 text-[0.75rem]"
+                      : "px-3 py-2 text-[0.875rem]"
+                  } ${isActive ? "bg-ink/[0.05] text-ink" : "text-ink/75"} ${
+                    isSelected ? "font-medium text-ink" : ""
+                  }`}
                 >
                   <span className="truncate">{option.label}</span>
                   {isSelected && (

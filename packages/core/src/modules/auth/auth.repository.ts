@@ -7,6 +7,30 @@ const authUserInclude = {
 
 export type UserWithRole = Prisma.UserGetPayload<{ include: typeof authUserInclude }>;
 
+const adminUserInclude = {
+  role: true,
+  barangay: { select: { name: true } },
+  _count: {
+    select: {
+      reports: true,
+      verifiedReports: true,
+      rescueAssignments: true,
+      adoptionRequests: true,
+    },
+  },
+} satisfies Prisma.UserInclude;
+
+export type UserWithAdminRelations = Prisma.UserGetPayload<{
+  include: typeof adminUserInclude;
+}>;
+
+export interface AdminUserFilters {
+  search?: string;
+  role?: RoleName;
+  status?: "pending" | "active" | "suspended" | "deactivated";
+  barangayId?: number;
+}
+
 export class AuthRepository {
   constructor(private readonly db: Db = prisma) {}
 
@@ -66,6 +90,70 @@ export class AuthRepository {
       },
       include: authUserInclude,
       orderBy: { createdAt: "asc" },
+    });
+  }
+
+  listActiveByRole(roleName: RoleName): Promise<UserWithRole[]> {
+    return this.db.user.findMany({
+      where: {
+        deletedAt: null,
+        accountStatus: "active",
+        role: { roleName },
+      },
+      include: authUserInclude,
+      orderBy: { firstName: "asc" },
+    });
+  }
+
+  async listUsers(
+    filters: AdminUserFilters,
+    pagination: { skip: number; take: number },
+  ): Promise<{ rows: UserWithAdminRelations[]; total: number }> {
+    const where: Prisma.UserWhereInput = {
+      deletedAt: null,
+      ...(filters.role ? { role: { roleName: filters.role } } : {}),
+      ...(filters.status ? { accountStatus: filters.status } : {}),
+      ...(filters.barangayId ? { barangayId: filters.barangayId } : {}),
+      ...(filters.search
+        ? {
+            OR: [
+              { firstName: { contains: filters.search, mode: "insensitive" } },
+              { lastName: { contains: filters.search, mode: "insensitive" } },
+              { email: { contains: filters.search, mode: "insensitive" } },
+              { phoneNumber: { contains: filters.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+
+    const [rows, total] = await Promise.all([
+      this.db.user.findMany({
+        where,
+        include: adminUserInclude,
+        orderBy: { createdAt: "desc" },
+        skip: pagination.skip,
+        take: pagination.take,
+      }),
+      this.db.user.count({ where }),
+    ]);
+
+    return { rows, total };
+  }
+
+  findAdminById(id: string): Promise<UserWithAdminRelations | null> {
+    return this.db.user.findFirst({
+      where: { id, deletedAt: null },
+      include: adminUserInclude,
+    });
+  }
+
+  countActiveAdmins(): Promise<number> {
+    return this.db.user.count({
+      where: {
+        deletedAt: null,
+        accountStatus: "active",
+        role: { roleName: "admin" },
+      },
     });
   }
 

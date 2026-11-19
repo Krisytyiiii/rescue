@@ -19,6 +19,7 @@ export * from "./shared/authz.ts";
 export * from "./modules/auth/index.ts";
 export * from "./modules/notifications/index.ts";
 export * from "./modules/reports/index.ts";
+export * from "./modules/rescues/index.ts";
 export * from "./modules/animals/index.ts";
 export * from "./modules/adoptions/index.ts";
 export * from "./modules/health/index.ts";

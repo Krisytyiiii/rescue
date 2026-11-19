@@ -64,3 +64,36 @@ export interface JwtPayload {
   role: RoleName;
   type: "access";
 }
+
+export interface ListUsersQuery {
+  search?: string;
+  role?: RoleName;
+  status?: AccountStatus;
+  barangayId?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+/** Admin list row — never includes credentials or reset tokens. */
+export interface AdminUserRow {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string | null;
+  role: RoleName;
+  accountStatus: AccountStatus;
+  barangay: string | null;
+  profilePhotoUrl: string | null;
+  emailVerifiedAt: Date | null;
+  lastLoginAt: Date | null;
+  createdAt: Date;
+}
+
+export interface AdminUserDetail extends AdminUserRow {
+  counts: {
+    reports: number;
+    verifiedReports: number;
+    rescues: number;
+    adoptionRequests: number;
+  };
+}

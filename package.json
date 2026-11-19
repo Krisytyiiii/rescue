@@ -15,6 +15,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",
+    "db:seed-report": "tsx scripts/seed-pending-report.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "db:apply-init": "node scripts/apply-supabase-sql.mjs",

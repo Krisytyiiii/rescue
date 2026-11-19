@@ -32,3 +32,14 @@ Optimize for a fast, correct answer — not for exploring the repository. Respon
 - Do not add `suppressHydrationWarning` to hide text/class mismatches; that masks the real cause.
 - Only real SSR-safe problems need code changes: `Date.now()`, `Math.random()`, locale formatting, `typeof window` branches, and `useReducedMotion`/`useMediaQuery` used in initial render output.
 - `useReducedMotion` returns `null` on the server and a boolean on the client, so never feed it into `initial`/`animate`/`className`/text. Use `MotionConfig reducedMotion="user"` for accessibility and keep those props deterministic; a hook value may only drive event handlers.
+
+## Action UX rules (required for all mutations)
+
+These apply to every state-changing admin action — verify, reject, approve, assign, resolve, archive, delete, etc.
+
+- **Always confirm in an overlay.** No state-changing action fires directly from a button or from inline UI. Use the shared `ConfirmDialog` from `@/components/ui/confirm-dialog` (or `OverlayCard` for custom flows). The dialog states the action, the consequence, and the destructive tone. Actions that need extra input (for example a rejection reason) collect it inside the dialog.
+- **Close immediately on confirm.** Call the optimistic update and close the dialog/overlay synchronously before awaiting the network. Never show a blocking spinner or disable the whole screen while the request runs.
+- **Update the UI optimistically.** Apply the new status/value in local state (or a parent optimistic map) the instant the user confirms, so the change is visible while the backend processes. Also dismiss the parent detail modal on confirm (`onDone`).
+- **Requests run in the background.** Fire the `fetch` without blocking the UI. Do not refetch or `router.refresh()` before the request resolves — that can race and restore stale server data. Refresh only after a successful response so the server state becomes the source of truth.
+- **Revert + report failures.** If the request fails, roll the optimistic update back to the previous value and surface a non-blocking `FormAlert` (or the caller's `onActionError`). Never leave the UI showing a change that did not persist.
+- **No stacked modals/prompts.** One confirmation at a time, closed on confirm, Escape, backdrop click, or Cancel. Keep optimistic keyed state scoped to the affected row so other rows are unaffected.

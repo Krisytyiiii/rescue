@@ -4,7 +4,7 @@ import { authService, isAppError } from "@furescue/core";
 
 import { readSession } from "@/lib/auth/session";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await readSession();
   if (!session) {
     return NextResponse.json(
@@ -20,7 +20,11 @@ export async function GET() {
   }
 
   try {
-    const rescuers = await authService.listPendingRescuers();
+    const status = new URL(request.url).searchParams.get("status");
+    const rescuers =
+      status === "active"
+        ? await authService.listActiveRescuers()
+        : await authService.listPendingRescuers();
     return NextResponse.json({ ok: true, data: rescuers });
   } catch (error) {
     if (isAppError(error)) {

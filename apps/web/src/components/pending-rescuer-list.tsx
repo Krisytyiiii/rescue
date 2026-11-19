@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormAlert } from "@/components/ui/form-alert";
 
 interface PendingRescuer {
@@ -32,13 +33,14 @@ function formatApplied(value: string): string {
 
 export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] }) {
   const router = useRouter();
-  const [approving, setApproving] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<PendingRescuer | null>(null);
   const [approved, setApproved] = useState<string[]>([]);
   const [error, setError] = useState("");
 
   async function approve(id: string) {
-    setApproving(id);
     setError("");
+    // Update immediately; the request continues in the background.
+    setApproved((current) => [...current, id]);
 
     try {
       const response = await fetch(`/api/admin/rescuers/${id}/approve`, {
@@ -47,16 +49,15 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
       const body = await response.json();
 
       if (!response.ok) {
+        setApproved((current) => current.filter((value) => value !== id));
         setError(body?.error?.message ?? "We couldn't approve this rescuer. Please try again.");
         return;
       }
 
-      setApproved((current) => [...current, id]);
       router.refresh();
     } catch {
+      setApproved((current) => current.filter((value) => value !== id));
       setError("Network error. Check your connection and try again.");
-    } finally {
-      setApproving(null);
     }
   }
 
@@ -81,7 +82,6 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
       <ul className="space-y-2.5">
         {rescuers.map((rescuer) => {
           const isApproved = approved.includes(rescuer.id);
-          const isBusy = approving === rescuer.id;
 
           return (
             <li
@@ -122,19 +122,15 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
 
                 <button
                   type="button"
-                  disabled={isBusy || isApproved}
-                  onClick={() => approve(rescuer.id)}
+                  disabled={isApproved}
+                  onClick={() => setConfirming(rescuer)}
                   className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-lg px-3 text-[0.75rem] font-medium transition-colors disabled:cursor-not-allowed ${
                     isApproved
                       ? "bg-moss/10 text-moss"
                       : "bg-ink text-paper hover:bg-moss disabled:opacity-70"
                   }`}
                 >
-                  {isBusy ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" strokeWidth={2} />
-                  ) : (
-                    <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
-                  )}
+                  <Check className="h-3.5 w-3.5" strokeWidth={2.4} />
                   {isApproved ? "Approved" : "Approve"}
                 </button>
               </div>
@@ -142,6 +138,27 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
           );
         })}
       </ul>
+
+      <ConfirmDialog
+        open={confirming !== null}
+        onOpenChange={(value) => {
+          if (!value) setConfirming(null);
+        }}
+        tone="success"
+        title="Approve this rescuer?"
+        description={
+          confirming ? (
+            <>
+              <span className="font-medium text-ink">{confirming.fullName}</span> will be
+              granted rescuer access and can claim rescue assignments.
+            </>
+          ) : null
+        }
+        confirmLabel="Approve rescuer"
+        onConfirm={() => {
+          if (confirming) void approve(confirming.id);
+        }}
+      />
     </div>
   );
 }

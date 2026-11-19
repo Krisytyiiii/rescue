@@ -72,16 +72,17 @@ export class ReportsRepository {
         : {}),
     };
 
-    const [items, total] = await this.db.$transaction([
-      this.db.report.findMany({
-        where,
-        include: reportDetailInclude,
-        orderBy: [{ submittedAt: "desc" }],
-        skip: pagination.skip,
-        take: pagination.take,
-      }),
-      this.db.report.count({ where }),
-    ]);
+    // Read-only list + count do not need a transaction. Running them outside
+    // one avoids "Unable to start a transaction in the given time" when the
+    // connection pool is busy (e.g. dashboard refresh bursts).
+    const items = await this.db.report.findMany({
+      where,
+      include: reportDetailInclude,
+      orderBy: [{ submittedAt: "desc" }],
+      skip: pagination.skip,
+      take: pagination.take,
+    });
+    const total = await this.db.report.count({ where });
 
     return {
       items,

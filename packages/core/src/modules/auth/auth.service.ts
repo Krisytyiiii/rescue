@@ -5,11 +5,22 @@ import { env } from "../../config/env.ts";
 import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from "../../shared/errors.ts";
 import { prisma } from "../../db/prisma.ts";
 import { writeAuditLog } from "../../shared/audit.ts";
-import { AuthRepository, authRepository, type UserWithRole } from "./auth.repository.ts";
+import { requireRole } from "../../shared/authz.ts";
+import { buildPageMeta, normalizePagination } from "../../shared/pagination.ts";
+import type { Actor, Paginated } from "../../shared/types.ts";
+import {
+  AuthRepository,
+  authRepository,
+  type UserWithAdminRelations,
+  type UserWithRole,
+} from "./auth.repository.ts";
 import type {
+  AdminUserDetail,
+  AdminUserRow,
   AuthSession,
   AuthUser,
   JwtPayload,
+  ListUsersQuery,
   LoginInput,
   OAuthRegisterInput,
   RegisterInput,
@@ -32,6 +43,22 @@ function toAuthUser(user: UserWithRole): AuthUser {
     barangayId: user.barangayId,
     profilePhotoUrl: user.profilePhotoUrl,
     emailVerifiedAt: user.emailVerifiedAt,
+    createdAt: user.createdAt,
+  };
+}
+
+function toAdminUserRow(user: UserWithAdminRelations): AdminUserRow {
+  return {
+    id: user.id,
+    fullName: [user.firstName, user.middleName, user.lastName].filter(Boolean).join(" "),
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    role: user.role.roleName,
+    accountStatus: user.accountStatus,
+    barangay: user.barangay?.name ?? null,
+    profilePhotoUrl: user.profilePhotoUrl,
+    emailVerifiedAt: user.emailVerifiedAt,
+    lastLoginAt: user.lastLoginAt,
     createdAt: user.createdAt,
   };
 }
@@ -224,6 +251,103 @@ export class AuthService {
   async listPendingRescuers(): Promise<AuthUser[]> {
     const users = await this.repo.listPendingByRole("rescuer");
     return users.map(toAuthUser);
+  }
+
+  /** Active rescuers who can be assigned to a verified report. */
+  async listActiveRescuers(): Promise<AuthUser[]> {
+    const users = await this.repo.listActiveByRole("rescuer");
+    return users.map(toAuthUser);
+  }
+
+  /** Paginated account directory for the admin users page. */
+  async listUsers(query: ListUsersQuery): Promise<Paginated<AdminUserRow>> {
+    const pagination = normalizePagination(query);
+    const { rows, total } = await this.repo.listUsers(
+      {
+        search: query.search,
+        role: query.role,
+        status: query.status,
+        barangayId: query.barangayId,
+      },
+      pagination,
+    );
+
+    return {
+      items: rows.map(toAdminUserRow),
+      meta: buildPageMeta(total, pagination),
+    };
+  }
+
+  async getUserDetail(id: string): Promise<AdminUserDetail> {
+    const user = await this.repo.findAdminById(id);
+    if (!user) throw new NotFoundError("Account");
+
+    return {
+      ...toAdminUserRow(user),
+      counts: {
+        reports: user._count.reports,
+        verifiedReports: user._count.verifiedReports,
+        rescues: user._count.rescueAssignments,
+        adoptionRequests: user._count.adoptionRequests,
+      },
+    };
+  }
+
+  /**
+   * Suspend, reactivate, or deactivate an account. Admins cannot lock
+   * themselves out, and the last active admin is protected.
+   */
+  async setAccountStatus(
+    actor: Actor | undefined,
+    userId: string,
+    status: "active" | "suspended" | "deactivated",
+  ): Promise<AdminUserRow> {
+    const admin = requireRole(actor, "admin");
+    const user = await this.repo.findAdminById(userId);
+    if (!user) throw new NotFoundError("Account");
+
+    if (user.id === admin.userId) {
+      throw new ForbiddenError("You cannot change your own account status");
+    }
+
+    if (
+      user.role.roleName === "admin" &&
+      status !== "active" &&
+      (await this.repo.countActiveAdmins()) <= 1
+    ) {
+      throw new ConflictError("The last active admin cannot be suspended or deactivated");
+    }
+
+    await this.repo.setAccountStatus(userId, status);
+
+    await writeAuditLog(prisma, {
+      userId: admin.userId,
+      action: `account_${status}`,
+      entityType: "user",
+      entityId: user.id,
+      oldValue: { status: user.accountStatus },
+      newValue: { status },
+    });
+
+    if (status !== "active") {
+      await prisma.notification.create({
+        data: {
+          recipientUserId: user.id,
+          notificationType: "system",
+          title: status === "suspended" ? "Account suspended" : "Account deactivated",
+          body:
+            status === "suspended"
+              ? "Your account has been suspended. Contact an administrator for assistance."
+              : "Your account has been deactivated.",
+          referenceType: "user",
+          referenceId: user.id,
+        },
+      });
+    }
+
+    const updated = await this.repo.findAdminById(userId);
+    if (!updated) throw new NotFoundError("Account");
+    return toAdminUserRow(updated);
   }
 
   async approveRescuer(actorRole: string, userId: string): Promise<AuthUser> {

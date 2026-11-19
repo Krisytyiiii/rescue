@@ -12,6 +12,7 @@ import Link from "next/link";
 
 import { AnimalPopulationCard } from "@/components/admin/charts/animal-population-card";
 import { ReportsActivityCard, type TrendPoint } from "@/components/admin/charts/reports-activity-card";
+import { AdminLiveRefresh } from "@/components/admin/admin-live-refresh";
 import { PendingRescuerList } from "@/components/pending-rescuer-list";
 import { StatCard } from "@/components/ui/stat-card";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -254,6 +255,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="w-full">
+      <AdminLiveRefresh />
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
         <div>
