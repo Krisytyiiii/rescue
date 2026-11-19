@@ -143,7 +143,7 @@ export function AdminSidebar({
   return (
     <aside
       aria-label="Admin navigation"
-      className={`group fixed inset-y-0 left-0 z-50 flex w-[248px] flex-col border-r border-ink/[0.08] bg-white text-ink transition-transform duration-300 ease-out lg:w-[236px] lg:translate-x-0 ${
+      className={`group fixed inset-y-0 left-0 z-50 flex w-[min(248px,85vw)] flex-col border-r border-ink/[0.08] bg-white text-ink transition-transform duration-300 ease-out lg:w-[236px] lg:translate-x-0 ${
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       }`}
     >
@@ -181,7 +181,7 @@ export function AdminSidebar({
         ))}
       </nav>
 
-      <div className="shrink-0 border-t border-ink/[0.08] p-3">
+      <div className="shrink-0 border-t border-ink/[0.08] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:pb-3">
         <NavLink
           item={FOOTER_ITEM}
           active={isActive(pathname, FOOTER_ITEM.href)}

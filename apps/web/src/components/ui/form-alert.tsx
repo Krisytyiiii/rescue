@@ -13,7 +13,7 @@ const STYLES: Record<
     icon: AlertCircle,
   },
   info: {
-    wrapper: "border-[#c9d8e8] bg-[#f1f6fb] text-[#2f4f6b]",
+    wrapper: "border-[#cbe3d1] bg-[#f1f8f3] text-[#2f5c42]",
     icon: Info,
   },
   success: {

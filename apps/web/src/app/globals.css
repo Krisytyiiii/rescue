@@ -1,16 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #f7fafd;
-  --paper-2: #e8f0fa;
-  --ink: #0a1d33;
-  --forest: #0e2a4a;
-  --moss: #1d4ed8;
-  --clay: #2563eb;
-  --clay-soft: #60a5fa;
-  --sage: #9db9d9;
-  --sand: #d7e6f6;
-  --line: rgba(10, 29, 51, 0.14);
+  --paper: #ffffff;
+  --paper-2: #f2faf4;
+  --ink: #10241a;
+  --forest: #0f3a24;
+  --moss: #16603b;
+  --clay: #1f7a4d;
+  --clay-soft: #7cc79a;
+  --sage: #b9dcc4;
+  --sand: #e3f1e6;
+  --line: rgba(16, 36, 26, 0.14);
 }
 
 @theme inline {
@@ -210,12 +210,12 @@ input[type="range"].ledger-range::-webkit-slider-thumb {
   border-radius: 999px;
   background: var(--paper);
   border: 1px solid var(--clay);
-  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.16);
+  box-shadow: 0 0 0 5px rgba(31, 122, 77, 0.16);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 input[type="range"].ledger-range:hover::-webkit-slider-thumb {
   transform: scale(1.1);
-  box-shadow: 0 0 0 7px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 0 0 7px rgba(31, 122, 77, 0.2);
 }
 input[type="range"].ledger-range::-moz-range-thumb {
   height: 20px;
@@ -223,7 +223,7 @@ input[type="range"].ledger-range::-moz-range-thumb {
   border-radius: 999px;
   background: var(--paper);
   border: 1px solid var(--clay);
-  box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.16);
+  box-shadow: 0 0 0 5px rgba(31, 122, 77, 0.16);
 }
 
 /* Hide number input spinners. */
@@ -272,14 +272,14 @@ input[type="range"].ledger-range::-moz-range-thumb {
 }
 .group:hover .scrollbar-on-hover,
 .group:focus-within .scrollbar-on-hover {
-  scrollbar-color: rgba(10, 29, 51, 0.28) transparent;
+  scrollbar-color: rgba(16, 36, 26, 0.28) transparent;
 }
 .group:hover .scrollbar-on-hover::-webkit-scrollbar-thumb,
 .group:focus-within .scrollbar-on-hover::-webkit-scrollbar-thumb {
-  background-color: rgba(10, 29, 51, 0.28);
+  background-color: rgba(16, 36, 26, 0.28);
 }
 .group:hover .scrollbar-on-hover::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(10, 29, 51, 0.45);
+  background-color: rgba(16, 36, 26, 0.45);
 }
 
 /* Report detail dialog --------------------------------------------------- */
@@ -335,45 +335,45 @@ input[type="range"].ledger-range::-moz-range-thumb {
 
 /* Report location map (Leaflet) ------------------------------------------ */
 .report-map .leaflet-container {
-  background: #e9edf0;
+  background: #eef6ef;
   font-family: inherit;
 }
 .report-map .leaflet-control-zoom {
   border: 0;
-  box-shadow: 0 8px 22px -12px rgba(6, 24, 43, 0.45);
+  box-shadow: 0 8px 22px -12px rgba(6, 32, 20, 0.45);
 }
 .report-map .leaflet-control-zoom a {
   width: 30px;
   height: 30px;
   line-height: 30px;
-  border-color: rgba(10, 29, 51, 0.1);
+  border-color: rgba(16, 36, 26, 0.1);
   background: #fff;
-  color: rgba(10, 29, 51, 0.7);
+  color: rgba(16, 36, 26, 0.7);
 }
 .report-map .leaflet-control-zoom a:hover {
-  background: #f4f2ed;
-  color: #0a1d33;
+  background: #f1f7f2;
+  color: #10241a;
 }
 .report-map .leaflet-control-attribution {
   background: rgba(255, 255, 255, 0.82);
-  color: rgba(10, 29, 51, 0.45);
+  color: rgba(16, 36, 26, 0.45);
   font-size: 9px;
 }
 .report-map .leaflet-control-attribution a {
-  color: rgba(10, 29, 51, 0.65);
+  color: rgba(16, 36, 26, 0.65);
 }
 .report-map .leaflet-control-scale-line {
-  border-color: rgba(10, 29, 51, 0.3);
+  border-color: rgba(16, 36, 26, 0.3);
   background: rgba(255, 255, 255, 0.78);
-  color: rgba(10, 29, 51, 0.6);
+  color: rgba(16, 36, 26, 0.6);
   font-size: 9px;
 }
 .report-map .leaflet-popup-content-wrapper {
-  border: 1px solid rgba(10, 29, 51, 0.08);
+  border: 1px solid rgba(16, 36, 26, 0.08);
   border-radius: 10px;
   background: #fff;
-  color: #0a1d33;
-  box-shadow: 0 16px 32px -16px rgba(6, 24, 43, 0.45);
+  color: #10241a;
+  box-shadow: 0 16px 32px -16px rgba(6, 32, 20, 0.45);
 }
 .report-map .leaflet-popup-content {
   margin: 8px 12px;
@@ -381,24 +381,24 @@ input[type="range"].ledger-range::-moz-range-thumb {
   font-weight: 600;
 }
 .report-map .leaflet-popup-tip {
-  border: 1px solid rgba(10, 29, 51, 0.08);
+  border: 1px solid rgba(16, 36, 26, 0.08);
   background: #fff;
 }
 .report-map .leaflet-popup-close-button {
-  color: rgba(10, 29, 51, 0.4);
+  color: rgba(16, 36, 26, 0.4);
 }
 .report-map .leaflet-popup-close-button:hover {
-  color: #0a1d33;
+  color: #10241a;
 }
 .report-map .leaflet-tooltip.user-location-label {
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(31, 122, 77, 0.2);
   border-radius: 9999px;
   background: #fff;
   padding: 2px 8px;
-  color: #1d4ed8;
+  color: #16603b;
   font-size: 9px;
   font-weight: 600;
-  box-shadow: 0 8px 18px -10px rgba(6, 24, 43, 0.45);
+  box-shadow: 0 8px 18px -10px rgba(6, 32, 20, 0.45);
 }
 .report-map .leaflet-tooltip-top.user-location-label::before {
   border-top-color: #fff;
@@ -406,14 +406,14 @@ input[type="range"].ledger-range::-moz-range-thumb {
 
 /* Multi-pin operations map ----------------------------------------------- */
 .report-map .leaflet-tooltip.rescue-map-tooltip {
-  border: 1px solid rgba(10, 29, 51, 0.1);
+  border: 1px solid rgba(16, 36, 26, 0.1);
   border-radius: 8px;
   background: #fff;
   padding: 6px 9px;
-  color: #0a1d33;
+  color: #10241a;
   font-size: 10px;
   line-height: 1.45;
-  box-shadow: 0 12px 28px -14px rgba(6, 24, 43, 0.5);
+  box-shadow: 0 12px 28px -14px rgba(6, 32, 20, 0.5);
 }
 .report-map .leaflet-tooltip-top.rescue-map-tooltip::before {
   border-top-color: #fff;

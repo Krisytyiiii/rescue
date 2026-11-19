@@ -28,9 +28,9 @@ export const ASSIGNMENT_META: Record<
   { label: string; tone: BadgeTone; pin: string; text: string }
 > = {
   pending: { label: "Pending", tone: "pending", pin: "#c99a4e", text: "text-[#7a5212]" },
-  accepted: { label: "Accepted", tone: "info", pin: "#2563eb", text: "text-[#1d4ed8]" },
-  en_route: { label: "En route", tone: "progress", pin: "#0d9488", text: "text-[#0f5f59]" },
-  on_site: { label: "On site", tone: "progress", pin: "#0f766e", text: "text-[#0f5f59]" },
+  accepted: { label: "Accepted", tone: "info", pin: "#1f7a4d", text: "text-[#16603b]" },
+  en_route: { label: "En route", tone: "progress", pin: "#2f8f63", text: "text-[#1c5f42]" },
+  on_site: { label: "On site", tone: "progress", pin: "#247a54", text: "text-[#1c5f42]" },
   completed: { label: "Completed", tone: "success", pin: "#15803d", text: "text-[#166534]" },
   declined: { label: "Declined", tone: "warning", pin: "#b45309", text: "text-[#92400e]" },
   failed: { label: "Failed", tone: "danger", pin: "#b42318", text: "text-[#991b1b]" },
@@ -51,13 +51,13 @@ export const REPORT_STATUS_META: Record<
   { label: string; pin: string; tone: BadgeTone }
 > = {
   submitted: { label: "Submitted", pin: "#c99a4e", tone: "pending" },
-  verified: { label: "Verified", pin: "#2563eb", tone: "info" },
-  assigned: { label: "Assigned", pin: "#0d9488", tone: "progress" },
-  in_progress: { label: "In progress", pin: "#0f766e", tone: "progress" },
+  verified: { label: "Verified", pin: "#1f7a4d", tone: "info" },
+  assigned: { label: "Assigned", pin: "#2f8f63", tone: "progress" },
+  in_progress: { label: "In progress", pin: "#247a54", tone: "progress" },
   rescued: { label: "Rescued", pin: "#15803d", tone: "success" },
   unable_to_locate: { label: "Unable to locate", pin: "#b45309", tone: "warning" },
   rejected: { label: "Rejected", pin: "#b42318", tone: "danger" },
-  closed: { label: "Closed", pin: "#64748b", tone: "neutral" },
+  closed: { label: "Closed", pin: "#5f7a6b", tone: "neutral" },
 };
 
 export const REPORT_STATUS_ORDER = [
@@ -189,8 +189,8 @@ export const FEED_META: Record<
   { label: string; dot: string }
 > = {
   assigned: { label: "assigned", dot: "bg-[#c99a4e]" },
-  accepted: { label: "accepted", dot: "bg-[#2563eb]" },
-  arrived: { label: "arrived on site", dot: "bg-[#0d9488]" },
+  accepted: { label: "accepted", dot: "bg-[#1f7a4d]" },
+  arrived: { label: "arrived on site", dot: "bg-[#2f8f63]" },
   completed: { label: "completed", dot: "bg-[#15803d]" },
   failed: { label: "marked failed", dot: "bg-[#b42318]" },
   declined: { label: "declined", dot: "bg-[#b45309]" },

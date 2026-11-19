@@ -43,7 +43,7 @@ export function SiteHeader() {
       />
 
       <header className="fixed inset-x-0 top-0 z-50">
-        <div className="relative overflow-hidden border-b border-white/10 bg-[#0b1a2b] text-paper">
+        <div className="relative overflow-hidden border-b border-white/10 bg-[#0b1f13] text-paper">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_160%_at_12%_-40%,rgba(201,154,78,0.28),transparent_58%)]" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-clay/40 to-transparent" />
           <div className="relative mx-auto flex h-9 max-w-[1440px] items-center gap-2.5 px-5 sm:px-8 lg:px-12">

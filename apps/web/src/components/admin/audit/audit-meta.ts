@@ -149,7 +149,7 @@ export function recordHref(record: AuditRecordRef): string {
 
 export const TONE_CLASS: Record<AuditTone, { icon: string; wash: string }> = {
   neutral: { icon: "text-ink/45", wash: "bg-ink/[0.04]" },
-  info: { icon: "text-[#2563eb]", wash: "bg-[#2563eb]/10" },
+  info: { icon: "text-[#1f7a4d]", wash: "bg-[#1f7a4d]/10" },
   success: { icon: "text-[#15803d]", wash: "bg-[#15803d]/10" },
   warning: { icon: "text-[#b45309]", wash: "bg-[#b45309]/10" },
   danger: { icon: "text-[#b42318]", wash: "bg-[#b42318]/10" },

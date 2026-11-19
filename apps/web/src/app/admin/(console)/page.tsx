@@ -347,8 +347,8 @@ export default async function AdminDashboardPage() {
         <AnimalPopulationCard
           totalAnimals={totalAnimals}
           segments={[
-            { label: "Dogs", value: species.dog ?? 0, color: "#2563eb" },
-            { label: "Cats", value: species.cat ?? 0, color: "#60a5fa" },
+            { label: "Dogs", value: species.dog ?? 0, color: "#1f7a4d" },
+            { label: "Cats", value: species.cat ?? 0, color: "#7cc79a" },
           ]}
         />
       </div>

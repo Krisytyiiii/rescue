@@ -48,8 +48,8 @@ const TONES: Record<
   },
   info: {
     icon: Info,
-    iconWrap: "bg-[#2563eb]/10 text-[#1d4ed8]",
-    bar: "bg-[#2563eb]",
+    iconWrap: "bg-[#1f7a4d]/10 text-[#16603b]",
+    bar: "bg-[#1f7a4d]",
   },
 };
 
@@ -103,7 +103,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={item.id}
               role={item.tone === "error" ? "alert" : "status"}
-              className="toast-in pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border border-ink/[0.08] bg-white py-3 pl-3.5 pr-2.5 shadow-[0_18px_44px_-20px_rgba(6,24,43,0.45)]"
+              className="toast-in pointer-events-auto relative flex w-full max-w-sm items-start gap-3 overflow-hidden rounded-xl border border-ink/[0.08] bg-white py-3 pl-3.5 pr-2.5 shadow-[0_18px_44px_-20px_rgba(6,32,20,0.45)]"
             >
               <span
                 aria-hidden="true"

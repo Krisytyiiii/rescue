@@ -21,7 +21,7 @@ export function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-dvh bg-gradient-to-br from-[#f4f8fe] via-[#fbfcff] to-white">
+    <div className="min-h-dvh bg-gradient-to-br from-[#f2faf4] via-[#fbfefb] to-white">
       <AdminSidebar
         mobileOpen={mobileOpen}
         pendingCount={pendingCount}

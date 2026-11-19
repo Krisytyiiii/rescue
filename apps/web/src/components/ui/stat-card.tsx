@@ -90,7 +90,7 @@ export function StatCard({
   return href ? (
     <Link
       href={href}
-      className={`${className} cursor-pointer hover:-translate-y-px hover:shadow-[0_10px_24px_-16px_rgba(10,29,51,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2 active:translate-y-0`}
+      className={`${className} cursor-pointer hover:-translate-y-px hover:shadow-[0_10px_24px_-16px_rgba(16,36,26,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2 active:translate-y-0`}
     >
       {content}
     </Link>

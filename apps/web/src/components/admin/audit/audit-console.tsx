@@ -264,7 +264,7 @@ export function AuditConsole({
             <button
               type="button"
               onClick={refreshNewEvents}
-              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-moss/25 bg-moss/[0.08] px-3 text-[0.75rem] font-medium text-[#0f5f59] transition-colors hover:border-moss/40 hover:bg-moss/[0.14]"
+              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-moss/25 bg-moss/[0.08] px-3 text-[0.75rem] font-medium text-[#1c5f42] transition-colors hover:border-moss/40 hover:bg-moss/[0.14]"
             >
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-moss" />
               {newEvents} new event{newEvents === 1 ? "" : "s"}

@@ -628,7 +628,7 @@ function IntegrationsSection({ rows }: { rows: IntegrationRow[] }) {
       title="Integrations & environment"
       description="Values are set through environment variables. Secrets are never shown here."
     >
-      <div className="mb-3 flex items-start gap-2 rounded-lg bg-[#2563eb]/[0.06] px-3 py-2 text-[0.6875rem] leading-[1.55] text-[#1d4ed8]">
+      <div className="mb-3 flex items-start gap-2 rounded-lg bg-[#1f7a4d]/[0.06] px-3 py-2 text-[0.6875rem] leading-[1.55] text-[#16603b]">
         <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" strokeWidth={1.9} />
         This panel reports status only. It cannot display or edit keys, passwords, or
         connection strings.

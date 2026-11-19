@@ -203,7 +203,7 @@ export function TimePicker({
             role="dialog"
             aria-label="Choose a time"
             style={{ top: position.top, left: position.left }}
-            className="dialog-panel fixed z-[95] w-[15rem] rounded-xl border border-ink/10 bg-white p-3 shadow-[0_18px_40px_-18px_rgba(6,24,43,0.45)]"
+            className="dialog-panel fixed z-[95] max-h-[min(20rem,calc(100dvh-1rem))] w-[min(15rem,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-ink/10 bg-white p-3 shadow-[0_18px_40px_-18px_rgba(6,32,20,0.45)]"
           >
           <div className="flex items-center justify-between gap-2">
             <p className="text-[0.75rem] font-semibold text-ink">

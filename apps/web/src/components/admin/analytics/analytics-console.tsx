@@ -752,7 +752,7 @@ function ActivityChart({ data }: { data: AnalyticsDashboardDto["overview"]["acti
       note="Compare the two lines each day. When reports run above adoptions, incoming cases are outpacing placements."
       legend={
         <>
-          <Legend color="#2563eb" label="Reports" />
+          <Legend color="#1f7a4d" label="Reports" />
           <Legend color="#c99a4e" label="Adoptions" />
         </>
       }
@@ -760,7 +760,7 @@ function ActivityChart({ data }: { data: AnalyticsDashboardDto["overview"]["acti
       <AnalyticsAreaChart
         ariaLabel="Reports and adoptions over time"
         series={[
-          { key: "reports", label: "Reports", color: "#2563eb" },
+          { key: "reports", label: "Reports", color: "#1f7a4d" },
           { key: "adoptions", label: "Adoptions", color: "#c99a4e" },
         ]}
         data={data.map((point) => ({
@@ -781,8 +781,8 @@ function AdoptionChart({ data }: { data: AnalyticsDashboardDto["adoptions"]["ser
       note="Tracks demand for adoption. If submitted rises but approved stays flat, applications are building up in review."
       legend={
         <>
-          <Legend color="#2563eb" label="Submitted" />
-          <Legend color="#0f766e" label="Approved" />
+          <Legend color="#1f7a4d" label="Submitted" />
+          <Legend color="#247a54" label="Approved" />
           <Legend color="#b45309" label="Rejected" />
         </>
       }
@@ -790,8 +790,8 @@ function AdoptionChart({ data }: { data: AnalyticsDashboardDto["adoptions"]["ser
       <AnalyticsAreaChart
         ariaLabel="Adoption applications over time"
         series={[
-          { key: "submitted", label: "Submitted", color: "#2563eb" },
-          { key: "approved", label: "Approved", color: "#0f766e" },
+          { key: "submitted", label: "Submitted", color: "#1f7a4d" },
+          { key: "approved", label: "Approved", color: "#247a54" },
           { key: "rejected", label: "Rejected", color: "#b45309" },
         ]}
         data={data.map((point) => ({
@@ -816,16 +816,16 @@ function ThroughputChart({ data }: { data: AnalyticsDashboardDto["rescues"]["thr
       note="Shows how much work is getting done each week. A widening gap between the lines means resolutions are falling behind operations."
       legend={
         <>
-          <Legend color="#2563eb" label="Resolved" />
-          <Legend color="#0f766e" label="Completed" />
+          <Legend color="#1f7a4d" label="Resolved" />
+          <Legend color="#247a54" label="Completed" />
         </>
       }
     >
       <AnalyticsAreaChart
         ariaLabel="Reports resolved and operations completed"
         series={[
-          { key: "resolved", label: "Resolved", color: "#2563eb" },
-          { key: "completed", label: "Completed", color: "#0f766e" },
+          { key: "resolved", label: "Resolved", color: "#1f7a4d" },
+          { key: "completed", label: "Completed", color: "#247a54" },
         ]}
         data={data.map((point) => ({
           label: point.label,
@@ -894,7 +894,7 @@ function DurationPanel({
           <p className="mt-0.5 text-[0.6875rem] text-ink/45">Mean and median hours</p>
         </div>
         <div className="flex items-center gap-3 text-[0.625rem] text-ink/45">
-          <Legend color="#2563eb" label="Mean" />
+          <Legend color="#1f7a4d" label="Mean" />
           <Legend color="#c99a4e" label="Median" />
         </div>
       </div>
@@ -922,7 +922,7 @@ function DurationPanel({
               </div>
               <div className="mt-1 space-y-1">
                 <div className="h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
-                  <div className="h-full rounded-full bg-[#2563eb]" style={{ width: `${(row.meanHours / max) * 100}%` }} />
+                  <div className="h-full rounded-full bg-[#1f7a4d]" style={{ width: `${(row.meanHours / max) * 100}%` }} />
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-ink/[0.06]">
                   <div className="h-full rounded-full bg-[#c99a4e]" style={{ width: `${(row.medianHours / max) * 100}%` }} />

@@ -142,16 +142,16 @@ export function ReportLocationMap({ latitude, longitude, label }: ReportLocation
 
     const circle = L.circle([userLocation.latitude, userLocation.longitude], {
       radius: Math.min(userLocation.accuracy, 300),
-      color: "#2563eb",
+      color: "#1f7a4d",
       weight: 1,
-      fillColor: "#2563eb",
+      fillColor: "#1f7a4d",
       fillOpacity: 0.1,
     }).addTo(map);
 
     const marker = L.marker([userLocation.latitude, userLocation.longitude], {
       icon: L.divIcon({
         className: "",
-        html: '<span style="display:block;width:16px;height:16px;border-radius:9999px;background:#2563eb;border:3px solid #fff;box-shadow:0 0 0 5px rgba(37,99,235,0.22),0 2px 8px rgba(6,24,43,0.4)"></span>',
+        html: '<span style="display:block;width:16px;height:16px;border-radius:9999px;background:#1f7a4d;border:3px solid #fff;box-shadow:0 0 0 5px rgba(31,122,77,0.22),0 2px 8px rgba(6,32,20,0.4)"></span>',
         iconSize: [16, 16],
         iconAnchor: [8, 8],
       }),
@@ -192,12 +192,12 @@ export function ReportLocationMap({ latitude, longitude, label }: ReportLocation
     <div
       className={
         expanded
-          ? "report-map fixed inset-0 z-[70] flex flex-col bg-[#f4f2ed] p-3 sm:p-5"
-          : "report-map relative isolate z-0 mt-3 flex flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_14px_34px_-22px_rgba(6,24,43,0.3)]"
+          ? "report-map fixed inset-0 z-[70] flex flex-col overflow-y-auto bg-[#f1f7f2] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-5"
+          : "report-map relative isolate z-0 mt-3 flex flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_14px_34px_-22px_rgba(6,32,20,0.3)]"
       }
     >
       <div
-        className={`flex items-center justify-between gap-3 bg-white px-3.5 py-2.5 ${
+        className={`flex flex-wrap items-center justify-between gap-x-3 gap-y-2 bg-white px-3 py-2.5 sm:px-3.5 ${
           expanded ? "rounded-xl border border-ink/[0.08]" : "border-b border-ink/[0.07]"
         }`}
       >
@@ -215,7 +215,7 @@ export function ReportLocationMap({ latitude, longitude, label }: ReportLocation
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
           <span className="hidden rounded-md border border-ink/[0.08] bg-ink/[0.02] px-2 py-1 font-mono text-[0.625rem] text-ink/45 md:inline">
             {coordinates}
           </span>
@@ -226,9 +226,9 @@ export function ReportLocationMap({ latitude, longitude, label }: ReportLocation
             title="My location"
           >
             {locating ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#2563eb]" strokeWidth={1.9} />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-[#1f7a4d]" strokeWidth={1.9} />
             ) : (
-              <LocateFixed className="h-3.5 w-3.5 text-[#2563eb]" strokeWidth={1.9} />
+              <LocateFixed className="h-3.5 w-3.5 text-[#1f7a4d]" strokeWidth={1.9} />
             )}
             {locating ? "Locating…" : "My location"}
           </button>
@@ -279,11 +279,11 @@ export function ReportLocationMap({ latitude, longitude, label }: ReportLocation
           ref={containerRef}
           role="application"
           aria-label={`Map showing reported location at ${coordinates}`}
-          className="report-map h-full w-full bg-[#e9edf0]"
+          className="report-map h-full w-full bg-[#eef6ef]"
         />
 
         <div
-          className={`pointer-events-none absolute inset-0 grid place-items-center bg-[#eef1f3] text-[0.6875rem] font-medium text-ink/40 transition-opacity duration-300 ${
+          className={`pointer-events-none absolute inset-0 grid place-items-center bg-[#edf5ee] text-[0.6875rem] font-medium text-ink/40 transition-opacity duration-300 ${
             ready ? "opacity-0" : "opacity-100"
           }`}
         >

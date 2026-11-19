@@ -207,7 +207,7 @@ export function AdminNavbar({
           <div
             role="menu"
             aria-label="Account menu"
-            className="absolute right-0 top-[calc(100%+8px)] w-[268px] origin-top-right overflow-hidden rounded-xl border border-ink/10 bg-white shadow-[0_12px_32px_-8px_rgba(20,30,25,0.22),0_2px_8px_-2px_rgba(20,30,25,0.08)]"
+            className="absolute right-0 top-[calc(100%+8px)] w-[min(268px,calc(100vw-1rem))] origin-top-right overflow-hidden rounded-xl border border-ink/10 bg-white shadow-[0_12px_32px_-8px_rgba(20,30,25,0.22),0_2px_8px_-2px_rgba(20,30,25,0.08)]"
           >
             <div className="border-b border-ink/[0.07] px-4 py-3.5">
               <p className="truncate text-[0.8125rem] font-semibold leading-tight text-ink">

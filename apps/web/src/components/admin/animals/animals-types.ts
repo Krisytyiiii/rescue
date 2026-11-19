@@ -166,13 +166,13 @@ export const LIFECYCLE_META: Record<
   { label: string; tone: BadgeTone; pin: string }
 > = {
   reported: { label: "Reported sighting", tone: "pending", pin: "#c99a4e" },
-  rescued: { label: "Rescued", tone: "info", pin: "#2563eb" },
-  under_care: { label: "At the city vet", tone: "progress", pin: "#0d9488" },
+  rescued: { label: "Rescued", tone: "info", pin: "#1f7a4d" },
+  under_care: { label: "At the city vet", tone: "progress", pin: "#2f8f63" },
   available: { label: "Ready for adoption", tone: "success", pin: "#15803d" },
   adoption_pending: { label: "Adoption in progress", tone: "pending", pin: "#b45309" },
   adopted: { label: "Adopted", tone: "success", pin: "#166534" },
-  returned_to_owner: { label: "Returned to owner", tone: "neutral", pin: "#64748b" },
-  deceased: { label: "Deceased", tone: "neutral", pin: "#475569" },
+  returned_to_owner: { label: "Returned to owner", tone: "neutral", pin: "#5f7a6b" },
+  deceased: { label: "Deceased", tone: "neutral", pin: "#3f5749" },
 };
 
 /** Short, plain-language names for the "move to" actions. */

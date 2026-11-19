@@ -570,7 +570,7 @@ export function AnimalIntakeDialog({
                                   <span className="font-mono text-[0.625rem] font-semibold text-ink/70">
                                     {report.reportCode}
                                   </span>
-                                  <span className="rounded bg-[#2563eb]/10 px-1 py-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.06em] text-[#2563eb]">
+                                  <span className="rounded bg-[#1f7a4d]/10 px-1 py-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.06em] text-[#1f7a4d]">
                                     Rescued
                                   </span>
                                 </span>

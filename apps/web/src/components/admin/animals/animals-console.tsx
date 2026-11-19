@@ -537,7 +537,7 @@ function AnimalCard({
             onOpen();
           }
         }}
-        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(10,29,51,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
+        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(16,36,26,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
       >
         <div className="relative">
           <span

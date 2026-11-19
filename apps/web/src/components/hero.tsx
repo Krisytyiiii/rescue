@@ -167,7 +167,7 @@ export function Hero() {
                 className="absolute right-0 top-0 z-10 w-[76%] max-w-[390px]"
               >
                 <motion.div style={{ y: imageY }} className="rotate-[-2.4deg]">
-                  <figure className="border border-ink/10 bg-white p-2 shadow-[0_36px_70px_-32px_rgba(10,29,51,0.35)]">
+                  <figure className="border border-ink/10 bg-white p-2 shadow-[0_36px_70px_-32px_rgba(16,36,26,0.35)]">
                     <div className="relative aspect-[4/5] overflow-hidden bg-sand">
                       <Image
                         src="/images/pet-7.jpg"
@@ -197,7 +197,7 @@ export function Hero() {
                 className="absolute bottom-2 left-0 z-20 w-[54%] max-w-[265px]"
               >
                 <motion.div style={{ y: smallImageY }} className="rotate-[3.5deg]">
-                  <figure className="border border-ink/10 bg-white p-1.5 shadow-[0_24px_50px_-24px_rgba(10,29,51,0.32)]">
+                  <figure className="border border-ink/10 bg-white p-1.5 shadow-[0_24px_50px_-24px_rgba(16,36,26,0.32)]">
                     <div className="relative aspect-[4/3] overflow-hidden bg-sand">
                       <Image
                         src="/images/pet-2.jpg"
@@ -220,7 +220,7 @@ export function Hero() {
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.9, delay: 0.7, ease }}
-                className="absolute left-0 top-[4%] z-30 grid h-[104px] w-[104px] rotate-[-7deg] place-content-center rounded-full border border-clay/20 bg-clay text-center text-paper shadow-[0_16px_40px_-16px_rgba(37,99,235,0.55)] sm:h-[118px] sm:w-[118px]"
+                className="absolute left-0 top-[4%] z-30 grid h-[104px] w-[104px] rotate-[-7deg] place-content-center rounded-full border border-clay/20 bg-clay text-center text-paper shadow-[0_16px_40px_-16px_rgba(31,122,77,0.55)] sm:h-[118px] sm:w-[118px]"
               >
                 <span className="font-display text-[2rem] leading-none sm:text-[2.35rem]">
                   916

@@ -57,7 +57,7 @@ export function AnimalPopulationCard({
               cy={CENTER}
               r={RADIUS}
               fill="none"
-              stroke="#eef3f9"
+              stroke="#eef7f0"
               strokeWidth={STROKE}
             />
 
@@ -67,7 +67,7 @@ export function AnimalPopulationCard({
                 cy={CENTER}
                 r={RADIUS}
                 fill="none"
-                stroke="#dbe6f2"
+                stroke="#dcefe0"
                 strokeWidth={STROKE}
                 strokeDasharray="4 7"
               />

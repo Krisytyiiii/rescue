@@ -142,7 +142,9 @@ export function AuditDetail({
             </p>
           ) : (
             <div className="mt-2 overflow-hidden rounded-lg border border-ink/[0.07]">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] bg-ink/[0.02] px-3 py-1.5 text-[0.5625rem] font-semibold uppercase tracking-[0.08em] text-ink/35">
+              <div
+                className="hidden sm:grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] bg-ink/[0.02] px-3 py-1.5 text-[0.5625rem] font-semibold uppercase tracking-[0.08em] text-ink/35"
+              >
                 <span>Field</span>
                 <span>Before</span>
                 <span>After</span>
@@ -151,7 +153,7 @@ export function AuditDetail({
                 {detail.changes.map((change) => (
                   <li
                     key={change.path}
-                    className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] gap-2 px-3 py-2 text-[0.6875rem]"
+                    className="grid grid-cols-1 gap-1.5 px-3 py-2.5 text-[0.6875rem] sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)] sm:gap-2 sm:py-2"
                   >
                     <span className="min-w-0">
                       <span className="block truncate font-medium text-ink/70">{change.label}</span>
@@ -160,9 +162,15 @@ export function AuditDetail({
                       </span>
                     </span>
                     <span className="min-w-0 break-words text-ink/45">
+                      <span className="mb-0.5 block text-[0.5rem] font-semibold uppercase tracking-[0.08em] text-ink/30 sm:hidden">
+                        Before
+                      </span>
                       {change.before ?? <span className="italic text-ink/25">None</span>}
                     </span>
                     <span className="min-w-0 break-words font-medium text-ink/75">
+                      <span className="mb-0.5 block text-[0.5rem] font-semibold uppercase tracking-[0.08em] text-ink/30 sm:hidden">
+                        After
+                      </span>
                       {change.after ?? <span className="italic text-ink/25">None</span>}
                     </span>
                   </li>

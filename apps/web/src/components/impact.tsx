@@ -118,7 +118,7 @@ export function Impact() {
 
           <div className="lg:col-span-6 lg:col-start-7">
             <Reveal delay={0.08}>
-              <div className="relative bg-forest p-5 text-paper shadow-[0_40px_90px_-50px_rgba(10,29,51,0.7)] sm:p-8 lg:p-9">
+              <div className="relative bg-forest p-5 text-paper shadow-[0_40px_90px_-50px_rgba(16,36,26,0.7)] sm:p-8 lg:p-9">
                 <div className="flex items-center justify-between border-b border-paper/15 pb-4">
                   <div className="flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-clay-soft" />

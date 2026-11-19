@@ -181,7 +181,7 @@ export function RescuesConsole({ data }: RescuesConsoleProps) {
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-[#c99a4e]" />
           Submitted
-          <span className="h-2 w-2 rounded-full bg-[#2563eb]" />
+          <span className="h-2 w-2 rounded-full bg-[#1f7a4d]" />
           Verified
           <span className="h-2 w-2 rounded-full bg-[#15803d]" />
           Rescued
@@ -207,8 +207,8 @@ function ReportRow({
     <li
       className={`overflow-hidden rounded-lg border bg-white transition-shadow ${
         active
-          ? "border-ink/20 shadow-[0_6px_18px_-10px_rgba(6,24,43,0.3)] ring-1 ring-ink/10"
-          : "border-ink/[0.08] hover:shadow-[0_4px_14px_-10px_rgba(6,24,43,0.22)]"
+          ? "border-ink/20 shadow-[0_6px_18px_-10px_rgba(6,32,20,0.3)] ring-1 ring-ink/10"
+          : "border-ink/[0.08] hover:shadow-[0_4px_14px_-10px_rgba(6,32,20,0.22)]"
       }`}
     >
       <button

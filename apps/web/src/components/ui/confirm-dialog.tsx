@@ -88,7 +88,7 @@ export function ConfirmDialog({
 
   return createPortal(
     <div
-      className="dialog-overlay fixed inset-0 z-[90] flex items-center justify-center bg-[#06182b]/55 p-4 backdrop-blur-sm"
+      className="dialog-overlay fixed inset-0 z-[90] flex items-end justify-center bg-[#062013]/55 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onOpenChange(false);
       }}
@@ -98,9 +98,9 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby={description ? "confirm-dialog-description" : undefined}
-        className="dialog-panel w-full max-w-md overflow-hidden rounded-2xl border border-ink/[0.08] bg-white shadow-[0_28px_70px_-28px_rgba(6,24,43,0.55)]"
+        className="dialog-panel max-h-[100dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-ink/[0.08] bg-white shadow-[0_28px_70px_-28px_rgba(6,32,20,0.55)] sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
       >
-        <div className="flex items-start gap-3.5 p-5">
+        <div className="flex items-start gap-3 p-4 sm:gap-3.5 sm:p-5">
           <span
             className={`grid h-10 w-10 shrink-0 place-items-center rounded-xl ${style.badge}`}
           >
@@ -132,13 +132,13 @@ export function ConfirmDialog({
           </button>
         </div>
 
-        {children && <div className="px-5 pb-1">{children}</div>}
+        {children && <div className="px-4 pb-1 sm:px-5">{children}</div>}
 
-        <div className="flex items-center justify-end gap-2 border-t border-ink/[0.07] bg-ink/[0.012] px-5 py-3.5">
+        <div className="flex flex-col-reverse items-stretch gap-2 border-t border-ink/[0.07] bg-ink/[0.012] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:px-5 sm:py-3.5 sm:pb-3.5">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="inline-flex h-9 items-center rounded-lg border border-ink/12 px-3.5 text-[0.75rem] font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40"
+            className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-ink/12 px-3.5 text-[0.75rem] font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-9 sm:w-auto"
           >
             {cancelLabel}
           </button>
@@ -150,7 +150,7 @@ export function ConfirmDialog({
               onConfirm();
               onOpenChange(false);
             }}
-            className={`inline-flex h-9 items-center rounded-lg px-3.5 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 disabled:cursor-not-allowed disabled:opacity-50 ${style.button}`}
+            className={`inline-flex h-10 w-full items-center justify-center rounded-lg px-3.5 text-[0.75rem] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:w-auto ${style.button}`}
           >
             {confirmLabel}
           </button>

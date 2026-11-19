@@ -15,7 +15,7 @@ const RANGES = [7, 14, 30] as const;
 type Range = (typeof RANGES)[number];
 
 const SERIES = [
-  { key: "reports", label: "Reports", color: "#2563eb" },
+  { key: "reports", label: "Reports", color: "#1f7a4d" },
   { key: "adoptions", label: "Adoptions", color: "#c99a4e" },
 ];
 

@@ -2,15 +2,15 @@
 
 import { useId, useState } from "react";
 
-const GRID = "#e8eef6";
-const AXIS = "#94a3b8";
+const GRID = "#e6f2e9";
+const AXIS = "#7f9c8b";
 
 export const CHART_COLORS = [
-  "#2563eb",
-  "#0f766e",
+  "#1f7a4d",
+  "#247a54",
   "#c99a4e",
   "#b45309",
-  "#64748b",
+  "#5f7a6b",
 ] as const;
 
 export function colorAt(index: number): string {
@@ -201,7 +201,7 @@ export function AnalyticsAreaChart({
             x2={x(active)}
             y1={padTop}
             y2={baseline}
-            stroke="#94a3b8"
+            stroke="#7f9c8b"
             strokeWidth={1}
             strokeDasharray="3 3"
           />
@@ -348,7 +348,7 @@ export function AnalyticsBarChart({
                 textAnchor="middle"
                 fontSize={10}
                 fontWeight={600}
-                fill="#475569"
+                fill="#3f5749"
               >
                 {row.value}
               </text>
@@ -543,7 +543,7 @@ export function AnalyticsGaugeChart({
   max = 100,
   label,
   caption,
-  color = "#0f766e",
+  color = "#247a54",
   size = 260,
 }: {
   value: number;
@@ -601,7 +601,7 @@ export function AnalyticsGaugeChart({
           textAnchor="middle"
           fontSize={30}
           fontWeight={600}
-          fill="#1e293b"
+          fill="#1b3325"
         >
           {percent}%
         </text>

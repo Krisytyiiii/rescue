@@ -132,7 +132,7 @@ export function RescuesMap({
         className: "",
         html: `<span style="display:block;width:${size}px;height:${size}px;border-radius:9999px;background:${meta.pin};border:2.5px solid #fff;box-shadow:0 0 0 ${
           selected ? 7 : 3
-        }px ${meta.pin}${selected ? "3d" : "26"},0 4px 10px rgba(6,24,43,0.4)"></span>`,
+        }px ${meta.pin}${selected ? "3d" : "26"},0 4px 10px rgba(6,32,20,0.4)"></span>`,
         iconSize: [size, size],
         iconAnchor: [size / 2, size / 2],
       });
@@ -340,7 +340,7 @@ export function RescuesMap({
         ref={containerRef}
         role="application"
         aria-label="Map of rescue reports"
-        className="report-map h-full w-full bg-[#e9edf0]"
+        className="report-map h-full w-full bg-[#eef6ef]"
       />
 
       <canvas
@@ -401,7 +401,7 @@ export function RescuesMap({
       )}
 
       <div
-        className={`pointer-events-none absolute inset-0 grid place-items-center bg-[#eef1f3] text-[0.6875rem] font-medium text-ink/40 transition-opacity duration-300 ${
+        className={`pointer-events-none absolute inset-0 grid place-items-center bg-[#edf5ee] text-[0.6875rem] font-medium text-ink/40 transition-opacity duration-300 ${
           ready ? "opacity-0" : "opacity-100"
         }`}
       >
@@ -430,7 +430,7 @@ export function RescuesMap({
         <span className="sr-only">Fit all reports</span>
       </Button>
 
-      <div className="pointer-events-none absolute bottom-3 right-3 z-[500] rounded-lg border border-ink/[0.08] bg-white/95 p-2.5 shadow-[0_10px_30px_-18px_rgba(6,24,43,0.45)] backdrop-blur-sm">
+      <div className="pointer-events-none absolute bottom-3 right-3 z-[500] rounded-lg border border-ink/[0.08] bg-white/95 p-2.5 shadow-[0_10px_30px_-18px_rgba(6,32,20,0.45)] backdrop-blur-sm">
         {mode === "heat" ? (
           <>
             <p className="text-[0.5rem] font-semibold uppercase tracking-[0.12em] text-ink/40">
@@ -440,7 +440,7 @@ export function RescuesMap({
               className="mt-1.5 h-1.5 w-36 rounded-full"
               style={{
                 background:
-                  "linear-gradient(90deg, #2563eb 0%, #06b6d4 20%, #22c55e 38%, #facc15 58%, #f97316 78%, #dc2626 100%)",
+                  "linear-gradient(90deg, #1f7a4d 0%, #06b6d4 20%, #22c55e 38%, #facc15 58%, #f97316 78%, #dc2626 100%)",
               }}
             />
             <div className="mt-1 flex justify-between text-[0.5rem] text-ink/35">

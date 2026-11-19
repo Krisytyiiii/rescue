@@ -459,8 +459,8 @@ export function LearningEditor({ module, onClose, onSubmit }: LearningEditorProp
                   </div>
 
                   <div className="space-y-2.5 p-2.5">
-                    <div className="grid grid-cols-[minmax(0,1fr)_6rem_minmax(0,1.35fr)] items-end gap-2">
-                      <div className="min-w-0">
+                    <div className="grid grid-cols-[minmax(0,1fr)_5rem] items-end gap-2 sm:grid-cols-[minmax(0,1fr)_6rem_minmax(0,1.35fr)]">
+                      <div className="col-span-2 min-w-0 sm:col-span-1">
                         <FieldLabel>Content type</FieldLabel>
                         <Select
                           name={`lesson-type-${lesson.key}`}

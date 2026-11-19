@@ -99,7 +99,7 @@ function DatePill({ animal }: { animal: AdoptionAnimalListRow }) {
   const value = animal.adoptedDate ?? animal.intakeDate;
   if (!value) return null;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#0a1d33] px-2.5 py-0.5 text-[0.625rem] font-semibold text-white shadow-[0_4px_12px_-4px_rgba(6,24,43,0.7)] ring-1 ring-inset ring-white/20">
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#10241a] px-2.5 py-0.5 text-[0.625rem] font-semibold text-white shadow-[0_4px_12px_-4px_rgba(6,32,20,0.7)] ring-1 ring-inset ring-white/20">
       <Clock className="h-3 w-3 shrink-0 text-white/70" strokeWidth={1.8} />
       <span className="font-medium text-white/70">
         {animal.adoptedDate ? "Adopted" : "Added"}
@@ -294,9 +294,9 @@ export function AdoptionAnimalsList({
                       setSelected(animal);
                     }
                   }}
-                  className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(10,29,51,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
+                  className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(16,36,26,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
                 >
-                  <div className="relative h-60 w-full shrink-0 overflow-hidden bg-[#0a1d33]">
+                  <div className="relative h-60 w-full shrink-0 overflow-hidden bg-[#10241a]">
                     {animal.primaryPhotoUrl ? (
                       <img
                         src={animal.primaryPhotoUrl}
@@ -310,8 +310,8 @@ export function AdoptionAnimalsList({
                       </span>
                     )}
 
-                    <div className="pointer-events-none absolute inset-0 bg-[#0a1d33]/15" />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06182b] via-[#06182b]/70 to-transparent" />
+                    <div className="pointer-events-none absolute inset-0 bg-[#10241a]/15" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#062013] via-[#062013]/70 to-transparent" />
 
                     <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
                       <Badge tone="neutral" className="font-mono tracking-wide">
@@ -475,7 +475,7 @@ function AnimalDetailModal({
     >
       <ScrollArea className="min-h-0 flex-1">
         <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <div className="relative h-56 shrink-0 bg-[#0a1d33] md:h-full md:min-h-[480px]">
+          <div className="relative h-56 shrink-0 bg-[#10241a] md:h-full md:min-h-[480px]">
             {animal.primaryPhotoUrl ? (
               <img
                 src={animal.primaryPhotoUrl}
@@ -487,7 +487,7 @@ function AnimalDetailModal({
                 <PawPrint className="h-8 w-8" strokeWidth={1.5} />
               </span>
             )}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#06182b]/70 via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#062013]/70 via-transparent to-transparent" />
           </div>
 
           <div className="space-y-5 p-5">
