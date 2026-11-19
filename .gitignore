@@ -16,3 +16,5 @@ ADMIN_CREDENTIALS.md
 .DS_Store
 Thumbs.db
 *.tsbuildinfo
+
+.vercel

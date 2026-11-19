@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@furescue/core": "*",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.119.1",
     "framer-motion": "^14.14.0",
