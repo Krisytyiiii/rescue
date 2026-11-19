@@ -1,102 +1,52 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 interface SearchInputProps {
-  /** Page the query is written to, e.g. `/admin/reports`. */
-  basePath?: string;
-  /** Search param key. Defaults to `q`. */
-  param?: string;
-  defaultValue?: string;
-  /** Controlled value. Pair with `onValueChange` to filter local state instead of the URL. */
+  /** Current text. Pair with `onValueChange` for an instant, fetch-free filter. */
   value?: string;
+  /** Fires on every keystroke so results can be filtered in memory. */
   onValueChange?: (value: string) => void;
+  /** Initial text when used uncontrolled. */
+  defaultValue?: string;
   placeholder?: string;
   label?: string;
-  /** Debounce before the URL updates. Kept short so results feel instant. */
-  delay?: number;
   /** Hide the leading magnifier for compact toolbars. */
   showIcon?: boolean;
   className?: string;
 }
 
 /**
- * URL-driven search field. Each keystroke cancels the previous pending
- * navigation, so rapid typing never stacks stale requests; the current page
- * can key its results on the URL to replace stale rows with a skeleton.
+ * Purely local search field. It never reads or writes the URL and never
+ * fetches: every keystroke updates the caller's state synchronously, so the
+ * caller can filter data it already has without stale responses.
  */
 export function SearchInput({
-  basePath = "",
-  param = "q",
-  defaultValue = "",
   value,
   onValueChange,
+  defaultValue = "",
   placeholder = "Search",
   label = "Search",
-  delay = 200,
   showIcon = true,
   className = "",
 }: SearchInputProps) {
-  const router = useRouter();
-  const timer = useRef<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const controlled = value !== undefined && onValueChange !== undefined;
+  const controlled = value !== undefined;
   const current = controlled ? value : internalValue;
 
+  // Keep an uncontrolled field in sync with server-driven resets (e.g. a
+  // "Clear filters" action) without clobbering active typing.
   useEffect(() => {
-    return () => {
-      if (timer.current !== null) window.clearTimeout(timer.current);
-    };
-  }, []);
-
-  // Keep in sync with server-driven resets (e.g. "Clear filters") without
-  // clobbering what the user is actively typing.
-  useEffect(() => {
-    if (document.activeElement !== inputRef.current) setInternalValue(defaultValue);
-  }, [defaultValue]);
-
-  function commit(next: string) {
-    const params = new URLSearchParams(window.location.search);
-    const trimmed = next.trim();
-    if (trimmed) params.set(param, trimmed);
-    else params.delete(param);
-    params.delete("page");
-
-    const query = params.toString();
-    router.replace(query ? `${basePath}?${query}` : basePath, { scroll: false });
-  }
-
-  function schedule(next: string) {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      timer.current = null;
-      commit(next);
-    }, delay);
-  }
-
-  function flush() {
-    if (timer.current !== null) {
-      window.clearTimeout(timer.current);
-      timer.current = null;
+    if (!controlled && document.activeElement !== inputRef.current) {
+      setInternalValue(defaultValue);
     }
-    commit(current);
-  }
+  }, [defaultValue, controlled]);
 
   function change(next: string) {
-    setInternalValue(next);
-    if (controlled) onValueChange(next);
-    else schedule(next);
-  }
-
-  function clear() {
-    if (timer.current !== null) window.clearTimeout(timer.current);
-    timer.current = null;
-    setInternalValue("");
-    if (controlled) onValueChange("");
-    else commit("");
+    if (!controlled) setInternalValue(next);
+    onValueChange?.(next);
   }
 
   return (
@@ -111,14 +61,12 @@ export function SearchInput({
       <input
         ref={inputRef}
         type="search"
-        name={param}
         value={current}
         onChange={(event) => change(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Enter" && !controlled) flush();
           if (event.key === "Escape" && current) {
             event.preventDefault();
-            clear();
+            change("");
           }
         }}
         placeholder={placeholder}
@@ -129,7 +77,7 @@ export function SearchInput({
       {current && (
         <button
           type="button"
-          onClick={clear}
+          onClick={() => change("")}
           aria-label="Clear search"
           className="absolute right-1.5 top-1/2 grid h-5 w-5 -translate-y-1/2 place-items-center rounded text-ink/35 transition-colors hover:bg-ink/[0.05] hover:text-ink/60"
         >

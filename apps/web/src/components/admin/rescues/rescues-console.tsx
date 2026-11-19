@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SearchEmpty } from "@/components/ui/search-empty";
 import { SearchInput } from "@/components/ui/search-input";
 import type { ReportMarkerRow, RescueConsoleData } from "@furescue/core";
 
@@ -151,9 +152,16 @@ export function RescuesConsole({ data }: RescuesConsoleProps) {
 
           <ScrollArea className="min-h-0 flex-1 pr-0.5">
             {visibleReports.length === 0 ? (
-              <p className="rounded-lg border border-dashed border-ink/[0.1] px-3 py-10 text-center text-[0.75rem] text-ink/40">
-                No reports match this view
-              </p>
+              <SearchEmpty
+                compact
+                title="No reports match your search"
+                description="Try a different report, barangay, or landmark."
+                onClear={() => {
+                  setQuery("");
+                  setFilter("all");
+                }}
+                clearLabel="Clear filters"
+              />
             ) : (
               <ul className="space-y-2">
                 {visibleReports.map((report) => (

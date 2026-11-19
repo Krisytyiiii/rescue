@@ -11,6 +11,9 @@ import {
   type CreateHealthRecordInput,
   type CreateHeartRateInput,
   type CreateVaccinationInput,
+  type UpdateHealthRecordInput,
+  type UpdateHeartRateInput,
+  type UpdateVaccinationInput,
 } from "./health.types.ts";
 
 function vaccinationStatus(
@@ -144,6 +147,133 @@ export class HealthService {
         referenceId: log.id,
       });
     }
+
+    return log;
+  }
+
+  async updateRecord(
+    animalId: string,
+    recordId: string,
+    input: UpdateHealthRecordInput,
+    actor?: Actor,
+  ) {
+    const staff = requireRole(actor, "admin", "rescuer");
+    await this.requireAnimal(animalId);
+
+    const existing = await prisma.healthRecord.findFirst({
+      where: { id: recordId, animalId },
+    });
+    if (!existing) throw new NotFoundError("Health record");
+
+    return prisma.$transaction(async (tx) => {
+      const record = await tx.healthRecord.update({
+        where: { id: recordId },
+        data: {
+          recordType: input.recordType,
+          recordDate: input.recordDate,
+          diagnosis: input.diagnosis,
+          treatment: input.treatment,
+          medication: input.medication,
+          weightKg: input.weightKg,
+          followUpDate: input.followUpDate,
+          remarks: input.remarks,
+        },
+      });
+
+      if (input.weightKg !== undefined) {
+        await tx.animal.update({
+          where: { id: animalId },
+          data: { weightKg: input.weightKg },
+        });
+      }
+
+      await writeAuditLog(tx, {
+        userId: staff.userId,
+        action: "update_health_record",
+        entityType: "health_record",
+        entityId: recordId,
+        oldValue: { animalId, recordType: existing.recordType },
+        newValue: { animalId, recordType: input.recordType },
+      });
+
+      return record;
+    });
+  }
+
+  async updateVaccination(
+    animalId: string,
+    vaccinationId: string,
+    input: UpdateVaccinationInput,
+    actor?: Actor,
+  ) {
+    const staff = requireRole(actor, "admin", "rescuer");
+    await this.requireAnimal(animalId);
+
+    const existing = await prisma.vaccination.findFirst({
+      where: { id: vaccinationId, animalId },
+    });
+    if (!existing) throw new NotFoundError("Vaccination");
+
+    const status = vaccinationStatus(input.nextDueDate);
+    const vaccination = await prisma.vaccination.update({
+      where: { id: vaccinationId },
+      data: {
+        vaccineName: input.vaccineName,
+        doseNumber: input.doseNumber,
+        dateGiven: input.dateGiven,
+        nextDueDate: input.nextDueDate,
+        batchLotNo: input.batchLotNo,
+        status,
+      },
+    });
+
+    await writeAuditLog(prisma, {
+      userId: staff.userId,
+      action: "update_vaccination",
+      entityType: "vaccination",
+      entityId: vaccinationId,
+      oldValue: { animalId, vaccineName: existing.vaccineName },
+      newValue: { animalId, vaccineName: input.vaccineName, status },
+    });
+
+    return vaccination;
+  }
+
+  async updateHeartRate(
+    animalId: string,
+    heartRateId: string,
+    input: UpdateHeartRateInput,
+    actor?: Actor,
+  ) {
+    const staff = requireRole(actor, "admin", "rescuer");
+    const animal = await this.requireAnimal(animalId);
+
+    const existing = await prisma.heartRateLog.findFirst({
+      where: { id: heartRateId, animalId },
+    });
+    if (!existing) throw new NotFoundError("Heart rate reading");
+
+    const range = HEART_RATE_RANGES[animal.species];
+    const isFlagged = input.heartRateBpm < range.min || input.heartRateBpm > range.max;
+    const log = await prisma.heartRateLog.update({
+      where: { id: heartRateId },
+      data: {
+        heartRateBpm: input.heartRateBpm,
+        measurementContext: input.measurementContext,
+        measuredAt: input.measuredAt ?? existing.measuredAt,
+        notes: input.notes,
+        isFlagged,
+      },
+    });
+
+    await writeAuditLog(prisma, {
+      userId: staff.userId,
+      action: "update_heart_rate",
+      entityType: "heart_rate_log",
+      entityId: heartRateId,
+      oldValue: { animalId, bpm: existing.heartRateBpm },
+      newValue: { animalId, bpm: input.heartRateBpm, isFlagged },
+    });
 
     return log;
   }

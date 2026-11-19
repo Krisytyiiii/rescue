@@ -4,6 +4,7 @@ export type ButtonVariant =
   | "primary"
   | "inverted"
   | "secondary"
+  | "tertiary"
   | "ghost"
   | "danger"
   | "dangerGhost";
@@ -15,6 +16,8 @@ const VARIANTS: Record<ButtonVariant, string> = {
   inverted: "bg-ink text-paper hover:bg-ink/90",
   secondary:
     "border border-ink/12 bg-white text-ink/60 hover:border-ink/25 hover:text-ink",
+  tertiary:
+    "border border-[#c99a4e]/45 bg-[#c99a4e]/10 text-[#7a5212] hover:border-[#c99a4e]/70 hover:bg-[#c99a4e]/18",
   ghost: "text-ink/55 hover:bg-ink/[0.04] hover:text-ink",
   danger: "bg-[#b42318] text-white hover:bg-[#991b1b]",
   dangerGhost: "text-[#991b1b] hover:bg-[#b42318]/10",

@@ -47,3 +47,7 @@ export const createHeartRateSchema = z.object({
   measuredAt: z.coerce.date().optional(),
   notes: z.string().trim().max(255).optional(),
 });
+
+export const updateHealthRecordSchema = createHealthRecordSchema.omit({ animalId: true });
+export const updateVaccinationSchema = createVaccinationSchema.omit({ animalId: true });
+export const updateHeartRateSchema = createHeartRateSchema.omit({ animalId: true });

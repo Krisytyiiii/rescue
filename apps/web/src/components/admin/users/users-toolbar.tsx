@@ -1,13 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { SearchInput } from "@/components/ui/search-input";
 
-interface UsersToolbarProps {
+export interface UserFilters {
   q: string;
   role: string;
   status: string;
+}
+
+export const EMPTY_USER_FILTERS: UserFilters = { q: "", role: "", status: "" };
+
+interface UsersToolbarProps {
+  filters: UserFilters;
+  onChange: (patch: Partial<UserFilters>) => void;
 }
 
 const TABS = [
@@ -19,24 +24,12 @@ const TABS = [
   { value: "suspended", label: "Suspended", status: "suspended" },
 ];
 
-/** Filters applied instantly through the URL — no submit button needed. */
-export function UsersToolbar({ q, role, status }: UsersToolbarProps) {
-  const router = useRouter();
-
-  function apply(overrides: Record<string, string>) {
-    const next = new URLSearchParams(window.location.search);
-    for (const [key, value] of Object.entries(overrides)) {
-      const trimmed = value.trim();
-      if (trimmed) next.set(key, trimmed);
-      else next.delete(key);
-    }
-    next.delete("page");
-
-    const query = next.toString();
-    router.replace(query ? `/admin/users?${query}` : "/admin/users", { scroll: false });
-  }
-
-  const activeTab = status === "pending" || status === "suspended" ? status : role;
+/** Filters an in-memory account list — no URL writes and no requests. */
+export function UsersToolbar({ filters, onChange }: UsersToolbarProps) {
+  const activeTab =
+    filters.status === "pending" || filters.status === "suspended"
+      ? filters.status
+      : filters.role;
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.07] pb-2">
@@ -47,12 +40,8 @@ export function UsersToolbar({ q, role, status }: UsersToolbarProps) {
             <button
               key={tab.label}
               type="button"
-              onClick={() => {
-                apply({
-                  role: tab.role ?? "",
-                  status: tab.status ?? "",
-                });
-              }}
+              onClick={() => onChange({ role: tab.role ?? "", status: tab.status ?? "" })}
+              aria-pressed={active}
               className={`rounded-lg px-2.5 py-1 text-[0.75rem] font-medium transition-colors ${
                 active
                   ? "bg-ink text-paper"
@@ -66,8 +55,8 @@ export function UsersToolbar({ q, role, status }: UsersToolbarProps) {
       </div>
 
       <SearchInput
-        basePath="/admin/users"
-        defaultValue={q}
+        value={filters.q}
+        onValueChange={(q) => onChange({ q })}
         label="Search users"
         placeholder="Search name, email, or phone"
         className="w-full sm:w-64"

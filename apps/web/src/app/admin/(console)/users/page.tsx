@@ -3,11 +3,12 @@ import { Users } from "lucide-react";
 import { Suspense } from "react";
 
 import { AdminLiveRefresh } from "@/components/admin/admin-live-refresh";
-import { UsersResults, UsersResultsSkeleton } from "@/components/admin/users/users-results";
+import { UsersConsole } from "@/components/admin/users/users-console";
 import { UsersStats, UsersStatsSkeleton } from "@/components/admin/users/users-stats";
-import { UsersToolbar } from "@/components/admin/users/users-toolbar";
+import type { UserRow } from "@/components/admin/users/users-types";
 import { readSession } from "@/lib/auth/session";
-import type { ListUsersQuery, RoleName } from "@furescue/core";
+import { fetchAllPages } from "@/lib/fetch-all-pages";
+import { authService } from "@furescue/core";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -15,52 +16,28 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const PAGE_SIZE = 10;
-const ROLES: RoleName[] = ["community_user", "rescuer", "admin"];
-const STATUSES = ["pending", "active", "suspended", "deactivated"] as const;
-
-function first(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
-}
-
-export default async function AdminUsersPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function AdminUsersPage() {
   const session = await readSession();
   if (!session || session.role !== "admin") redirect("/admin/login");
 
-  const params = await searchParams;
+  // Loaded once. Search and tabs run against this list in the browser.
+  const users = await fetchAllPages((page, pageSize) =>
+    authService.listUsers({ page, pageSize }),
+  );
 
-  const q = first(params.q).trim();
-  const roleParam = first(params.role);
-  const statusParam = first(params.status);
-  const pageParam = Number.parseInt(first(params.page), 10);
-
-  const role = ROLES.includes(roleParam as RoleName) ? (roleParam as RoleName) : undefined;
-  const status = STATUSES.includes(statusParam as (typeof STATUSES)[number])
-    ? (statusParam as (typeof STATUSES)[number])
-    : undefined;
-  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
-
-  const hasFilters = Boolean(q || role || status);
-
-  const listQuery: ListUsersQuery = {
-    page,
-    pageSize: PAGE_SIZE,
-    ...(q ? { search: q } : {}),
-    ...(role ? { role } : {}),
-    ...(status ? { status } : {}),
-  };
-
-  const baseParams: Record<string, string> = {};
-  if (q) baseParams.q = q;
-  if (role) baseParams.role = role;
-  if (status) baseParams.status = status;
-
-  // A new key discards stale rows immediately and swaps in the skeleton.
-  const resultsKey = [q, roleParam, statusParam, page].join("|");
+  const rows: UserRow[] = users.map((user) => ({
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    phoneNumber: user.phoneNumber,
+    role: user.role,
+    accountStatus: user.accountStatus,
+    barangay: user.barangay,
+    profilePhotoUrl: user.profilePhotoUrl,
+    emailVerifiedAt: user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : null,
+    lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
+    createdAt: user.createdAt.toISOString(),
+  }));
 
   return (
     <div className="w-full">
@@ -89,28 +66,14 @@ export default async function AdminUsersPage({
 
       <section className="mt-4 flex min-h-[480px] flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.07] px-4 py-3.5">
-          <h2 className="text-[0.9375rem] font-semibold text-ink">
-            {hasFilters ? "Filtered accounts" : "All accounts"}
-          </h2>
+          <h2 className="text-[0.9375rem] font-semibold text-ink">All accounts</h2>
           <span className="inline-flex items-center gap-1.5 text-[0.6875rem] font-medium text-ink/45">
             <span className="h-1.5 w-1.5 rounded-full bg-moss" />
-            Results update as you filter
+            Results update as you type
           </span>
         </div>
 
-        <div className="px-4 py-4">
-          <UsersToolbar q={q} role={roleParam} status={statusParam} />
-        </div>
-
-        <Suspense key={resultsKey} fallback={<UsersResultsSkeleton />}>
-          <UsersResults
-            query={listQuery}
-            page={page}
-            baseParams={baseParams}
-            hasFilters={hasFilters}
-            currentUserId={session.sub}
-          />
-        </Suspense>
+        <UsersConsole rows={rows} currentUserId={session.sub} />
       </section>
     </div>
   );

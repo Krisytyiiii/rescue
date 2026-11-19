@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { ToastProvider } from "@/components/ui/toast";
 import { authService } from "@furescue/core";
 
 import { readSession } from "@/lib/auth/session";
@@ -27,7 +28,7 @@ export default async function AdminConsoleLayout({
       admin={{ fullName: admin.fullName, email: admin.email }}
       pendingCount={pending.length}
     >
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </AdminShell>
   );
 }

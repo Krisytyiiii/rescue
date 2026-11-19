@@ -13,6 +13,8 @@ interface SelectProps {
   id?: string;
   options: SelectOption[];
   placeholder?: string;
+  /** Controlled value. When provided, the field follows external resets. */
+  value?: string;
   defaultValue?: string;
   className?: string;
   size?: "default" | "compact";
@@ -29,6 +31,7 @@ export function Select({
   id,
   options,
   placeholder = "Select an option",
+  value: controlledValue,
   defaultValue = "",
   className = "",
   size = "default",
@@ -39,7 +42,7 @@ export function Select({
   const listboxId = `${selectId}-listbox`;
 
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(defaultValue);
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
 
@@ -47,6 +50,7 @@ export function Select({
   const searchRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
+  const value = controlledValue ?? internalValue;
   const selected = options.find((option) => option.value === value);
   const showSearch = options.length > 8;
   const compact = size === "compact";
@@ -79,8 +83,13 @@ export function Select({
     else listRef.current?.focus();
   }, [open, showSearch]);
 
+  // Follow external resets ("Clear filters", tab switches) in controlled mode.
+  useEffect(() => {
+    if (controlledValue !== undefined) setInternalValue(controlledValue);
+  }, [controlledValue]);
+
   function choose(option: SelectOption) {
-    setValue(option.value);
+    if (controlledValue === undefined) setInternalValue(option.value);
     setOpen(false);
     onChange?.(option.value);
   }
@@ -157,7 +166,7 @@ export function Select({
             : "mt-2 flex h-11 w-full items-center justify-between gap-2 rounded-xl border border-ink/15 bg-white px-4 text-left text-[0.9375rem] text-ink outline-none transition-colors focus:border-clay focus:ring-4 focus:ring-clay/15"
         }
       >
-        <span className={selected ? "text-ink" : "text-ink/35"}>
+        <span className={`min-w-0 truncate ${selected ? "text-ink" : "text-ink/35"}`}>
           {selected?.label ?? placeholder}
         </span>
         <ChevronDown

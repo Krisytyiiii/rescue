@@ -26,6 +26,7 @@ export const animalDetailInclude = {
   postedBy: { select: { id: true, firstName: true, lastName: true } },
   healthRecords: { orderBy: { recordDate: "desc" }, take: 10 },
   vaccinations: { orderBy: { dateGiven: "desc" }, take: 10 },
+  heartRateLogs: { orderBy: { measuredAt: "desc" }, take: 1 },
 } satisfies Prisma.AnimalInclude;
 
 export type AnimalDetail = Prisma.AnimalGetPayload<{ include: typeof animalDetailInclude }>;

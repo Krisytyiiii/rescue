@@ -9,6 +9,7 @@ import { notificationsService } from "../notifications/notifications.service.ts"
 import { AnimalsRepository, animalsRepository } from "./animals.repository.ts";
 import {
   ANIMAL_LIFECYCLE_TRANSITIONS,
+  animalDetailInclude,
   type CreateAnimalInput,
   type ListAnimalsQuery,
   type UpdateAnimalInput,
@@ -177,6 +178,26 @@ export class AnimalsService {
       );
     }
 
+    if (status === "available") {
+      const [records, vaccinations, heartRates] = await Promise.all([
+        prisma.healthRecord.count({ where: { animalId: id } }),
+        prisma.vaccination.count({ where: { animalId: id } }),
+        prisma.heartRateLog.count({ where: { animalId: id } }),
+      ]);
+
+      const missing = [
+        records === 0 ? "a medical note" : null,
+        vaccinations === 0 ? "a vaccination record" : null,
+        heartRates === 0 ? "a heart rate reading" : null,
+      ].filter(Boolean);
+
+      if (missing.length > 0) {
+        throw new ConflictError(
+          `Add ${missing.join(", ")} before marking this animal ready for adoption.`,
+        );
+      }
+    }
+
     const now = new Date();
     return prisma.$transaction(async (tx) => {
       const updated = await this.repo.update(
@@ -267,6 +288,35 @@ export class AnimalsService {
       prisma.animal.count({ where: { lifecycleStatus: "adopted", deletedAt: null } }),
     ]);
     return { inCare, available, adopted };
+  }
+
+  /** Counts for the admin animals console, including the moderation queue. */
+  async getAdminCounts() {
+    const [total, inCare, available, adoptionPending, adopted, pendingReview] =
+      await prisma.$transaction([
+        prisma.animal.count({ where: { deletedAt: null } }),
+        prisma.animal.count({
+          where: { lifecycleStatus: { in: ["rescued", "under_care"] }, deletedAt: null },
+        }),
+        prisma.animal.count({ where: { lifecycleStatus: "available", deletedAt: null } }),
+        prisma.animal.count({
+          where: { lifecycleStatus: "adoption_pending", deletedAt: null },
+        }),
+        prisma.animal.count({ where: { lifecycleStatus: "adopted", deletedAt: null } }),
+        prisma.animal.count({ where: { listingStatus: "pending_review", deletedAt: null } }),
+      ]);
+
+    return { total, inCare, available, adoptionPending, adopted, pendingReview };
+  }
+
+  /** Oldest community submissions waiting for a listing decision. */
+  async listPendingReview(limit = 3) {
+    return prisma.animal.findMany({
+      where: { listingStatus: "pending_review", deletedAt: null },
+      include: animalDetailInclude,
+      orderBy: { createdAt: "asc" },
+      take: limit,
+    });
   }
 }
 

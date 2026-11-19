@@ -55,3 +55,7 @@ export interface CreateHeartRateInput {
   measuredAt?: Date;
   notes?: string;
 }
+
+export type UpdateHealthRecordInput = Omit<CreateHealthRecordInput, "animalId">;
+export type UpdateVaccinationInput = Omit<CreateVaccinationInput, "animalId">;
+export type UpdateHeartRateInput = Omit<CreateHeartRateInput, "animalId">;

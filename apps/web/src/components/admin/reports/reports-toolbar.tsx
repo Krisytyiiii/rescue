@@ -1,16 +1,27 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { SearchInput } from "@/components/ui/search-input";
 import { Select } from "@/components/ui/select";
 
-interface ReportsToolbarProps {
+export interface ReportFilters {
   q: string;
   status: string;
   urgency: string;
   reportType: string;
   species: string;
+}
+
+export const EMPTY_REPORT_FILTERS: ReportFilters = {
+  q: "",
+  status: "",
+  urgency: "",
+  reportType: "",
+  species: "",
+};
+
+interface ReportsToolbarProps {
+  filters: ReportFilters;
+  onChange: (patch: Partial<ReportFilters>) => void;
 }
 
 const STATUS_OPTIONS = [
@@ -47,73 +58,54 @@ const SPECIES_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
-/** Filters applied instantly through the URL — no submit button needed. */
-export function ReportsToolbar({ q, status, urgency, reportType, species }: ReportsToolbarProps) {
-  const router = useRouter();
-
-  function apply(overrides: Record<string, string>) {
-    // Seed from the live URL so rapid successive changes never overwrite each
-    // other with stale server props.
-    const next = new URLSearchParams(window.location.search);
-    for (const [key, value] of Object.entries(overrides)) {
-      const trimmed = value.trim();
-      if (trimmed) next.set(key, trimmed);
-      else next.delete(key);
-    }
-    next.delete("page");
-
-    const query = next.toString();
-    router.replace(query ? `/admin/reports?${query}` : "/admin/reports", {
-      scroll: false,
-    });
-  }
-
+/** Filters an in-memory report list — no URL writes and no requests. */
+export function ReportsToolbar({ filters, onChange }: ReportsToolbarProps) {
   return (
     <div className="flex flex-wrap items-center justify-end gap-2.5">
-        <SearchInput
-          basePath="/admin/reports"
-          defaultValue={q}
-          label="Search reports"
-          placeholder="Search code, description, or landmark"
-          className="w-full sm:w-64"
-        />
+      <SearchInput
+        value={filters.q}
+        onValueChange={(q) => onChange({ q })}
+        label="Search reports"
+        placeholder="Search code, description, or landmark"
+        className="w-full sm:w-64"
+      />
 
-        <Select
-          name="status"
-          options={STATUS_OPTIONS}
-          defaultValue={status}
-          placeholder="All statuses"
-          size="compact"
-          className="w-full sm:w-36"
-          onChange={(value) => apply({ status: value })}
-        />
-        <Select
-          name="urgency"
-          options={URGENCY_OPTIONS}
-          defaultValue={urgency}
-          placeholder="Any urgency"
-          size="compact"
-          className="w-full sm:w-36"
-          onChange={(value) => apply({ urgency: value })}
-        />
-        <Select
-          name="type"
-          options={TYPE_OPTIONS}
-          defaultValue={reportType}
-          placeholder="Any type"
-          size="compact"
-          className="w-full sm:w-36"
-          onChange={(value) => apply({ type: value })}
-        />
-        <Select
-          name="species"
-          options={SPECIES_OPTIONS}
-          defaultValue={species}
-          placeholder="Any species"
-          size="compact"
-          className="w-full sm:w-36"
-          onChange={(value) => apply({ species: value })}
-        />
-      </div>
+      <Select
+        name="status"
+        options={STATUS_OPTIONS}
+        value={filters.status}
+        placeholder="All statuses"
+        size="compact"
+        className="w-full sm:w-36"
+        onChange={(status) => onChange({ status })}
+      />
+      <Select
+        name="urgency"
+        options={URGENCY_OPTIONS}
+        value={filters.urgency}
+        placeholder="Any urgency"
+        size="compact"
+        className="w-full sm:w-36"
+        onChange={(urgency) => onChange({ urgency })}
+      />
+      <Select
+        name="type"
+        options={TYPE_OPTIONS}
+        value={filters.reportType}
+        placeholder="Any type"
+        size="compact"
+        className="w-full sm:w-36"
+        onChange={(reportType) => onChange({ reportType })}
+      />
+      <Select
+        name="species"
+        options={SPECIES_OPTIONS}
+        value={filters.species}
+        placeholder="Any species"
+        size="compact"
+        className="w-full sm:w-36"
+        onChange={(species) => onChange({ species })}
+      />
+    </div>
   );
 }
