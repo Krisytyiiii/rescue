@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  ArrowUpRight,
   Bell,
   ChevronDown,
   ExternalLink,
   LogOut,
   Menu,
+  MessagesSquare,
   Settings,
   ShieldCheck,
 } from "lucide-react";
@@ -103,7 +105,38 @@ export function AdminNavbar({
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-ink/10 bg-white/85 px-4 backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-ink/10 bg-white/85 backdrop-blur-md">
+      <div className="relative overflow-hidden border-b border-ink/[0.06] bg-gradient-to-r from-[#fbf3e6] via-[#fdfbf7] to-white">
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-[radial-gradient(120%_140%_at_0%_50%,rgba(201,154,78,0.16),transparent_70%)]" />
+        <div className="relative flex h-9 items-center gap-2.5 px-4">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-clay/40" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-clay" />
+          </span>
+          <span className="grid h-5 w-5 shrink-0 place-items-center rounded-md bg-clay/10 text-clay">
+            <MessagesSquare className="h-3 w-3" strokeWidth={1.9} />
+          </span>
+          <span className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-[#8a6420]">
+            Community feed
+          </span>
+          <span aria-hidden="true" className="hidden h-3 w-px shrink-0 bg-ink/10 sm:block" />
+          <p className="min-w-0 flex-1 truncate text-[0.6875rem] text-ink/50">
+            Residents post animals for adoption. Review the feed and hide anything harmful.
+          </p>
+          <Link
+            href="/admin/community"
+            className="group/cta inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#c99a4e]/40 bg-white/70 px-2.5 py-1 text-[0.625rem] font-medium text-[#7a5212] transition-colors hover:border-[#c99a4e]/70 hover:bg-white"
+          >
+            Review feed
+            <ArrowUpRight
+              className="h-3 w-3 transition-transform duration-200 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5"
+              strokeWidth={2}
+            />
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex h-16 items-center gap-3 px-4">
       <button
         type="button"
         onClick={onOpenMobile}
@@ -225,6 +258,7 @@ export function AdminNavbar({
           </div>
         )}
         </div>
+      </div>
       </div>
     </header>
   );

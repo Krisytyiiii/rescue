@@ -25,5 +25,8 @@ export * from "./modules/adoptions/index.ts";
 export * from "./modules/messaging/index.ts";
 export * from "./modules/health/index.ts";
 export * from "./modules/learning/index.ts";
+export * from "./modules/analytics/index.ts";
+export * from "./modules/audit/index.ts";
+export * from "./modules/settings/index.ts";
 
 export * from "./generated/prisma/enums.ts";

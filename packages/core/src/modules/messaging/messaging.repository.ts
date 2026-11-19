@@ -152,6 +152,7 @@ export class MessagingRepository {
               id: true,
               firstName: true,
               lastName: true,
+              profilePhotoUrl: true,
               role: { select: { roleName: true } },
             },
           },
@@ -250,6 +251,7 @@ export class MessagingRepository {
         firstName: true,
         lastName: true,
         email: true,
+        profilePhotoUrl: true,
         role: { select: { roleName: true } },
       },
     });

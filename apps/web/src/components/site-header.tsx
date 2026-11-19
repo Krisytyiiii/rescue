@@ -42,14 +42,43 @@ export function SiteHeader() {
         style={{ scaleX: scrollYProgress }}
       />
 
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-colors duration-500 ${
-          scrolled
-            ? "border-b border-ink/10 bg-paper/85 backdrop-blur-md"
-            : "border-b border-transparent bg-transparent"
-        }`}
-      >
-        <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[84px] lg:px-12">
+      <header className="fixed inset-x-0 top-0 z-50">
+        <div className="relative overflow-hidden border-b border-white/10 bg-[#0b1a2b] text-paper">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_160%_at_12%_-40%,rgba(201,154,78,0.28),transparent_58%)]" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-clay/40 to-transparent" />
+          <div className="relative mx-auto flex h-9 max-w-[1440px] items-center gap-2.5 px-5 sm:px-8 lg:px-12">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-moss/50" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#7fbf8b]" />
+            </span>
+            <span className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.16em] text-paper/50">
+              Community feed
+            </span>
+            <span aria-hidden="true" className="hidden h-3 w-px shrink-0 bg-paper/15 sm:block" />
+            <p className="min-w-0 flex-1 truncate text-[0.6875rem] leading-none text-paper/70">
+              Residents are posting pets for adoption — browse the latest from your barangay.
+            </p>
+            <Link
+              href="/community"
+              className="group/cta inline-flex shrink-0 items-center gap-1.5 rounded-full border border-paper/15 bg-paper/[0.06] px-2.5 py-1 text-[0.625rem] font-medium text-paper/85 transition-colors hover:border-paper/35 hover:bg-paper/10 hover:text-paper"
+            >
+              Open feed
+              <ArrowUpRight
+                className="h-3 w-3 transition-transform duration-200 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5"
+                strokeWidth={2}
+              />
+            </Link>
+          </div>
+        </div>
+
+        <div
+          className={`transition-colors duration-500 ${
+            scrolled
+              ? "border-b border-ink/10 bg-paper/85 backdrop-blur-md"
+              : "border-b border-transparent bg-transparent"
+          }`}
+        >
+          <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:h-[84px] lg:px-12">
           <Link
             href="/"
             className="group flex items-center gap-3"
@@ -102,6 +131,7 @@ export function SiteHeader() {
             >
               <Menu className="h-4.5 w-4.5" strokeWidth={1.6} />
             </button>
+          </div>
           </div>
         </div>
       </header>

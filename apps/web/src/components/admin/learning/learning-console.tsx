@@ -2,11 +2,14 @@
 
 import {
   BookOpen,
+  CheckCircle2,
   Copy,
+  FileText,
   GraduationCap,
   Pencil,
   Plus,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -18,6 +21,7 @@ import { OverlayCard } from "@/components/ui/overlay-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SearchEmpty } from "@/components/ui/search-empty";
 import { SearchInput } from "@/components/ui/search-input";
+import { StatCard } from "@/components/ui/stat-card";
 import { TabFilters } from "@/components/ui/tab-filters";
 import { useToast } from "@/components/ui/toast";
 
@@ -347,10 +351,34 @@ export function LearningConsole({ modules }: LearningConsoleProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <Kpi label="Published" value={publishedCount} tone="moss" />
-        <Kpi label="Drafts" value={draftCount} tone="warning" />
-        <Kpi label="Lessons" value={lessonCount} tone="ink" />
-        <Kpi label="Completion" value={`${completionRate}%`} tone="ink" />
+        <StatCard
+          label="Published"
+          value={publishedCount}
+          hint="Visible to learners"
+          icon={CheckCircle2}
+          tone="moss"
+        />
+        <StatCard
+          label="Drafts"
+          value={draftCount}
+          hint="Hidden from catalog"
+          icon={FileText}
+          tone="amber"
+        />
+        <StatCard
+          label="Lessons"
+          value={lessonCount}
+          hint="Across all courses"
+          icon={GraduationCap}
+          tone="clay"
+        />
+        <StatCard
+          label="Completion"
+          value={`${completionRate}%`}
+          hint="Average across courses"
+          icon={TrendingUp}
+          tone="forest"
+        />
       </div>
 
       <section className="overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
@@ -755,25 +783,3 @@ function DetailStat({ label, value }: { label: string; value: number | string })
   );
 }
 
-function Kpi({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: number | string;
-  tone: "moss" | "warning" | "ink";
-}) {
-  const toneClass =
-    tone === "moss" ? "text-moss" : tone === "warning" ? "text-[#a04a35]" : "text-ink";
-  return (
-    <div className="rounded-xl border border-ink/[0.08] bg-white px-3 py-2.5 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
-      <p className="text-[0.5625rem] font-semibold uppercase tracking-[0.1em] text-ink/40">
-        {label}
-      </p>
-      <p className={`mt-0.5 text-[1.125rem] font-semibold tabular-nums ${toneClass}`}>
-        {value}
-      </p>
-    </div>
-  );
-}

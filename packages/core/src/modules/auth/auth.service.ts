@@ -244,7 +244,18 @@ export class AuthService {
     if (!(await compare(currentPassword, user.passwordHash))) {
       throw new UnauthorizedError("Current password is incorrect");
     }
-    await this.repo.updatePasswordHash(userId, await hash(newPassword, SALT_ROUNDS));
+
+    const passwordHash = await hash(newPassword, SALT_ROUNDS);
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({ where: { id: userId }, data: { passwordHash } });
+      await writeAuditLog(tx, {
+        userId,
+        action: "change_password",
+        entityType: "user",
+        entityId: userId,
+        newValue: { changedAt: new Date().toISOString() },
+      });
+    });
   }
 
   /** Admin queue: rescuers waiting for access. */

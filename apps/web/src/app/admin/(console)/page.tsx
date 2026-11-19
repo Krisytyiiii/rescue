@@ -63,9 +63,14 @@ const WORKSPACE = [
   },
 ];
 
-const REPORT_STAGES: { status: string; label: string; tone: string }[] = [
-  { status: "submitted", label: "Submitted", tone: "bg-clay" },
-  { status: "verified", label: "Verified", tone: "bg-[#c99a4e]" },
+const REPORT_STAGES: { status: string; statuses?: string[]; label: string; tone: string }[] = [
+  {
+    status: "submitted",
+    statuses: ["submitted", "verified"],
+    label: "Submitted",
+    tone: "bg-clay",
+  },
+  { status: "assigned", label: "Assigned", tone: "bg-[#c99a4e]" },
   { status: "in_progress", label: "In progress", tone: "bg-moss" },
   { status: "rescued", label: "Rescued", tone: "bg-forest" },
 ];
@@ -116,16 +121,22 @@ function Breakdown({
   counts,
   unit,
 }: {
-  stages: { status: string; label: string; tone: string }[];
+  stages: { status: string; statuses?: string[]; label: string; tone: string }[];
   counts: Record<string, number>;
   unit: { one: string; many: string };
 }) {
-  const max = Math.max(1, ...stages.map((stage) => counts[stage.status] ?? 0));
+  const valueFor = (stage: { status: string; statuses?: string[] }) =>
+    (stage.statuses ?? [stage.status]).reduce(
+      (total, key) => total + (counts[key] ?? 0),
+      0,
+    );
+
+  const max = Math.max(1, ...stages.map(valueFor));
 
   return (
     <ul className="space-y-2.5">
       {stages.map((stage) => {
-        const value = counts[stage.status] ?? 0;
+        const value = valueFor(stage);
         return (
           <li key={stage.status}>
             <div className="flex items-baseline justify-between gap-3">
@@ -175,6 +186,7 @@ export default async function AdminDashboardPage() {
     roleRows,
     barangayCount,
     recentReports,
+    recentAdoptions,
   ] = await Promise.all([
     authService.listPendingRescuers(),
     prisma.report.groupBy({ by: ["status"], _count: { _all: true } }),
@@ -189,7 +201,11 @@ export default async function AdminDashboardPage() {
     }),
     prisma.barangay.count(),
     prisma.report.findMany({
-      where: { createdAt: { gte: trendStart } },
+      where: { submittedAt: { gte: trendStart }, deletedAt: null },
+      select: { submittedAt: true },
+    }),
+    prisma.adoptionRequest.findMany({
+      where: { createdAt: { gte: trendStart }, deletedAt: null },
       select: { createdAt: true },
     }),
   ]);
@@ -211,8 +227,14 @@ export default async function AdminDashboardPage() {
 
   const buckets = new Map<string, number>();
   for (const report of recentReports) {
-    const key = `${report.createdAt.getFullYear()}-${report.createdAt.getMonth()}-${report.createdAt.getDate()}`;
+    const key = `${report.submittedAt.getFullYear()}-${report.submittedAt.getMonth()}-${report.submittedAt.getDate()}`;
     buckets.set(key, (buckets.get(key) ?? 0) + 1);
+  }
+
+  const adoptionBuckets = new Map<string, number>();
+  for (const adoption of recentAdoptions) {
+    const key = `${adoption.createdAt.getFullYear()}-${adoption.createdAt.getMonth()}-${adoption.createdAt.getDate()}`;
+    adoptionBuckets.set(key, (adoptionBuckets.get(key) ?? 0) + 1);
   }
 
   const trend: TrendPoint[] = Array.from({ length: 30 }, (_, index) => {
@@ -222,7 +244,8 @@ export default async function AdminDashboardPage() {
     return {
       label: dayFormatter.format(day),
       fullLabel: fullDayFormatter.format(day),
-      value: buckets.get(key) ?? 0,
+      reports: buckets.get(key) ?? 0,
+      adoptions: adoptionBuckets.get(key) ?? 0,
     };
   });
 

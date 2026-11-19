@@ -112,6 +112,19 @@ export const ADMIN_MODULES: Record<string, AdminModuleMeta> = {
       "Learner completion reports",
     ],
   },
+  community: {
+    slug: "community",
+    title: "Community feed",
+    group: "Community",
+    description:
+      "Resident-posted adoption animals. Read-only moderation: hide posts that break community guidelines.",
+    features: [
+      "Resident adoption posts with photos",
+      "Read-only review for admins",
+      "Hide or restore harmful posts",
+      "Report queue and moderation audit",
+    ],
+  },
   analytics: {
     slug: "analytics",
     title: "Analytics",

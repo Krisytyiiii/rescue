@@ -372,6 +372,7 @@ export function MessagingConsole({
       conversationId,
       senderUserId: currentUserId,
       senderName: "You",
+      senderProfilePhotoUrl: null,
       senderRole: "admin",
       body,
       attachmentUrl: null,
@@ -543,6 +544,7 @@ export function MessagingConsole({
         fullName: candidate.fullName,
         email: candidate.email,
         phoneNumber: null,
+        profilePhotoUrl: candidate.profilePhotoUrl,
         role: candidate.role,
         lastReadAt: null,
       };
@@ -758,6 +760,10 @@ export function MessagingConsole({
                       {filtered.map((conversation) => {
                         const Icon = contextIcon(conversation.contextType);
                         const active = conversation.id === selectedId;
+                        const person =
+                          conversation.participants.find(
+                            (participant) => participant.role !== "admin",
+                          ) ?? conversation.participants[0];
                         return (
                           <li key={conversation.id}>
                             <button
@@ -768,9 +774,17 @@ export function MessagingConsole({
                                 active ? "bg-ink/[0.035]" : "hover:bg-ink/[0.02]"
                               }`}
                             >
-                              <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-ink/[0.07] bg-ink/[0.02] text-ink/40">
-                                <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
-                              </span>
+                              {person?.profilePhotoUrl ? (
+                                <img
+                                  src={person.profilePhotoUrl}
+                                  alt={person.fullName}
+                                  className="mt-0.5 h-8 w-8 shrink-0 rounded-lg border border-ink/[0.07] object-cover"
+                                />
+                              ) : (
+                                <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-ink/[0.07] bg-ink/[0.02] text-ink/40">
+                                  <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
+                                </span>
+                              )}
                               <span className="min-w-0 flex-1">
                                 <span className="flex items-center justify-between gap-2">
                                   <span className="truncate text-[0.75rem] font-semibold text-ink/80">
@@ -830,11 +844,25 @@ export function MessagingConsole({
                     </p>
                   </div>
                 ) : loadingDetail && !detail ? (
-                  <div className="flex-1 space-y-3 p-4" aria-hidden="true">
-                    <div className="h-10 w-2/3 animate-pulse rounded-lg bg-ink/[0.05]" />
-                    <div className="h-16 w-3/4 animate-pulse rounded-xl bg-ink/[0.04]" />
-                    <div className="ml-auto h-12 w-1/2 animate-pulse rounded-xl bg-ink/[0.04]" />
-                    <div className="h-20 w-2/3 animate-pulse rounded-xl bg-ink/[0.04]" />
+                  <div className="flex min-h-0 flex-1 flex-col" aria-hidden="true">
+                    <div className="border-b border-ink/[0.07] px-4 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0 space-y-2">
+                          <div className="h-3.5 w-44 animate-pulse rounded bg-ink/[0.06]" />
+                          <div className="h-2.5 w-28 animate-pulse rounded bg-ink/[0.04]" />
+                        </div>
+                        <div className="h-4 w-16 animate-pulse rounded-full bg-ink/[0.05]" />
+                      </div>
+                    </div>
+                    <div className="min-h-0 flex-1 space-y-3 p-4">
+                      <div className="h-14 w-2/3 animate-pulse rounded-xl bg-ink/[0.04]" />
+                      <div className="ml-auto h-11 w-1/2 animate-pulse rounded-xl bg-ink/[0.05]" />
+                      <div className="h-20 w-3/4 animate-pulse rounded-xl bg-ink/[0.04]" />
+                      <div className="ml-auto h-10 w-2/5 animate-pulse rounded-xl bg-ink/[0.05]" />
+                    </div>
+                    <div className="border-t border-ink/[0.07] p-3">
+                      <div className="h-16 w-full animate-pulse rounded-lg bg-ink/[0.04]" />
+                    </div>
                   </div>
                 ) : detail ? (
                   <>
@@ -944,11 +972,18 @@ export function MessagingConsole({
                                     mine ? "justify-end" : "justify-start"
                                   }`}
                                 >
-                                  {!mine && (
-                                    <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                      {initials(message.senderName)}
-                                    </span>
-                                  )}
+                                  {!mine &&
+                                    (message.senderProfilePhotoUrl ? (
+                                      <img
+                                        src={message.senderProfilePhotoUrl}
+                                        alt={message.senderName}
+                                        className="h-6 w-6 shrink-0 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
+                                        {initials(message.senderName)}
+                                      </span>
+                                    ))}
                                   <div
                                     className={`max-w-[80%] ${
                                       mine ? "items-end" : "items-start"
@@ -1123,9 +1158,17 @@ export function MessagingConsole({
                                         onClick={() => void addParticipant(candidate)}
                                         className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-ink/[0.03]"
                                       >
-                                        <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                          {initials(candidate.fullName)}
-                                        </span>
+                                        {candidate.profilePhotoUrl ? (
+                                          <img
+                                            src={candidate.profilePhotoUrl}
+                                            alt={candidate.fullName}
+                                            className="h-6 w-6 shrink-0 rounded-full object-cover"
+                                          />
+                                        ) : (
+                                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
+                                            {initials(candidate.fullName)}
+                                          </span>
+                                        )}
                                         <span className="min-w-0 flex-1">
                                           <span className="block truncate text-[0.6875rem] font-medium text-ink/75">
                                             {candidate.fullName}
@@ -1153,9 +1196,17 @@ export function MessagingConsole({
                               key={participant.userId}
                               className="group/person flex items-center gap-2 rounded-lg border border-ink/[0.06] px-2 py-1.5"
                             >
-                              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                {initials(participant.fullName)}
-                              </span>
+                              {participant.profilePhotoUrl ? (
+                                <img
+                                  src={participant.profilePhotoUrl}
+                                  alt={participant.fullName}
+                                  className="h-6 w-6 shrink-0 rounded-full object-cover"
+                                />
+                              ) : (
+                                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
+                                  {initials(participant.fullName)}
+                                </span>
+                              )}
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-[0.6875rem] font-medium text-ink/75">
                                   {participant.fullName}

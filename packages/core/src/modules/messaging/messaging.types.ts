@@ -12,6 +12,7 @@ const participantUserSelect = {
   lastName: true,
   email: true,
   phoneNumber: true,
+  profilePhotoUrl: true,
   role: { select: { roleName: true } },
 } as const;
 
@@ -19,6 +20,7 @@ const senderSelect = {
   id: true,
   firstName: true,
   lastName: true,
+  profilePhotoUrl: true,
   role: { select: { roleName: true } },
 } as const;
 
@@ -96,6 +98,7 @@ export interface MessagingParticipantRow {
   fullName: string;
   email: string;
   phoneNumber: string | null;
+  profilePhotoUrl: string | null;
   role: string;
   lastReadAt: string | null;
 }
@@ -110,6 +113,7 @@ export interface MessagingMessageRow {
   conversationId: string;
   senderUserId: string;
   senderName: string;
+  senderProfilePhotoUrl: string | null;
   senderRole: string;
   body: string;
   attachmentUrl: string | null;
@@ -181,5 +185,6 @@ export interface ParticipantCandidateRow {
   userId: string;
   fullName: string;
   email: string;
+  profilePhotoUrl: string | null;
   role: string;
 }

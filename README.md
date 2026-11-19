@@ -41,6 +41,7 @@ Never commit `.env`. It is git-ignored.
 npm run db:deploy     # apply prisma/migrations to Supabase (needs port 5432)
 npm run db:apply-init # fallback: apply prisma/supabase-init.sql over port 6543
 npm run db:seed       # seed roles + 26 Mati barangays
+npm run db:seed-clinic # demo data for a small vet clinic (staff, animals, cases)
 npm run db:verify     # print table count, roles, barangay count
 npm run db:studio     # browse data
 npm run db:migrate    # create a new migration during development

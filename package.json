@@ -20,6 +20,7 @@
     "db:seed-messaging": "tsx scripts/seed-messaging.ts",
     "db:seed-notifications": "tsx scripts/seed-notifications.ts",
     "db:seed-learning": "tsx scripts/seed-learning.ts",
+    "db:seed-clinic": "tsx scripts/seed-clinic-demo.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "db:apply-init": "node scripts/apply-supabase-sql.mjs",

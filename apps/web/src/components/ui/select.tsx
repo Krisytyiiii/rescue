@@ -3,6 +3,8 @@
 import { Check, ChevronDown, Search } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { ScrollArea } from "@/components/ui/scroll-area";
+
 export interface SelectOption {
   value: string;
   label: string;
@@ -180,7 +182,7 @@ export function Select({
 
       {open && (
         <div
-          className={`absolute z-30 w-full border border-ink/15 bg-white shadow-[0_16px_40px_-12px_rgba(20,30,25,0.25)] ${
+          className={`group absolute z-30 w-full border border-ink/15 bg-white shadow-[0_16px_40px_-12px_rgba(20,30,25,0.25)] ${
             compact ? "mt-1 rounded-lg p-1" : "mt-2 rounded-xl p-1.5"
           }`}
         >
@@ -209,47 +211,49 @@ export function Select({
             </div>
           )}
 
-          <ul
-            ref={listRef}
-            id={listboxId}
-            role="listbox"
-            aria-labelledby={selectId}
-            tabIndex={-1}
-            onKeyDown={handleListKeyDown}
-            className="max-h-60 overflow-y-auto outline-none"
-          >
-            {filtered.length === 0 && (
-              <li className="px-3 py-6 text-center text-[0.8125rem] text-ink/45">
-                No barangay matches “{query}”.
-              </li>
-            )}
-
-            {filtered.map((option, index) => {
-              const isSelected = option.value === value;
-              const isActive = index === activeIndex;
-              return (
-                <li
-                  key={option.value}
-                  role="option"
-                  aria-selected={isSelected}
-                  onPointerEnter={() => setActiveIndex(index)}
-                  onClick={() => choose(option)}
-                  className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg transition-colors ${
-                    compact
-                      ? "px-2 py-1 text-[0.75rem]"
-                      : "px-3 py-2 text-[0.875rem]"
-                  } ${isActive ? "bg-ink/[0.05] text-ink" : "text-ink/75"} ${
-                    isSelected ? "font-medium text-ink" : ""
-                  }`}
-                >
-                  <span className="truncate">{option.label}</span>
-                  {isSelected && (
-                    <Check aria-hidden="true" strokeWidth={2} className="h-3.5 w-3.5 shrink-0 text-clay" />
-                  )}
+          <ScrollArea className="max-h-60">
+            <ul
+              ref={listRef}
+              id={listboxId}
+              role="listbox"
+              aria-labelledby={selectId}
+              tabIndex={-1}
+              onKeyDown={handleListKeyDown}
+              className="outline-none"
+            >
+              {filtered.length === 0 && (
+                <li className="px-3 py-6 text-center text-[0.8125rem] text-ink/45">
+                  No barangay matches “{query}”.
                 </li>
-              );
-            })}
-          </ul>
+              )}
+
+              {filtered.map((option, index) => {
+                const isSelected = option.value === value;
+                const isActive = index === activeIndex;
+                return (
+                  <li
+                    key={option.value}
+                    role="option"
+                    aria-selected={isSelected}
+                    onPointerEnter={() => setActiveIndex(index)}
+                    onClick={() => choose(option)}
+                    className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg transition-colors ${
+                      compact
+                        ? "px-2 py-1 text-[0.75rem]"
+                        : "px-3 py-2 text-[0.875rem]"
+                    } ${isActive ? "bg-ink/[0.05] text-ink" : "text-ink/75"} ${
+                      isSelected ? "font-medium text-ink" : ""
+                    }`}
+                  >
+                    <span className="truncate">{option.label}</span>
+                    {isSelected && (
+                      <Check aria-hidden="true" strokeWidth={2} className="h-3.5 w-3.5 shrink-0 text-clay" />
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </ScrollArea>
         </div>
       )}
     </div>

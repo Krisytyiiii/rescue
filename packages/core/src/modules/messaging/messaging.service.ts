@@ -40,6 +40,7 @@ function toParticipant(
     fullName: fullName(participant.user),
     email: participant.user.email,
     phoneNumber: participant.user.phoneNumber,
+    profilePhotoUrl: participant.user.profilePhotoUrl,
     role: participant.user.role.roleName,
     lastReadAt: participant.lastReadAt?.toISOString() ?? null,
   };
@@ -55,6 +56,7 @@ function toMessage(
     conversationId: message.conversationId,
     senderUserId: message.senderUserId,
     senderName: fullName(message.sender),
+    senderProfilePhotoUrl: message.sender.profilePhotoUrl,
     senderRole: message.sender.role.roleName,
     body: message.messageBody,
     attachmentUrl: message.attachmentUrl,
@@ -235,6 +237,7 @@ export class MessagingService {
       userId: user.id,
       fullName: fullName(user),
       email: user.email,
+      profilePhotoUrl: user.profilePhotoUrl,
       role: user.role.roleName,
     }));
   }
@@ -411,6 +414,7 @@ export class MessagingService {
         firstName: true,
         lastName: true,
         email: true,
+        profilePhotoUrl: true,
         role: { select: { roleName: true } },
       },
     });
@@ -444,6 +448,7 @@ export class MessagingService {
       userId: user.id,
       fullName: fullName(user),
       email: user.email,
+      profilePhotoUrl: user.profilePhotoUrl,
       role: user.role.roleName,
     };
   }
@@ -508,6 +513,7 @@ export class MessagingService {
       userId: user.id,
       fullName: fullName(user),
       email: user.email,
+      profilePhotoUrl: user.profilePhotoUrl,
       role: user.role.roleName,
     }));
   }
