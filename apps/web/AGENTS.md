@@ -50,6 +50,8 @@ These apply to every state-changing admin action — verify, reject, approve, as
 Reuse the shared components before writing new markup — consistency is the point of the `src/components/ui` set.
 
 - **Scroll containers:** always use `ScrollArea` (`@/components/ui/scroll-area`), never raw `overflow-y-auto`, for lists and panels. Its thin scrollbar only shows while the nearest `group` ancestor is hovered/focused, so add `group` to the surrounding column when it has no other group.
+- **Pagination:** always use `Pagination` (`@/components/ui/pagination`) for admin lists; never hand-roll Previous/Next footers. It hides itself unless `total > pageSize`. Pass `onPageChange` for in-memory lists or `hrefForPage` for URL-driven server lists.
+- **Tabs:** use `TabFilters` (`@/components/ui/tab-filters`) for primary section tabs with counts, and `SecondaryTabFilters` (`@/components/ui/secondary-tab-filters`) for quieter status filters (optional color dots and counts).
 - **Tooltips:** use `Tooltip` (`@/components/ui/tooltip`) for DOM hover hints. For map overlays, reuse the exported `TOOLTIP_BUBBLE` class on the overlay bubble so it matches the dark ink surface, radius, padding, and shadow. Do not style custom white tooltips.
 - **Badges/status:** map statuses to `Badge` tones and shared meta helpers (`reportStatusMeta`, `urgencyMeta`, `ASSIGNMENT_META`) instead of ad-hoc colors.
 - **Cards/banners:** report cards use a banner treatment — status-colored top rule plus a subtle tinted gradient in the status color, an eyebrow label, monospace code, and a status badge. Keep hover/selection states subtle and reuse the same recipe for expanded detail panels.

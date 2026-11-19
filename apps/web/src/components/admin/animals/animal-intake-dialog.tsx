@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ImagePlus,
+  MapPin,
   PawPrint,
   Trash2,
 } from "lucide-react";
@@ -19,7 +20,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 
-import type { AnimalDraft, AnimalSpecies, OriginType } from "./animals-types";
+import type {
+  AnimalDraft,
+  AnimalSpecies,
+  OriginType,
+  RescueReportOption,
+} from "./animals-types";
 
 interface AnimalIntakeDialogProps {
   open: boolean;
@@ -28,6 +34,8 @@ interface AnimalIntakeDialogProps {
   onCreated: (draft: AnimalDraft, pendingKey: string) => void;
   /** Confirms or rolls back the optimistic card. */
   onSettled: (pendingKey: string, saved: boolean) => void;
+  /** Rescued reports that can be linked to the new animal. */
+  rescueReports?: RescueReportOption[];
 }
 
 const SPECIES = [
@@ -58,7 +66,11 @@ const ORIGINS = [
 ];
 
 const STEPS = [
-  { id: "basics", label: "The basics", hint: "Species, breed, name, and sex." },
+  {
+    id: "basics",
+    label: "The basics",
+    hint: "Where it came from, species, breed, name, and sex.",
+  },
   {
     id: "health",
     label: "Health and appearance",
@@ -66,8 +78,8 @@ const STEPS = [
   },
   {
     id: "intake",
-    label: "Arrival and photo",
-    hint: "Where it came from and a single photo.",
+    label: "Photo and notes",
+    hint: "One photo and anything else the care team should know.",
   },
 ];
 
@@ -80,6 +92,7 @@ export function AnimalIntakeDialog({
   onClose,
   onCreated,
   onSettled,
+  rescueReports = [],
 }: AnimalIntakeDialogProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -90,6 +103,16 @@ export function AnimalIntakeDialog({
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState("");
   const [photo, setPhoto] = useState<{ file: File; preview: string } | null>(null);
+  const hasRescueReports = rescueReports.length > 0;
+  const originOptions = hasRescueReports
+    ? ORIGINS
+    : ORIGINS.filter((option) => option.value !== "rescue_report");
+  const [origin, setOrigin] = useState<OriginType>(
+    hasRescueReports ? "rescue_report" : "surrender",
+  );
+  const [species, setSpecies] = useState<AnimalSpecies>("dog");
+  const [selectedReport, setSelectedReport] = useState<RescueReportOption | null>(null);
+  const [reportPhotoUrl, setReportPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     setToday(new Date().toISOString().slice(0, 10));
@@ -100,12 +123,16 @@ export function AnimalIntakeDialog({
     setError("");
     setErrors({});
     setStep(0);
+    setOrigin(hasRescueReports ? "rescue_report" : "surrender");
+    setSpecies("dog");
+    setSelectedReport(null);
+    setReportPhotoUrl(null);
     setPhoto((current) => {
       if (current) URL.revokeObjectURL(current.preview);
       return null;
     });
     if (fileRef.current) fileRef.current.value = "";
-  }, [open]);
+  }, [open, hasRescueReports]);
 
   useEffect(() => {
     return () => {
@@ -128,6 +155,13 @@ export function AnimalIntakeDialog({
       if (!value("breedType")) found.breedType = "Choose a breed.";
       if (!value("sex")) found.sex = "Choose a sex.";
       if (value("name").length > 60) found.name = "Keep the name under 60 characters.";
+
+      if (!value("originType")) found.originType = "Choose where the animal came from.";
+      const intakeDate = value("intakeDate");
+      if (!intakeDate) found.intakeDate = "Choose the date it arrived.";
+      else if (!/^\d{4}-\d{2}-\d{2}$/.test(intakeDate)) {
+        found.intakeDate = "Use a valid date.";
+      }
     }
 
     if (index === 1) {
@@ -146,15 +180,6 @@ export function AnimalIntakeDialog({
         }
       }
       if (!value("size")) found.size = "Choose a size.";
-    }
-
-    if (index === 2) {
-      if (!value("originType")) found.originType = "Choose where the animal came from.";
-      const intakeDate = value("intakeDate");
-      if (!intakeDate) found.intakeDate = "Choose the date it arrived.";
-      else if (!/^\d{4}-\d{2}-\d{2}$/.test(intakeDate)) {
-        found.intakeDate = "Use a valid date.";
-      }
     }
 
     return found;
@@ -193,7 +218,26 @@ export function AnimalIntakeDialog({
   function removePhoto() {
     if (photo) URL.revokeObjectURL(photo.preview);
     setPhoto(null);
+    setReportPhotoUrl(null);
     if (fileRef.current) fileRef.current.value = "";
+  }
+
+  /** Picks or clears the rescue report the animal is being created from. */
+  function chooseReport(report: RescueReportOption) {
+    if (selectedReport?.id === report.id) {
+      setSelectedReport(null);
+      setReportPhotoUrl(null);
+      return;
+    }
+
+    setSelectedReport(report);
+    setReportPhotoUrl((current) => {
+      if (photo) return current;
+      return report.photoUrl;
+    });
+    if (report.species === "dog" || report.species === "cat") {
+      setSpecies(report.species);
+    }
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -236,9 +280,11 @@ export function AnimalIntakeDialog({
       isNeutered: data.get("isNeutered") === "on",
       microchipNo: text("microchipNo"),
       originType: (text("originType") ?? "rescue_report") as OriginType,
+      sourceReportId:
+        origin === "rescue_report" && selectedReport ? selectedReport.id : undefined,
       intakeDate: text("intakeDate"),
       description: text("description"),
-      photoUrl: photo?.preview,
+      photoUrl: photo?.preview ?? reportPhotoUrl ?? undefined,
     };
 
     // Close instantly and show the animal in the list right away; the upload
@@ -264,6 +310,8 @@ export function AnimalIntakeDialog({
           throw new Error(uploadJson?.error?.message ?? "The photo couldn't be uploaded");
         }
         photoUrl = uploadJson.data.url as string;
+      } else if (reportPhotoUrl) {
+        photoUrl = reportPhotoUrl;
       }
 
       const payload = {
@@ -279,6 +327,7 @@ export function AnimalIntakeDialog({
         isNeutered: draft.isNeutered,
         microchipNo: draft.microchipNo,
         originType: draft.originType,
+        sourceReportId: draft.sourceReportId,
         intakeDate: draft.intakeDate,
         description: draft.description,
         ...(photoUrl ? { media: [{ mediaType: "photo", fileUrl: photoUrl }] } : {}),
@@ -405,11 +454,35 @@ export function AnimalIntakeDialog({
 
             <div className={step === 0 ? "block" : "hidden"}>
               <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Where it came from" error={errors.originType}>
+                  <Select
+                    name="originType"
+                    value={origin}
+                    onChange={(value) => setOrigin(value as OriginType)}
+                    options={originOptions}
+                    size="compact"
+                    className="mt-1"
+                  />
+                </Field>
+                <Field label="Date it arrived" error={errors.intakeDate}>
+                  <DatePicker
+                    key={today}
+                    name="intakeDate"
+                    defaultValue={today}
+                    placeholder="Pick a date"
+                    invalid={Boolean(errors.intakeDate)}
+                    className="mt-1"
+                  />
+                </Field>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Field label="Species" error={errors.species} hint="Dogs and cats only for now.">
                   <Select
                     name="species"
+                    value={species}
+                    onChange={(value) => setSpecies(value as AnimalSpecies)}
                     options={SPECIES}
-                    defaultValue="dog"
                     size="compact"
                     className="mt-1"
                   />
@@ -445,6 +518,86 @@ export function AnimalIntakeDialog({
                   />
                 </Field>
               </div>
+
+              {hasRescueReports && origin === "rescue_report" && (
+                <div className="mt-4">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-[0.6875rem] font-medium text-ink/60">
+                      Rescued reports
+                    </p>
+                    <span className="text-[0.625rem] text-ink/35">
+                      {rescueReports.length} waiting for intake
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-[0.625rem] text-ink/40">
+                    Pick the rescue case this animal came from. Only reports marked
+                    rescued and not yet added are shown.
+                  </p>
+
+                  <ScrollArea className="mt-2 max-h-64 rounded-lg border border-ink/[0.08]">
+                    <ul className="grid gap-2 p-2 sm:grid-cols-2">
+                      {rescueReports.map((report) => {
+                        const isSelected = selectedReport?.id === report.id;
+                        const place = [report.barangayName, report.locationLandmark]
+                          .filter(Boolean)
+                          .join(" · ");
+                        return (
+                          <li key={report.id}>
+                            <button
+                              type="button"
+                              aria-pressed={isSelected}
+                              onClick={() => chooseReport(report)}
+                              className={`flex w-full items-start gap-2.5 rounded-lg border p-2 text-left transition-colors ${
+                                isSelected
+                                  ? "border-clay bg-clay/[0.05]"
+                                  : "border-ink/[0.08] bg-white hover:border-ink/20"
+                              }`}
+                            >
+                              {report.photoUrl ? (
+                                <img
+                                  src={report.photoUrl}
+                                  alt={`Photo from ${report.reportCode}`}
+                                  className="h-12 w-12 shrink-0 rounded-md object-cover"
+                                />
+                              ) : (
+                                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-md bg-ink/[0.05] text-ink/30">
+                                  <PawPrint className="h-4 w-4" strokeWidth={1.8} />
+                                </span>
+                              )}
+
+                              <span className="min-w-0 flex-1">
+                                <span className="flex flex-wrap items-center gap-1.5">
+                                  <span className="font-mono text-[0.625rem] font-semibold text-ink/70">
+                                    {report.reportCode}
+                                  </span>
+                                  <span className="rounded bg-[#2563eb]/10 px-1 py-0.5 text-[0.5rem] font-semibold uppercase tracking-[0.06em] text-[#2563eb]">
+                                    Rescued
+                                  </span>
+                                </span>
+                                <span className="mt-0.5 line-clamp-2 block text-[0.625rem] leading-[1.4] text-ink/50">
+                                  {report.description}
+                                </span>
+                                <span className="mt-1 flex items-center gap-1 text-[0.5625rem] text-ink/35">
+                                  <MapPin className="h-2.5 w-2.5 shrink-0" strokeWidth={1.9} />
+                                  <span className="truncate">
+                                    {place || "Location not recorded"}
+                                  </span>
+                                </span>
+                              </span>
+
+                              {isSelected && (
+                                <span className="mt-0.5 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-clay text-white">
+                                  <Check className="h-2.5 w-2.5" strokeWidth={3} />
+                                </span>
+                              )}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </ScrollArea>
+                </div>
+              )}
             </div>
 
             <div className={step === 1 ? "block" : "hidden"}>
@@ -516,29 +669,7 @@ export function AnimalIntakeDialog({
             </div>
 
             <div className={step === 2 ? "block" : "hidden"}>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Field label="Where it came from" error={errors.originType}>
-                  <Select
-                    name="originType"
-                    options={ORIGINS}
-                    defaultValue="rescue_report"
-                    size="compact"
-                    className="mt-1"
-                  />
-                </Field>
-                <Field label="Date it arrived" error={errors.intakeDate}>
-                  <DatePicker
-                    key={today}
-                    name="intakeDate"
-                    defaultValue={today}
-                    placeholder="Pick a date"
-                    invalid={Boolean(errors.intakeDate)}
-                    className="mt-1"
-                  />
-                </Field>
-              </div>
-
-              <div className="mt-4">
+              <div>
                 <p className="text-[0.6875rem] font-medium text-ink/60">
                   Photo <span className="font-normal text-ink/35">· 1 image</span>
                 </p>
@@ -564,6 +695,31 @@ export function AnimalIntakeDialog({
                       </p>
                       <p className="text-[0.625rem] text-ink/40">
                         {(photo.file.size / 1024).toFixed(0)} KB · ready to upload
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="dangerGhost"
+                      onClick={removePhoto}
+                    >
+                      <Trash2 className="h-3 w-3" strokeWidth={2} />
+                      Remove
+                    </Button>
+                  </div>
+                ) : reportPhotoUrl ? (
+                  <div className="mt-1 flex items-center gap-3 rounded-lg border border-ink/15 bg-white p-2">
+                    <img
+                      src={reportPhotoUrl}
+                      alt="Photo from the rescue report"
+                      className="h-14 w-14 shrink-0 rounded-md object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[0.75rem] font-medium text-ink/75">
+                        From {selectedReport?.reportCode ?? "the rescue report"}
+                      </p>
+                      <p className="text-[0.625rem] text-ink/40">
+                        This photo will be reused for the animal.
                       </p>
                     </div>
                     <Button
@@ -603,9 +759,11 @@ export function AnimalIntakeDialog({
 
               <Field label="Notes" className="mt-4">
                 <textarea
+                  key={selectedReport?.id ?? "notes"}
                   name="description"
                   rows={3}
                   maxLength={10000}
+                  defaultValue={selectedReport?.description ?? ""}
                   className={`${inputClass} h-auto resize-y py-2`}
                   placeholder="Anything else the care team should know — temperament notes, medical history, rescue circumstances…"
                 />

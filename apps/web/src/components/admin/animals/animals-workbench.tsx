@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { Pagination } from "@/components/ui/pagination";
+
 import { AnimalsConsole } from "./animals-console";
 import { AnimalsSidebar, type AnimalsTab } from "./animals-sidebar";
 import {
@@ -9,7 +11,7 @@ import {
   EMPTY_ANIMAL_FILTERS,
   type AnimalFilters,
 } from "./animals-toolbar";
-import type { AnimalCounts, AnimalRow } from "./animals-types";
+import type { AnimalCounts, AnimalRow, RescueReportOption } from "./animals-types";
 
 const PAGE_SIZE = 12;
 
@@ -66,13 +68,18 @@ function presetForTab(tab: AnimalsTab): Pick<AnimalFilters, "lifecycle" | "listi
 interface AnimalsWorkbenchProps {
   animals: AnimalRow[];
   counts: AnimalCounts;
+  rescueReports: RescueReportOption[];
 }
 
 /**
  * Client-side animal registry. The full list arrives once from the server, so
  * the sidebar, filters, search, and pagination all resolve instantly in memory.
  */
-export function AnimalsWorkbench({ animals, counts }: AnimalsWorkbenchProps) {
+export function AnimalsWorkbench({
+  animals,
+  counts,
+  rescueReports,
+}: AnimalsWorkbenchProps) {
   const [filters, setFilters] = useState<AnimalFilters>(EMPTY_ANIMAL_FILTERS);
   const [page, setPage] = useState(1);
   const [overrides, setOverrides] = useState<Record<string, Partial<AnimalRow>>>({});
@@ -161,6 +168,7 @@ export function AnimalsWorkbench({ animals, counts }: AnimalsWorkbenchProps) {
         <AnimalsConsole
           animals={visible}
           hasFilters={hasFilters}
+          rescueReports={rescueReports}
           onClearFilters={() => {
             setPage(1);
             setFilters(EMPTY_ANIMAL_FILTERS);
@@ -169,31 +177,15 @@ export function AnimalsWorkbench({ animals, counts }: AnimalsWorkbenchProps) {
           onOptimisticRemove={applyRemove}
         />
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between gap-3 border-t border-ink/[0.07] px-4 py-3">
-            <p className="text-[0.75rem] text-ink/45">
-              Page {currentPage} of {totalPages} · {filtered.length} animals
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={currentPage <= 1}
-                onClick={() => setPage(currentPage - 1)}
-                className="inline-flex h-8 items-center rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors enabled:hover:border-ink/20 enabled:hover:text-ink disabled:border-ink/[0.06] disabled:text-ink/25"
-              >
-                Previous
-              </button>
-              <button
-                type="button"
-                disabled={currentPage >= totalPages}
-                onClick={() => setPage(currentPage + 1)}
-                className="inline-flex h-8 items-center rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors enabled:hover:border-ink/20 enabled:hover:text-ink disabled:border-ink/[0.06] disabled:text-ink/25"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          page={currentPage}
+          totalPages={totalPages}
+          total={filtered.length}
+          pageSize={PAGE_SIZE}
+          itemLabel="animals"
+          onPageChange={setPage}
+          className="flex-wrap border-t border-ink/[0.07] px-4 py-3"
+        />
       </div>
     </>
   );

@@ -4,10 +4,11 @@ import { ChevronDown, ExternalLink, Flame, Map, MapPin } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SearchEmpty } from "@/components/ui/search-empty";
 import { SearchInput } from "@/components/ui/search-input";
+import { SecondaryTabFilters } from "@/components/ui/secondary-tab-filters";
+import { TabFilters } from "@/components/ui/tab-filters";
 import type { ReportMarkerRow, RescueConsoleData } from "@furescue/core";
 
 import { RescuesMap } from "./rescues-map";
@@ -63,70 +64,17 @@ export function RescuesConsole({ data }: RescuesConsoleProps) {
 
   return (
     <div className="flex min-h-0 flex-col">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-ink/[0.08] pb-2">
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
-          {STATUS_FILTERS.map((item) => {
-            const active = filter === item.id;
-            const count =
-              item.id === "all"
-                ? counts.total
-                : counts[item.id as keyof typeof counts];
-            const meta = item.id === "all" ? null : reportStatusMeta(item.id);
-            return (
-              <Button
-                key={item.id}
-                variant="ghost"
-                size="sm"
-                onClick={() => setFilter(item.id)}
-                className={`h-auto shrink-0 py-1 text-[0.8125rem] font-normal ${
-                  active
-                    ? "bg-ink/[0.055] text-ink hover:bg-ink/[0.055]"
-                    : "text-ink/50 hover:bg-ink/[0.03] hover:text-ink/80"
-                }`}
-              >
-                {meta && (
-                  <span
-                    className="h-1.5 w-1.5 rounded-full"
-                    style={{ backgroundColor: meta.pin }}
-                  />
-                )}
-                {item.label}
-                <span
-                  className={`font-mono text-[0.6875rem] tabular-nums ${
-                    active ? "text-ink/55" : "text-ink/35"
-                  }`}
-                >
-                  {count}
-                </span>
-              </Button>
-            );
-          })}
-        </div>
-
-        <div className="ml-auto flex shrink-0 items-center gap-2">
-          <div className="flex h-8 items-center rounded-lg border border-ink/[0.1] bg-white p-0.5">
-            {(
-              [
-                { id: "map", label: "Map", icon: Map },
-                { id: "heat", label: "Heat map", icon: Flame },
-              ] as const
-            ).map((option) => {
-              const Icon = option.icon;
-              const active = view === option.id;
-              return (
-                <Button
-                  key={option.id}
-                  onClick={() => setView(option.id)}
-                  variant={active ? "inverted" : "ghost"}
-                  size="sm"
-                  className="h-7 rounded-md px-2.5 text-[0.8125rem]"
-                >
-                  <Icon className="h-3.5 w-3.5" strokeWidth={1.9} />
-                  {option.label}
-                </Button>
-              );
-            })}
-          </div>
+      <div className="flex flex-col gap-2 border-b border-ink/[0.08] pb-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <TabFilters
+            ariaLabel="Rescue view"
+            value={view}
+            onChange={setView}
+            options={[
+              { id: "map", label: "Map", icon: Map },
+              { id: "heat", label: "Heat map", icon: Flame },
+            ]}
+          />
 
           <SearchInput
             value={query}
@@ -137,6 +85,24 @@ export function RescuesConsole({ data }: RescuesConsoleProps) {
             className="w-56"
           />
         </div>
+
+        <SecondaryTabFilters
+          ariaLabel="Rescue status"
+          value={filter}
+          onChange={setFilter}
+          wrap
+          options={STATUS_FILTERS.map((item) => {
+            const meta = item.id === "all" ? null : reportStatusMeta(item.id);
+            return {
+              ...item,
+              count:
+                item.id === "all"
+                  ? counts.total
+                  : counts[item.id as keyof typeof counts],
+              dot: meta?.pin,
+            };
+          })}
+        />
       </div>
 
       <div className="mt-3 grid gap-3 lg:h-[calc(100dvh-9.5rem)] lg:min-h-[620px] lg:grid-cols-[340px_minmax(0,1fr)]">

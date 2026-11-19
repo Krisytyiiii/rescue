@@ -15,6 +15,8 @@ interface OverlayCardProps {
   footer?: ReactNode;
   panelClassName?: string;
   closeLabel?: string;
+  /** Hide the header close button (dismiss via backdrop or Escape). Defaults to true. */
+  showClose?: boolean;
 }
 
 /**
@@ -31,6 +33,7 @@ export function OverlayCard({
   footer,
   panelClassName = "",
   closeLabel = "Close",
+  showClose = true,
 }: OverlayCardProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -79,15 +82,17 @@ export function OverlayCard({
               {meta}
             </div>
           </div>
-          <button
-            ref={closeRef}
-            type="button"
-            onClick={onClose}
-            aria-label={closeLabel}
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-ink/[0.08] text-ink/45 transition-colors hover:border-ink/20 hover:bg-ink/[0.03] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40"
-          >
-            <X className="h-4 w-4" strokeWidth={1.9} />
-          </button>
+          {showClose && (
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label={closeLabel}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-ink/[0.08] text-ink/45 transition-colors hover:border-ink/20 hover:bg-ink/[0.03] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40"
+            >
+              <X className="h-4 w-4" strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         {children}

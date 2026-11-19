@@ -67,9 +67,24 @@ export interface AnimalDraft {
   isNeutered: boolean;
   microchipNo?: string;
   originType: OriginType;
+  sourceReportId?: string;
   intakeDate?: string;
   description?: string;
   photoUrl?: string;
+}
+
+/** A rescued report that can be turned into an animal record. */
+export interface RescueReportOption {
+  id: string;
+  reportCode: string;
+  species: "dog" | "cat" | "unknown";
+  reportType: string;
+  urgencyLevel: string;
+  description: string;
+  locationLandmark: string | null;
+  barangayName: string | null;
+  photoUrl: string | null;
+  submittedAt: string;
 }
 
 export interface AnimalRow {

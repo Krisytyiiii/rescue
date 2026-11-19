@@ -4,12 +4,15 @@ import type { AdoptionStatus, HousingType } from "../../generated/prisma/enums.t
 export const ADOPTION_STATUS_TRANSITIONS: Record<AdoptionStatus, readonly AdoptionStatus[]> = {
   submitted: ["under_review", "withdrawn"],
   under_review: ["interview_scheduled", "approved", "rejected", "withdrawn"],
-  interview_scheduled: ["approved", "rejected", "withdrawn"],
+  interview_scheduled: ["interview_scheduled", "approved", "rejected", "withdrawn"],
   approved: ["completed"],
   rejected: [],
   withdrawn: [],
   completed: [],
 };
+
+/** Fixed venue where adoption meet-and-greets are held. */
+export const INTERVIEW_VENUE = "City Vet Building";
 
 /** Requests occupying a slot for an animal. */
 export const OPEN_ADOPTION_STATUSES: readonly AdoptionStatus[] = [
@@ -42,7 +45,20 @@ export interface ReviewAdoptionInput {
 
 export const adoptionDetailInclude = {
   animal: {
-    select: { id: true, animalCode: true, name: true, species: true, primaryPhotoUrl: true, lifecycleStatus: true },
+    select: {
+      id: true,
+      animalCode: true,
+      name: true,
+      species: true,
+      primaryPhotoUrl: true,
+      lifecycleStatus: true,
+      media: {
+        where: { mediaType: "photo" },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+        select: { fileUrl: true },
+      },
+    },
   },
   adopter: {
     select: { id: true, firstName: true, lastName: true, email: true, phoneNumber: true },

@@ -77,6 +77,30 @@ const CONTEXTS = [
   { value: "under_stress", label: "Under stress" },
 ];
 
+const manilaDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Asia/Manila",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const manilaTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Asia/Manila",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** Today's date in Manila as `yyyy-mm-dd`. */
+function manilaToday() {
+  return manilaDateFormatter.format(new Date());
+}
+
+/** The current Manila wall-clock time as `HH:mm`. */
+function manilaNow() {
+  return manilaTimeFormatter.format(new Date());
+}
+
 export function HealthEntryDialog({
   open,
   animal,
@@ -90,6 +114,7 @@ export function HealthEntryDialog({
   const submitIntentRef = useRef(false);
   const toast = useToast();
   const [today, setToday] = useState("");
+  const [nowTime, setNowTime] = useState("");
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState<Errors>({});
   const [error, setError] = useState("");
@@ -102,11 +127,16 @@ export function HealthEntryDialog({
   const range = HEART_RATE_RANGES[animal.species];
 
   useEffect(() => {
-    setToday(new Date().toISOString().slice(0, 10));
+    setToday(manilaToday());
+    setNowTime(manilaNow());
   }, []);
 
   useEffect(() => {
     if (!open) return;
+    // Refresh the clock every time the dialog opens so a long-lived console
+    // never prefills a stale time.
+    setToday(manilaToday());
+    setNowTime(manilaNow());
     const index = STEPS.findIndex((item) => item.id === initialKind);
     setStep(index >= 0 ? index : 0);
     setErrors({});
@@ -269,6 +299,22 @@ export function HealthEntryDialog({
       for (const [key, value] of data.entries()) {
         if (typeof value === "string" && value.trim() !== "") payload[key] = value.trim();
       }
+
+      // The form collects a date and a time separately. Combine them into a
+      // real timestamp so logs keep the actual time of measurement instead of
+      // defaulting to midnight.
+      if (item.id === "heart_rate") {
+        const date = String(payload.measuredAt ?? "");
+        const time = String(payload.measuredTime ?? "");
+        delete payload.measuredTime;
+        if (date) {
+          const stamp = new Date(`${date}T${time || "00:00"}:00+08:00`);
+          if (!Number.isNaN(stamp.getTime())) {
+            payload.measuredAt = stamp.toISOString();
+          }
+        }
+      }
+
       payloads.push({ kind: item.id, payload });
     }
 
@@ -586,6 +632,15 @@ export function HealthEntryDialog({
                     placeholder="Pick a date"
                     invalid={Boolean(errors.measuredAt)}
                     className="mt-1"
+                  />
+                </Field>
+                <Field label="Time measured (optional)">
+                  <input
+                    type="time"
+                    name="measuredTime"
+                    key={`measured-time-${nowTime}-${entry?.id ?? "new"}`}
+                    defaultValue={entry?.values.measuredTime || nowTime}
+                    className={inputClass}
                   />
                 </Field>
                 <Field label="Notes">

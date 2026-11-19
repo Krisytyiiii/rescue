@@ -2,10 +2,13 @@
 
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface DatePickerProps {
   name: string;
   id?: string;
+  /** Controlled value (`yyyy-mm-dd`). When provided, the field follows external changes. */
+  value?: string;
   defaultValue?: string;
   placeholder?: string;
   onChange?: (value: string) => void;
@@ -65,6 +68,7 @@ function todayIso(): string {
 export function DatePicker({
   name,
   id,
+  value: controlledValue,
   defaultValue = "",
   placeholder = "Pick a date",
   onChange,
@@ -75,15 +79,29 @@ export function DatePicker({
   const generatedId = useId();
   const pickerId = id ?? generatedId;
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [value, setValue] = useState(defaultValue);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [internalValue, setInternalValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [cursor, setCursor] = useState(
-    () => parseValue(defaultValue) ?? (min ? parseValue(min) : null) ?? new Date(),
+    () =>
+      parseValue(controlledValue ?? defaultValue) ??
+      (min ? parseValue(min) : null) ??
+      new Date(),
   );
+
+  const value = controlledValue ?? internalValue;
 
   useEffect(() => {
     function onPointerDown(event: MouseEvent) {
-      if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false);
+      const target = event.target as Node;
+      if (
+        !wrapperRef.current?.contains(target) &&
+        !popoverRef.current?.contains(target)
+      ) {
+        setOpen(false);
+      }
     }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
@@ -95,6 +113,37 @@ export function DatePicker({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const POPOVER_WIDTH = 272;
+    const POPOVER_HEIGHT = 330;
+
+    function updatePosition() {
+      const rect = triggerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const left = Math.min(
+        Math.max(8, rect.left),
+        Math.max(8, window.innerWidth - POPOVER_WIDTH - 8),
+      );
+      const openUp =
+        rect.bottom + 6 + POPOVER_HEIGHT > window.innerHeight &&
+        rect.top - 6 - POPOVER_HEIGHT > 0;
+      setPosition({
+        top: openUp ? rect.top - 6 - POPOVER_HEIGHT : rect.bottom + 6,
+        left,
+      });
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
 
   const days = useMemo(() => {
     const year = cursor.getFullYear();
@@ -131,7 +180,7 @@ export function DatePicker({
   const previousDisabled = earliestMonth !== null && cursorMonth <= earliestMonth;
 
   function commit(next: string) {
-    setValue(next);
+    if (controlledValue === undefined) setInternalValue(next);
     onChange?.(next);
     setOpen(false);
   }
@@ -141,9 +190,13 @@ export function DatePicker({
       <input type="hidden" name={name} value={value} />
 
       <button
+        ref={triggerRef}
         id={pickerId}
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          setPosition(null);
+          setOpen((current) => !current);
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-invalid={invalid || undefined}
@@ -155,12 +208,15 @@ export function DatePicker({
         <CalendarDays className="h-3.5 w-3.5 shrink-0 text-ink/35" strokeWidth={1.9} />
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Choose a date"
-          className="dialog-panel absolute left-0 top-[calc(100%+6px)] z-50 w-[17rem] rounded-xl border border-ink/10 bg-white p-3 shadow-[0_18px_40px_-18px_rgba(6,24,43,0.45)]"
-        >
+      {open && position &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            role="dialog"
+            aria-label="Choose a date"
+            style={{ top: position.top, left: position.left }}
+            className="dialog-panel fixed z-[95] w-[17rem] rounded-xl border border-ink/10 bg-white p-3 shadow-[0_18px_40px_-18px_rgba(6,24,43,0.45)]"
+          >
           <div className="flex items-center justify-between gap-2">
             <p className="text-[0.75rem] font-semibold text-ink">
               {MONTHS[cursor.getMonth()]} {cursor.getFullYear()}
@@ -257,8 +313,9 @@ export function DatePicker({
               Today
             </button>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -34,7 +34,12 @@ import {
   type HealthEntryEdit,
   type HealthEntryKind,
 } from "./health-entry-dialog";
-import type { AnimalDraft, AnimalRow, LifecycleStatus } from "./animals-types";
+import type {
+  AnimalDraft,
+  AnimalRow,
+  LifecycleStatus,
+  RescueReportOption,
+} from "./animals-types";
 import { LIFECYCLE_META, LISTING_META, MOVE_LABELS, ORIGIN_LABELS } from "./animals-types";
 import {
   adoptionReadiness,
@@ -60,6 +65,8 @@ interface AnimalsConsoleProps {
   onOptimisticPatch?: (id: string, changes: Partial<AnimalRow>) => void;
   /** Hides an archived row instantly; `removed: false` restores it on failure. */
   onOptimisticRemove?: (id: string, removed: boolean) => void;
+  /** Rescued reports that can seed a new animal record. */
+  rescueReports?: RescueReportOption[];
 }
 
 export function AnimalsConsole({
@@ -68,6 +75,7 @@ export function AnimalsConsole({
   onClearFilters,
   onOptimisticPatch,
   onOptimisticRemove,
+  rescueReports = [],
 }: AnimalsConsoleProps) {
   const router = useRouter();
   const toast = useToast();
@@ -459,6 +467,7 @@ export function AnimalsConsole({
         onClose={() => setIntakeOpen(false)}
         onCreated={addPending}
         onSettled={settlePending}
+        rescueReports={rescueReports}
       />
 
       <ConfirmDialog
@@ -602,7 +611,7 @@ function AnimalCard({
                 value={animal.size ? humanize(animal.size) : "Size unknown"}
               />
               <MetaStat
-                label="Arrived"
+                label="Added"
                 value={formatDate(animal.intakeDate)}
                 align="right"
               />
@@ -814,7 +823,7 @@ function AnimalDrawer({
                     />
                     <Field label="Color / markings" value={animal.colorMarkings ?? "—"} />
                     <Field label="Behaviour" value={animal.temperament ?? "—"} />
-                    <Field label="Arrived" value={formatDate(animal.intakeDate)} />
+                    <Field label="Added" value={formatDate(animal.intakeDate)} />
                     <Field label="Came from" value={ORIGIN_LABELS[animal.originType]} />
                   </dl>
                 </div>

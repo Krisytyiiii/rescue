@@ -70,7 +70,7 @@ export function SearchInput({
           }
         }}
         placeholder={placeholder}
-        className={`h-8 w-full rounded-lg border border-ink/15 bg-white pr-8 text-[0.75rem] text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-clay focus:ring-2 focus:ring-clay/15 ${
+        className={`h-8 w-full rounded-lg border border-ink/15 bg-white pr-8 text-[0.75rem] text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-clay focus:ring-2 focus:ring-clay/15 [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden ${
           showIcon ? "pl-8" : "pl-2.5"
         }`}
       />

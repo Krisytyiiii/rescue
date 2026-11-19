@@ -278,6 +278,22 @@ export class HealthService {
     return log;
   }
 
+  /** Cross-animal lists for the admin health console. */
+  async listAllRecords(actor?: Actor) {
+    requireRole(actor, "admin", "rescuer");
+    return this.repo.listAllRecords();
+  }
+
+  async listAllVaccinations(actor?: Actor) {
+    requireRole(actor, "admin", "rescuer");
+    return this.repo.listAllVaccinations();
+  }
+
+  async listAllHeartRates(actor?: Actor) {
+    requireRole(actor, "admin", "rescuer");
+    return this.repo.listAllHeartRates();
+  }
+
   async getAnimalHealth(animalId: string) {
     await this.requireAnimal(animalId);
     const [records, vaccinations, heartRates] = await Promise.all([

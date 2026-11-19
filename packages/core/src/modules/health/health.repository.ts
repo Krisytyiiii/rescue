@@ -4,6 +4,11 @@ import type {
   CreateHealthRecordInput,
   CreateVaccinationInput,
 } from "./health.types.ts";
+import {
+  healthRecordListInclude,
+  heartRateListInclude,
+  vaccinationListInclude,
+} from "./health.types.ts";
 
 export class HealthRepository {
   constructor(private readonly db: Db = prisma) {}
@@ -63,6 +68,32 @@ export class HealthRepository {
 
   updateVaccinationStatus(id: string, status: "completed" | "due" | "overdue") {
     return this.db.vaccination.update({ where: { id }, data: { status } });
+  }
+
+  /** Cross-animal lists used by /admin/health. Deleted animals are excluded. */
+  listAllRecords() {
+    return this.db.healthRecord.findMany({
+      where: { animal: { deletedAt: null } },
+      include: healthRecordListInclude,
+      orderBy: { recordDate: "desc" },
+    });
+  }
+
+  listAllVaccinations() {
+    return this.db.vaccination.findMany({
+      where: { animal: { deletedAt: null } },
+      include: vaccinationListInclude,
+      orderBy: { dateGiven: "desc" },
+    });
+  }
+
+  listAllHeartRates(take = 500) {
+    return this.db.heartRateLog.findMany({
+      where: { animal: { deletedAt: null } },
+      include: heartRateListInclude,
+      orderBy: { measuredAt: "desc" },
+      take,
+    });
   }
 }
 

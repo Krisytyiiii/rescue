@@ -1,7 +1,9 @@
-import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
 import { reportsService, type ListReportsQuery } from "@furescue/core";
+
+import { Pagination } from "@/components/ui/pagination";
 
 import { toReportCardData } from "./report-card-data";
 import { ReportsGrid } from "./reports-grid";
@@ -21,7 +23,7 @@ function pageHref(baseParams: Record<string, string>, target: number): string {
 }
 
 /** Streamed results section — keyed by the active filters so stale cards are replaced. */
-export async function ReportsResults({ query, page, baseParams, hasFilters }: ReportsResultsProps) {
+export async function ReportsResults({ query, baseParams, hasFilters }: ReportsResultsProps) {
   const { items, meta } = await reportsService.list(query);
   const first = items.length === 0 ? 0 : (meta.page - 1) * meta.pageSize + 1;
   const last = (meta.page - 1) * meta.pageSize + items.length;
@@ -60,42 +62,14 @@ export async function ReportsResults({ query, page, baseParams, hasFilters }: Re
 
       <ReportsGrid reports={items.map(toReportCardData)} />
 
-      {meta.totalPages > 1 && (
-        <div className="flex items-center justify-between gap-3 border-t border-ink/[0.07] px-4 py-3">
-          <p className="text-[0.75rem] text-ink/45">
-            Page {page} of {meta.totalPages}
-          </p>
-          <div className="flex items-center gap-2">
-            {meta.hasPrevious ? (
-              <Link
-                href={pageHref(baseParams, meta.page - 1)}
-                className="inline-flex h-8 items-center rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink"
-              >
-                Previous
-              </Link>
-            ) : (
-              <span className="inline-flex h-8 items-center rounded-lg border border-ink/[0.06] px-3 text-[0.75rem] font-medium text-ink/25">
-                Previous
-              </span>
-            )}
-
-            {meta.hasNext ? (
-              <Link
-                href={pageHref(baseParams, meta.page + 1)}
-                className="inline-flex h-8 items-center gap-1 rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink"
-              >
-                Next
-                <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
-              </Link>
-            ) : (
-              <span className="inline-flex h-8 items-center gap-1 rounded-lg border border-ink/[0.06] px-3 text-[0.75rem] font-medium text-ink/25">
-                Next
-                <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
-              </span>
-            )}
-          </div>
-        </div>
-      )}
+      <Pagination
+        page={meta.page}
+        totalPages={meta.totalPages}
+        total={meta.total}
+        pageSize={meta.pageSize}
+        hrefForPage={(next) => pageHref(baseParams, next)}
+        className="border-t border-ink/[0.07] px-4 py-3"
+      />
     </>
   );
 }

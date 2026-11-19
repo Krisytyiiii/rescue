@@ -59,3 +59,55 @@ export interface CreateHeartRateInput {
 export type UpdateHealthRecordInput = Omit<CreateHealthRecordInput, "animalId">;
 export type UpdateVaccinationInput = Omit<CreateVaccinationInput, "animalId">;
 export type UpdateHeartRateInput = Omit<CreateHeartRateInput, "animalId">;
+
+/** Compact animal summary included on cross-animal health lists. */
+export const healthAnimalSelect = {
+  id: true,
+  animalCode: true,
+  name: true,
+  species: true,
+  breedType: true,
+  sex: true,
+  estimatedAgeMonths: true,
+  weightKg: true,
+  lifecycleStatus: true,
+  listingStatus: true,
+  primaryPhotoUrl: true,
+  media: {
+    where: { mediaType: "photo" },
+    orderBy: { sortOrder: "asc" },
+    take: 1,
+    select: { fileUrl: true },
+  },
+} satisfies Prisma.AnimalSelect;
+
+export type HealthAnimalSummary = Prisma.AnimalGetPayload<{
+  select: typeof healthAnimalSelect;
+}>;
+
+export const healthRecordListInclude = {
+  animal: { select: healthAnimalSelect },
+  attendedUser: { select: { id: true, firstName: true, lastName: true } },
+  heartRates: { orderBy: { measuredAt: "desc" } },
+} satisfies Prisma.HealthRecordInclude;
+
+export type HealthRecordWithAnimal = Prisma.HealthRecordGetPayload<{
+  include: typeof healthRecordListInclude;
+}>;
+
+export const vaccinationListInclude = {
+  animal: { select: healthAnimalSelect },
+  administered: { select: { id: true, firstName: true, lastName: true } },
+} satisfies Prisma.VaccinationInclude;
+
+export type VaccinationWithAnimal = Prisma.VaccinationGetPayload<{
+  include: typeof vaccinationListInclude;
+}>;
+
+export const heartRateListInclude = {
+  animal: { select: healthAnimalSelect },
+} satisfies Prisma.HeartRateLogInclude;
+
+export type HeartRateWithAnimal = Prisma.HeartRateLogGetPayload<{
+  include: typeof heartRateListInclude;
+}>;

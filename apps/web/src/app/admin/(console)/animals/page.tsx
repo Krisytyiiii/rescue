@@ -2,12 +2,13 @@ import type { Metadata } from "next";
 import { PawPrint } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { authService, animalsService, type Actor } from "@furescue/core";
+import { authService, animalsService, reportsService, type Actor } from "@furescue/core";
 
 import { AdminLiveRefresh } from "@/components/admin/admin-live-refresh";
 import { toAnimalRow } from "@/components/admin/animals/animals-data";
 import { AnimalsStats } from "@/components/admin/animals/animals-stats";
 import { AnimalsWorkbench } from "@/components/admin/animals/animals-workbench";
+import type { RescueReportOption } from "@/components/admin/animals/animals-types";
 import { fetchAllPages } from "@/lib/fetch-all-pages";
 import { readSession } from "@/lib/auth/session";
 
@@ -34,6 +35,27 @@ export default async function AdminAnimalsPage() {
   const rows = animals.map(toAnimalRow);
   const counts = await animalsService.getAdminCounts();
 
+  // Rescued reports that do not yet have an animal record can be turned into
+  // one from the intake form's first step.
+  const rescuedReports = await fetchAllPages((page, pageSize) =>
+    reportsService.list({ status: "rescued", page, pageSize }),
+  );
+  const rescueReportOptions: RescueReportOption[] = rescuedReports
+    .filter((report) => !report.resultingAnimal)
+    .map((report) => ({
+      id: report.id,
+      reportCode: report.reportCode,
+      species: report.species ?? "unknown",
+      reportType: report.reportType,
+      urgencyLevel: report.urgencyLevel,
+      description: report.description,
+      locationLandmark: report.locationLandmark,
+      barangayName: report.barangay?.name ?? null,
+      photoUrl:
+        report.media.find((item) => item.mediaType === "photo")?.fileUrl ?? null,
+      submittedAt: report.submittedAt.toISOString(),
+    }));
+
   return (
     <div className="w-full">
       <AdminLiveRefresh />
@@ -59,7 +81,11 @@ export default async function AdminAnimalsPage() {
       <AnimalsStats counts={counts} />
 
       <section className="mt-4 grid min-h-[480px] overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)] lg:grid-cols-[216px_minmax(0,1fr)]">
-        <AnimalsWorkbench animals={rows} counts={counts} />
+        <AnimalsWorkbench
+          animals={rows}
+          counts={counts}
+          rescueReports={rescueReportOptions}
+        />
       </section>
     </div>
   );

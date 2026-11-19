@@ -8,6 +8,7 @@ import { notificationsService } from "../notifications/notifications.service.ts"
 import { AdoptionsRepository, adoptionsRepository } from "./adoptions.repository.ts";
 import {
   ADOPTION_STATUS_TRANSITIONS,
+  INTERVIEW_VENUE,
   type CreateAdoptionInput,
   type ListAdoptionsQuery,
   type ReviewAdoptionInput,
@@ -110,12 +111,24 @@ export class AdoptionsService {
     const current = await this.repo.getById(id);
     assertTransition(current.status, input.status);
 
-    if (input.status === "interview_scheduled" && !input.interviewSchedule) {
-      throw new ConflictError("An interview schedule is required");
+    if (input.status === "interview_scheduled") {
+      if (!input.interviewSchedule) {
+        throw new ConflictError("An interview schedule is required");
+      }
+      if (input.interviewSchedule.getTime() <= Date.now()) {
+        throw new ConflictError("The interview must be scheduled in the future");
+      }
     }
 
     // Rule: one approved request per animal; close the rest with a notification.
     if (input.status === "approved") {
+      if (!current.interviewSchedule) {
+        throw new ConflictError("Schedule and complete the interview before approving");
+      }
+      if (current.interviewSchedule.getTime() > Date.now()) {
+        throw new ConflictError("The interview has not taken place yet");
+      }
+
       const active = await this.repo.findActiveForAnimal(current.animalId);
       const alreadyApproved = active.find(
         (request) => request.status === "approved" && request.id !== current.id,
@@ -182,7 +195,11 @@ export class AdoptionsService {
           title: `Adoption application ${input.status.replaceAll("_", " ")}`,
           body:
             input.decisionRemarks ??
-            `Your application ${current.requestCode} is now ${input.status.replaceAll("_", " ")}.`,
+            (input.status === "interview_scheduled" && input.interviewSchedule
+              ? `Your interview for ${current.requestCode} is set for ${input.interviewSchedule.toLocaleString(
+                  "en-PH",
+                )} at the ${INTERVIEW_VENUE}.`
+              : `Your application ${current.requestCode} is now ${input.status.replaceAll("_", " ")}.`),
           referenceType: "adoption_request",
           referenceId: id,
         },

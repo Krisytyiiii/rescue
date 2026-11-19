@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { Pagination } from "@/components/ui/pagination";
 import { SearchEmpty } from "@/components/ui/search-empty";
 
 import { ReportsGrid, type ReportCardData } from "./reports-grid";
@@ -105,32 +106,14 @@ export function ReportsConsole({ reports }: ReportsConsoleProps) {
 
           <ReportsGrid reports={visible} />
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between gap-3 border-t border-ink/[0.07] px-4 py-3">
-              <p className="text-[0.75rem] text-ink/45">
-                Page {currentPage} of {totalPages}
-              </p>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  disabled={currentPage <= 1}
-                  onClick={() => setPage(currentPage - 1)}
-                  className="inline-flex h-8 items-center rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors enabled:hover:border-ink/20 enabled:hover:text-ink disabled:border-ink/[0.06] disabled:text-ink/25"
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setPage(currentPage + 1)}
-                  className="inline-flex h-8 items-center gap-1 rounded-lg border border-ink/10 px-3 text-[0.75rem] font-medium text-ink/60 transition-colors enabled:hover:border-ink/20 enabled:hover:text-ink disabled:border-ink/[0.06] disabled:text-ink/25"
-                >
-                  Next
-                  <ArrowUpRight className="h-3 w-3" strokeWidth={2} />
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            total={filtered.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setPage}
+            className="flex-wrap border-t border-ink/[0.07] px-4 py-3"
+          />
         </>
       )}
     </div>
