@@ -376,6 +376,7 @@ model User {
   followupsConducted       AdoptionFollowup[]        @relation("FollowupConductor")
   favorites                Favorite[]
   conversationParticipants ConversationParticipant[]
+  conversationAssignments  Conversation[]          @relation("ConversationAssignee")
   messagesSent             Message[]
   notifications            Notification[]
   learningModulesCreated   LearningModule[]          @relation("LearningModuleAuthor")
@@ -741,6 +742,9 @@ model Conversation {
   contextId   String?                 @map("context_id") @db.Uuid
   subject     String?                 @db.VarChar(150)
   status      ConversationStatus      @default(open)
+  assignedToUserId String?            @map("assigned_to_user_id") @db.Uuid
+
+  assignee User? @relation("ConversationAssignee", fields: [assignedToUserId], references: [id], onDelete: SetNull)
 
   participants ConversationParticipant[]
   messages     Message[]
@@ -750,6 +754,7 @@ model Conversation {
   deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   @@index([contextType, contextId])
+  @@index([assignedToUserId])
   @@map("conversations")
 }
 

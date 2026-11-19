@@ -9,6 +9,8 @@ interface OverlayCardProps {
   labelledBy: string;
   eyebrow?: string;
   title: ReactNode;
+  /** Overrides the default monospace title styling. */
+  titleClassName?: string;
   /** Badges or metadata shown beside the title. */
   meta?: ReactNode;
   children: ReactNode;
@@ -28,6 +30,7 @@ export function OverlayCard({
   labelledBy,
   eyebrow,
   title,
+  titleClassName = "font-mono text-[0.9375rem] font-semibold tracking-wide text-ink",
   meta,
   children,
   footer,
@@ -36,10 +39,14 @@ export function OverlayCard({
   showClose = true,
 }: OverlayCardProps) {
   const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
+  // Focus and scroll lock belong to opening the dialog, not to every parent
+  // re-render. Re-running on a new `onClose` identity steals focus from inputs.
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKeyDown);
     const previousOverflow = document.body.style.overflow;
@@ -50,7 +57,7 @@ export function OverlayCard({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
     };
-  }, [onClose]);
+  }, []);
 
   return (
     <div
@@ -75,7 +82,7 @@ export function OverlayCard({
             <div className="mt-1.5 flex flex-wrap items-center gap-2">
               <h2
                 id={labelledBy}
-                className="font-mono text-[0.9375rem] font-semibold tracking-wide text-ink"
+                className={titleClassName}
               >
                 {title}
               </h2>

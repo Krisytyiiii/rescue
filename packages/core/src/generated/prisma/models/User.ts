@@ -334,6 +334,7 @@ export type UserWhereInput = {
   followupsConducted?: Prisma.AdoptionFollowupListRelationFilter
   favorites?: Prisma.FavoriteListRelationFilter
   conversationParticipants?: Prisma.ConversationParticipantListRelationFilter
+  conversationAssignments?: Prisma.ConversationListRelationFilter
   messagesSent?: Prisma.MessageListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   learningModulesCreated?: Prisma.LearningModuleListRelationFilter
@@ -379,6 +380,7 @@ export type UserOrderByWithRelationInput = {
   followupsConducted?: Prisma.AdoptionFollowupOrderByRelationAggregateInput
   favorites?: Prisma.FavoriteOrderByRelationAggregateInput
   conversationParticipants?: Prisma.ConversationParticipantOrderByRelationAggregateInput
+  conversationAssignments?: Prisma.ConversationOrderByRelationAggregateInput
   messagesSent?: Prisma.MessageOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   learningModulesCreated?: Prisma.LearningModuleOrderByRelationAggregateInput
@@ -427,6 +429,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   followupsConducted?: Prisma.AdoptionFollowupListRelationFilter
   favorites?: Prisma.FavoriteListRelationFilter
   conversationParticipants?: Prisma.ConversationParticipantListRelationFilter
+  conversationAssignments?: Prisma.ConversationListRelationFilter
   messagesSent?: Prisma.MessageListRelationFilter
   notifications?: Prisma.NotificationListRelationFilter
   learningModulesCreated?: Prisma.LearningModuleListRelationFilter
@@ -518,6 +521,7 @@ export type UserCreateInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -561,6 +565,7 @@ export type UserUncheckedCreateInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -604,6 +609,7 @@ export type UserUpdateInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -647,6 +653,7 @@ export type UserUncheckedUpdateInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1134,6 +1141,22 @@ export type UserUpdateOneRequiredWithoutFavoritesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutFavoritesInput, Prisma.UserUpdateWithoutFavoritesInput>, Prisma.UserUncheckedUpdateWithoutFavoritesInput>
 }
 
+export type UserCreateNestedOneWithoutConversationAssignmentsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConversationAssignmentsInput, Prisma.UserUncheckedCreateWithoutConversationAssignmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationAssignmentsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutConversationAssignmentsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutConversationAssignmentsInput, Prisma.UserUncheckedCreateWithoutConversationAssignmentsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationAssignmentsInput
+  upsert?: Prisma.UserUpsertWithoutConversationAssignmentsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutConversationAssignmentsInput, Prisma.UserUpdateWithoutConversationAssignmentsInput>, Prisma.UserUncheckedUpdateWithoutConversationAssignmentsInput>
+}
+
 export type UserCreateNestedOneWithoutConversationParticipantsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutConversationParticipantsInput, Prisma.UserUncheckedCreateWithoutConversationParticipantsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutConversationParticipantsInput
@@ -1285,6 +1308,7 @@ export type UserCreateWithoutRoleInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -1327,6 +1351,7 @@ export type UserUncheckedCreateWithoutRoleInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -1418,6 +1443,7 @@ export type UserCreateWithoutBarangayInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -1460,6 +1486,7 @@ export type UserUncheckedCreateWithoutBarangayInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -1528,6 +1555,7 @@ export type UserCreateWithoutPasswordResetsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -1570,6 +1598,7 @@ export type UserUncheckedCreateWithoutPasswordResetsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -1628,6 +1657,7 @@ export type UserUpdateWithoutPasswordResetsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -1670,6 +1700,7 @@ export type UserUncheckedUpdateWithoutPasswordResetsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1712,6 +1743,7 @@ export type UserCreateWithoutAnimalsPostedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -1754,6 +1786,7 @@ export type UserUncheckedCreateWithoutAnimalsPostedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -1812,6 +1845,7 @@ export type UserUpdateWithoutAnimalsPostedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -1854,6 +1888,7 @@ export type UserUncheckedUpdateWithoutAnimalsPostedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -1896,6 +1931,7 @@ export type UserCreateWithoutAnimalMediaUploadedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -1938,6 +1974,7 @@ export type UserUncheckedCreateWithoutAnimalMediaUploadedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -1996,6 +2033,7 @@ export type UserUpdateWithoutAnimalMediaUploadedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2038,6 +2076,7 @@ export type UserUncheckedUpdateWithoutAnimalMediaUploadedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2080,6 +2119,7 @@ export type UserCreateWithoutHealthRecordsAttendedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -2122,6 +2162,7 @@ export type UserUncheckedCreateWithoutHealthRecordsAttendedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -2180,6 +2221,7 @@ export type UserUpdateWithoutHealthRecordsAttendedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2222,6 +2264,7 @@ export type UserUncheckedUpdateWithoutHealthRecordsAttendedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2264,6 +2307,7 @@ export type UserCreateWithoutVaccinationsAdministeredInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -2306,6 +2350,7 @@ export type UserUncheckedCreateWithoutVaccinationsAdministeredInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -2364,6 +2409,7 @@ export type UserUpdateWithoutVaccinationsAdministeredInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2406,6 +2452,7 @@ export type UserUncheckedUpdateWithoutVaccinationsAdministeredInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2448,6 +2495,7 @@ export type UserCreateWithoutHeartRateLogsRecordedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -2490,6 +2538,7 @@ export type UserUncheckedCreateWithoutHeartRateLogsRecordedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -2548,6 +2597,7 @@ export type UserUpdateWithoutHeartRateLogsRecordedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2590,6 +2640,7 @@ export type UserUncheckedUpdateWithoutHeartRateLogsRecordedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2632,6 +2683,7 @@ export type UserCreateWithoutReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -2674,6 +2726,7 @@ export type UserUncheckedCreateWithoutReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -2721,6 +2774,7 @@ export type UserCreateWithoutVerifiedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -2763,6 +2817,7 @@ export type UserUncheckedCreateWithoutVerifiedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -2821,6 +2876,7 @@ export type UserUpdateWithoutReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2863,6 +2919,7 @@ export type UserUncheckedUpdateWithoutReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -2916,6 +2973,7 @@ export type UserUpdateWithoutVerifiedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -2958,6 +3016,7 @@ export type UserUncheckedUpdateWithoutVerifiedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3000,6 +3059,7 @@ export type UserCreateWithoutReportStatusChangesInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3042,6 +3102,7 @@ export type UserUncheckedCreateWithoutReportStatusChangesInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -3100,6 +3161,7 @@ export type UserUpdateWithoutReportStatusChangesInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -3142,6 +3204,7 @@ export type UserUncheckedUpdateWithoutReportStatusChangesInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3184,6 +3247,7 @@ export type UserCreateWithoutRescueAssignmentsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3226,6 +3290,7 @@ export type UserUncheckedCreateWithoutRescueAssignmentsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -3273,6 +3338,7 @@ export type UserCreateWithoutRescueAssignmentsMadeInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3315,6 +3381,7 @@ export type UserUncheckedCreateWithoutRescueAssignmentsMadeInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -3373,6 +3440,7 @@ export type UserUpdateWithoutRescueAssignmentsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -3415,6 +3483,7 @@ export type UserUncheckedUpdateWithoutRescueAssignmentsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3468,6 +3537,7 @@ export type UserUpdateWithoutRescueAssignmentsMadeInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -3510,6 +3580,7 @@ export type UserUncheckedUpdateWithoutRescueAssignmentsMadeInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3552,6 +3623,7 @@ export type UserCreateWithoutAdoptionRequestsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3594,6 +3666,7 @@ export type UserUncheckedCreateWithoutAdoptionRequestsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -3641,6 +3714,7 @@ export type UserCreateWithoutAdoptionRequestsReviewedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3683,6 +3757,7 @@ export type UserUncheckedCreateWithoutAdoptionRequestsReviewedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -3741,6 +3816,7 @@ export type UserUpdateWithoutAdoptionRequestsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -3783,6 +3859,7 @@ export type UserUncheckedUpdateWithoutAdoptionRequestsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3836,6 +3913,7 @@ export type UserUpdateWithoutAdoptionRequestsReviewedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -3878,6 +3956,7 @@ export type UserUncheckedUpdateWithoutAdoptionRequestsReviewedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -3920,6 +3999,7 @@ export type UserCreateWithoutFollowupsConductedInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestCreateNestedManyWithoutReviewerInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -3962,6 +4042,7 @@ export type UserUncheckedCreateWithoutFollowupsConductedInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedCreateNestedManyWithoutReviewerInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -4020,6 +4101,7 @@ export type UserUpdateWithoutFollowupsConductedInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUpdateManyWithoutReviewerNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -4062,6 +4144,7 @@ export type UserUncheckedUpdateWithoutFollowupsConductedInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutReviewerNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -4104,6 +4187,7 @@ export type UserCreateWithoutFavoritesInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestCreateNestedManyWithoutReviewerInput
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -4146,6 +4230,7 @@ export type UserUncheckedCreateWithoutFavoritesInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedCreateNestedManyWithoutReviewerInput
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -4204,6 +4289,7 @@ export type UserUpdateWithoutFavoritesInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUpdateManyWithoutReviewerNestedInput
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -4245,6 +4331,195 @@ export type UserUncheckedUpdateWithoutFavoritesInput = {
   adoptionRequests?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutAdopterNestedInput
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutReviewerNestedInput
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
+  conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
+  messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+  learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
+  learningProgress?: Prisma.UserLearningProgressUncheckedUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedUpdateManyWithoutUserNestedInput
+  generatedReports?: Prisma.GeneratedReportUncheckedUpdateManyWithoutAuthorNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutConversationAssignmentsInput = {
+  id?: string
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash: string
+  addressLine?: string | null
+  profilePhotoUrl?: string | null
+  emailVerifiedAt?: Date | string | null
+  accountStatus?: $Enums.AccountStatus
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  role: Prisma.RoleCreateNestedOneWithoutUsersInput
+  barangay?: Prisma.BarangayCreateNestedOneWithoutUsersInput
+  passwordResets?: Prisma.PasswordResetCreateNestedManyWithoutUserInput
+  reports?: Prisma.ReportCreateNestedManyWithoutReporterInput
+  verifiedReports?: Prisma.ReportCreateNestedManyWithoutVerifierInput
+  reportStatusChanges?: Prisma.ReportStatusHistoryCreateNestedManyWithoutChangerInput
+  animalsPosted?: Prisma.AnimalCreateNestedManyWithoutPostedByInput
+  animalMediaUploaded?: Prisma.AnimalMediaCreateNestedManyWithoutUploaderInput
+  healthRecordsAttended?: Prisma.HealthRecordCreateNestedManyWithoutAttendedUserInput
+  vaccinationsAdministered?: Prisma.VaccinationCreateNestedManyWithoutAdministeredInput
+  heartRateLogsRecorded?: Prisma.HeartRateLogCreateNestedManyWithoutRecorderInput
+  rescueAssignments?: Prisma.RescueOperationCreateNestedManyWithoutRescuerInput
+  rescueAssignmentsMade?: Prisma.RescueOperationCreateNestedManyWithoutAssignerInput
+  adoptionRequests?: Prisma.AdoptionRequestCreateNestedManyWithoutAdopterInput
+  adoptionRequestsReviewed?: Prisma.AdoptionRequestCreateNestedManyWithoutReviewerInput
+  followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
+  favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
+  conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
+  learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
+  learningProgress?: Prisma.UserLearningProgressCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptCreateNestedManyWithoutUserInput
+  generatedReports?: Prisma.GeneratedReportCreateNestedManyWithoutAuthorInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutConversationAssignmentsInput = {
+  id?: string
+  roleId: number
+  barangayId?: number | null
+  firstName: string
+  middleName?: string | null
+  lastName: string
+  email: string
+  phoneNumber?: string | null
+  passwordHash: string
+  addressLine?: string | null
+  profilePhotoUrl?: string | null
+  emailVerifiedAt?: Date | string | null
+  accountStatus?: $Enums.AccountStatus
+  lastLoginAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedCreateNestedManyWithoutUserInput
+  reports?: Prisma.ReportUncheckedCreateNestedManyWithoutReporterInput
+  verifiedReports?: Prisma.ReportUncheckedCreateNestedManyWithoutVerifierInput
+  reportStatusChanges?: Prisma.ReportStatusHistoryUncheckedCreateNestedManyWithoutChangerInput
+  animalsPosted?: Prisma.AnimalUncheckedCreateNestedManyWithoutPostedByInput
+  animalMediaUploaded?: Prisma.AnimalMediaUncheckedCreateNestedManyWithoutUploaderInput
+  healthRecordsAttended?: Prisma.HealthRecordUncheckedCreateNestedManyWithoutAttendedUserInput
+  vaccinationsAdministered?: Prisma.VaccinationUncheckedCreateNestedManyWithoutAdministeredInput
+  heartRateLogsRecorded?: Prisma.HeartRateLogUncheckedCreateNestedManyWithoutRecorderInput
+  rescueAssignments?: Prisma.RescueOperationUncheckedCreateNestedManyWithoutRescuerInput
+  rescueAssignmentsMade?: Prisma.RescueOperationUncheckedCreateNestedManyWithoutAssignerInput
+  adoptionRequests?: Prisma.AdoptionRequestUncheckedCreateNestedManyWithoutAdopterInput
+  adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedCreateNestedManyWithoutReviewerInput
+  followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
+  favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
+  conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
+  learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
+  learningProgress?: Prisma.UserLearningProgressUncheckedCreateNestedManyWithoutUserInput
+  quizAttempts?: Prisma.QuizAttemptUncheckedCreateNestedManyWithoutUserInput
+  generatedReports?: Prisma.GeneratedReportUncheckedCreateNestedManyWithoutAuthorInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutConversationAssignmentsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutConversationAssignmentsInput, Prisma.UserUncheckedCreateWithoutConversationAssignmentsInput>
+}
+
+export type UserUpsertWithoutConversationAssignmentsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutConversationAssignmentsInput, Prisma.UserUncheckedUpdateWithoutConversationAssignmentsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutConversationAssignmentsInput, Prisma.UserUncheckedCreateWithoutConversationAssignmentsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutConversationAssignmentsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutConversationAssignmentsInput, Prisma.UserUncheckedUpdateWithoutConversationAssignmentsInput>
+}
+
+export type UserUpdateWithoutConversationAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountStatus?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.RoleUpdateOneRequiredWithoutUsersNestedInput
+  barangay?: Prisma.BarangayUpdateOneWithoutUsersNestedInput
+  passwordResets?: Prisma.PasswordResetUpdateManyWithoutUserNestedInput
+  reports?: Prisma.ReportUpdateManyWithoutReporterNestedInput
+  verifiedReports?: Prisma.ReportUpdateManyWithoutVerifierNestedInput
+  reportStatusChanges?: Prisma.ReportStatusHistoryUpdateManyWithoutChangerNestedInput
+  animalsPosted?: Prisma.AnimalUpdateManyWithoutPostedByNestedInput
+  animalMediaUploaded?: Prisma.AnimalMediaUpdateManyWithoutUploaderNestedInput
+  healthRecordsAttended?: Prisma.HealthRecordUpdateManyWithoutAttendedUserNestedInput
+  vaccinationsAdministered?: Prisma.VaccinationUpdateManyWithoutAdministeredNestedInput
+  heartRateLogsRecorded?: Prisma.HeartRateLogUpdateManyWithoutRecorderNestedInput
+  rescueAssignments?: Prisma.RescueOperationUpdateManyWithoutRescuerNestedInput
+  rescueAssignmentsMade?: Prisma.RescueOperationUpdateManyWithoutAssignerNestedInput
+  adoptionRequests?: Prisma.AdoptionRequestUpdateManyWithoutAdopterNestedInput
+  adoptionRequestsReviewed?: Prisma.AdoptionRequestUpdateManyWithoutReviewerNestedInput
+  followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
+  favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
+  conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
+  learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
+  learningProgress?: Prisma.UserLearningProgressUpdateManyWithoutUserNestedInput
+  quizAttempts?: Prisma.QuizAttemptUpdateManyWithoutUserNestedInput
+  generatedReports?: Prisma.GeneratedReportUpdateManyWithoutAuthorNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutConversationAssignmentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  roleId?: Prisma.IntFieldUpdateOperationsInput | number
+  barangayId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  middleName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  addressLine?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  profilePhotoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  accountStatus?: Prisma.EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+  lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  passwordResets?: Prisma.PasswordResetUncheckedUpdateManyWithoutUserNestedInput
+  reports?: Prisma.ReportUncheckedUpdateManyWithoutReporterNestedInput
+  verifiedReports?: Prisma.ReportUncheckedUpdateManyWithoutVerifierNestedInput
+  reportStatusChanges?: Prisma.ReportStatusHistoryUncheckedUpdateManyWithoutChangerNestedInput
+  animalsPosted?: Prisma.AnimalUncheckedUpdateManyWithoutPostedByNestedInput
+  animalMediaUploaded?: Prisma.AnimalMediaUncheckedUpdateManyWithoutUploaderNestedInput
+  healthRecordsAttended?: Prisma.HealthRecordUncheckedUpdateManyWithoutAttendedUserNestedInput
+  vaccinationsAdministered?: Prisma.VaccinationUncheckedUpdateManyWithoutAdministeredNestedInput
+  heartRateLogsRecorded?: Prisma.HeartRateLogUncheckedUpdateManyWithoutRecorderNestedInput
+  rescueAssignments?: Prisma.RescueOperationUncheckedUpdateManyWithoutRescuerNestedInput
+  rescueAssignmentsMade?: Prisma.RescueOperationUncheckedUpdateManyWithoutAssignerNestedInput
+  adoptionRequests?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutAdopterNestedInput
+  adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutReviewerNestedInput
+  followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
+  favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
@@ -4288,6 +4563,7 @@ export type UserCreateWithoutConversationParticipantsInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestCreateNestedManyWithoutReviewerInput
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -4330,6 +4606,7 @@ export type UserUncheckedCreateWithoutConversationParticipantsInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedCreateNestedManyWithoutReviewerInput
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -4388,6 +4665,7 @@ export type UserUpdateWithoutConversationParticipantsInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUpdateManyWithoutReviewerNestedInput
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -4430,6 +4708,7 @@ export type UserUncheckedUpdateWithoutConversationParticipantsInput = {
   adoptionRequestsReviewed?: Prisma.AdoptionRequestUncheckedUpdateManyWithoutReviewerNestedInput
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -4473,6 +4752,7 @@ export type UserCreateWithoutMessagesSentInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
   learningProgress?: Prisma.UserLearningProgressCreateNestedManyWithoutUserInput
@@ -4515,6 +4795,7 @@ export type UserUncheckedCreateWithoutMessagesSentInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
   learningProgress?: Prisma.UserLearningProgressUncheckedCreateNestedManyWithoutUserInput
@@ -4573,6 +4854,7 @@ export type UserUpdateWithoutMessagesSentInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
   learningProgress?: Prisma.UserLearningProgressUpdateManyWithoutUserNestedInput
@@ -4615,6 +4897,7 @@ export type UserUncheckedUpdateWithoutMessagesSentInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
   learningProgress?: Prisma.UserLearningProgressUncheckedUpdateManyWithoutUserNestedInput
@@ -4657,6 +4940,7 @@ export type UserCreateWithoutNotificationsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
   learningProgress?: Prisma.UserLearningProgressCreateNestedManyWithoutUserInput
@@ -4699,6 +4983,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
   learningProgress?: Prisma.UserLearningProgressUncheckedCreateNestedManyWithoutUserInput
@@ -4757,6 +5042,7 @@ export type UserUpdateWithoutNotificationsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
   learningProgress?: Prisma.UserLearningProgressUpdateManyWithoutUserNestedInput
@@ -4799,6 +5085,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
   learningProgress?: Prisma.UserLearningProgressUncheckedUpdateManyWithoutUserNestedInput
@@ -4841,6 +5128,7 @@ export type UserCreateWithoutLearningModulesCreatedInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningProgress?: Prisma.UserLearningProgressCreateNestedManyWithoutUserInput
@@ -4883,6 +5171,7 @@ export type UserUncheckedCreateWithoutLearningModulesCreatedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningProgress?: Prisma.UserLearningProgressUncheckedCreateNestedManyWithoutUserInput
@@ -4941,6 +5230,7 @@ export type UserUpdateWithoutLearningModulesCreatedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningProgress?: Prisma.UserLearningProgressUpdateManyWithoutUserNestedInput
@@ -4983,6 +5273,7 @@ export type UserUncheckedUpdateWithoutLearningModulesCreatedInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningProgress?: Prisma.UserLearningProgressUncheckedUpdateManyWithoutUserNestedInput
@@ -5025,6 +5316,7 @@ export type UserCreateWithoutLearningProgressInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -5067,6 +5359,7 @@ export type UserUncheckedCreateWithoutLearningProgressInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -5125,6 +5418,7 @@ export type UserUpdateWithoutLearningProgressInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5167,6 +5461,7 @@ export type UserUncheckedUpdateWithoutLearningProgressInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5209,6 +5504,7 @@ export type UserCreateWithoutQuizAttemptsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -5251,6 +5547,7 @@ export type UserUncheckedCreateWithoutQuizAttemptsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -5309,6 +5606,7 @@ export type UserUpdateWithoutQuizAttemptsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5351,6 +5649,7 @@ export type UserUncheckedUpdateWithoutQuizAttemptsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5393,6 +5692,7 @@ export type UserCreateWithoutGeneratedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -5435,6 +5735,7 @@ export type UserUncheckedCreateWithoutGeneratedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -5493,6 +5794,7 @@ export type UserUpdateWithoutGeneratedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5535,6 +5837,7 @@ export type UserUncheckedUpdateWithoutGeneratedReportsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5577,6 +5880,7 @@ export type UserCreateWithoutAuditLogsInput = {
   followupsConducted?: Prisma.AdoptionFollowupCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleCreateNestedManyWithoutAuthorInput
@@ -5619,6 +5923,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedCreateNestedManyWithoutConductorInput
   favorites?: Prisma.FavoriteUncheckedCreateNestedManyWithoutUserInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedCreateNestedManyWithoutUserInput
+  conversationAssignments?: Prisma.ConversationUncheckedCreateNestedManyWithoutAssigneeInput
   messagesSent?: Prisma.MessageUncheckedCreateNestedManyWithoutSenderInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutRecipientInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedCreateNestedManyWithoutAuthorInput
@@ -5677,6 +5982,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5719,6 +6025,7 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5779,6 +6086,7 @@ export type UserUpdateWithoutRoleInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5821,6 +6129,7 @@ export type UserUncheckedUpdateWithoutRoleInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5901,6 +6210,7 @@ export type UserUpdateWithoutBarangayInput = {
   followupsConducted?: Prisma.AdoptionFollowupUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUpdateManyWithoutAuthorNestedInput
@@ -5943,6 +6253,7 @@ export type UserUncheckedUpdateWithoutBarangayInput = {
   followupsConducted?: Prisma.AdoptionFollowupUncheckedUpdateManyWithoutConductorNestedInput
   favorites?: Prisma.FavoriteUncheckedUpdateManyWithoutUserNestedInput
   conversationParticipants?: Prisma.ConversationParticipantUncheckedUpdateManyWithoutUserNestedInput
+  conversationAssignments?: Prisma.ConversationUncheckedUpdateManyWithoutAssigneeNestedInput
   messagesSent?: Prisma.MessageUncheckedUpdateManyWithoutSenderNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutRecipientNestedInput
   learningModulesCreated?: Prisma.LearningModuleUncheckedUpdateManyWithoutAuthorNestedInput
@@ -5993,6 +6304,7 @@ export type UserCountOutputType = {
   followupsConducted: number
   favorites: number
   conversationParticipants: number
+  conversationAssignments: number
   messagesSent: number
   notifications: number
   learningModulesCreated: number
@@ -6019,6 +6331,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   followupsConducted?: boolean | UserCountOutputTypeCountFollowupsConductedArgs
   favorites?: boolean | UserCountOutputTypeCountFavoritesArgs
   conversationParticipants?: boolean | UserCountOutputTypeCountConversationParticipantsArgs
+  conversationAssignments?: boolean | UserCountOutputTypeCountConversationAssignmentsArgs
   messagesSent?: boolean | UserCountOutputTypeCountMessagesSentArgs
   notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
   learningModulesCreated?: boolean | UserCountOutputTypeCountLearningModulesCreatedArgs
@@ -6153,6 +6466,13 @@ export type UserCountOutputTypeCountConversationParticipantsArgs<ExtArgs extends
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountConversationAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ConversationWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountMessagesSentArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.MessageWhereInput
 }
@@ -6236,6 +6556,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   followupsConducted?: boolean | Prisma.User$followupsConductedArgs<ExtArgs>
   favorites?: boolean | Prisma.User$favoritesArgs<ExtArgs>
   conversationParticipants?: boolean | Prisma.User$conversationParticipantsArgs<ExtArgs>
+  conversationAssignments?: boolean | Prisma.User$conversationAssignmentsArgs<ExtArgs>
   messagesSent?: boolean | Prisma.User$messagesSentArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   learningModulesCreated?: boolean | Prisma.User$learningModulesCreatedArgs<ExtArgs>
@@ -6330,6 +6651,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   followupsConducted?: boolean | Prisma.User$followupsConductedArgs<ExtArgs>
   favorites?: boolean | Prisma.User$favoritesArgs<ExtArgs>
   conversationParticipants?: boolean | Prisma.User$conversationParticipantsArgs<ExtArgs>
+  conversationAssignments?: boolean | Prisma.User$conversationAssignmentsArgs<ExtArgs>
   messagesSent?: boolean | Prisma.User$messagesSentArgs<ExtArgs>
   notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>
   learningModulesCreated?: boolean | Prisma.User$learningModulesCreatedArgs<ExtArgs>
@@ -6369,6 +6691,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     followupsConducted: Prisma.$AdoptionFollowupPayload<ExtArgs>[]
     favorites: Prisma.$FavoritePayload<ExtArgs>[]
     conversationParticipants: Prisma.$ConversationParticipantPayload<ExtArgs>[]
+    conversationAssignments: Prisma.$ConversationPayload<ExtArgs>[]
     messagesSent: Prisma.$MessagePayload<ExtArgs>[]
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     learningModulesCreated: Prisma.$LearningModulePayload<ExtArgs>[]
@@ -6807,6 +7130,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   followupsConducted<T extends Prisma.User$followupsConductedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followupsConductedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AdoptionFollowupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   favorites<T extends Prisma.User$favoritesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$favoritesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FavoritePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   conversationParticipants<T extends Prisma.User$conversationParticipantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationParticipantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  conversationAssignments<T extends Prisma.User$conversationAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$conversationAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConversationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   messagesSent<T extends Prisma.User$messagesSentArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$messagesSentArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   learningModulesCreated<T extends Prisma.User$learningModulesCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$learningModulesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LearningModulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7661,6 +7985,30 @@ export type User$conversationParticipantsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.ConversationParticipantScalarFieldEnum | Prisma.ConversationParticipantScalarFieldEnum[]
+}
+
+/**
+ * User.conversationAssignments
+ */
+export type User$conversationAssignmentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Conversation
+   */
+  select?: Prisma.ConversationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Conversation
+   */
+  omit?: Prisma.ConversationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ConversationInclude<ExtArgs> | null
+  where?: Prisma.ConversationWhereInput
+  orderBy?: Prisma.ConversationOrderByWithRelationInput | Prisma.ConversationOrderByWithRelationInput[]
+  cursor?: Prisma.ConversationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ConversationScalarFieldEnum | Prisma.ConversationScalarFieldEnum[]
 }
 
 /**

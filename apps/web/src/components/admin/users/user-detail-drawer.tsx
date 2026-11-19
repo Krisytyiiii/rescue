@@ -1,21 +1,28 @@
 "use client";
 
 import {
+  Activity,
   BadgeCheck,
-  CalendarDays,
+  CheckCircle2,
   Mail,
   MapPin,
   PawPrint,
-  Phone,
+  RotateCcw,
   ShieldCheck,
   UserCheck,
+  UserRound,
+  UserX,
+  PauseCircle,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog, type ConfirmTone } from "@/components/ui/confirm-dialog";
 import { FormAlert } from "@/components/ui/form-alert";
 import { OverlayCard } from "@/components/ui/overlay-card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
   ROLE_LABELS,
@@ -91,8 +98,98 @@ export function UserDetailDrawer({
   const status = user.accountStatus;
   const isSelf = user.id === currentUserId;
 
-  function ask(next: UserStatus, title: string, description: string, confirmLabel: string, tone: ConfirmTone) {
+  function ask(
+    next: UserStatus,
+    title: string,
+    description: string,
+    confirmLabel: string,
+    tone: ConfirmTone,
+  ) {
     setPending({ status: next, title, description, confirmLabel, tone });
+  }
+
+  const actions: Array<{
+    label: string;
+    icon: LucideIcon;
+    tone: "success" | "danger";
+    onClick: () => void;
+  }> = [];
+
+  if (!isSelf) {
+    if (status === "pending" && user.role === "rescuer") {
+      actions.push({
+        label: "Approve account",
+        icon: CheckCircle2,
+        tone: "success",
+        onClick: () => {
+          onApprove(user.id, status);
+          onClose();
+        },
+      });
+    }
+
+    if (status === "active") {
+      actions.push(
+        {
+          label: "Suspend",
+          icon: PauseCircle,
+          tone: "danger",
+          onClick: () =>
+            ask(
+              "suspended",
+              "Suspend this account?",
+              `${user.fullName} will be signed out and cannot sign in until reactivated.`,
+              "Suspend account",
+              "danger",
+            ),
+        },
+        {
+          label: "Deactivate",
+          icon: UserX,
+          tone: "danger",
+          onClick: () =>
+            ask(
+              "deactivated",
+              "Deactivate this account?",
+              `Access is removed permanently for ${user.fullName}. History is kept.`,
+              "Deactivate account",
+              "danger",
+            ),
+        },
+      );
+    }
+
+    if (status === "suspended" || status === "deactivated") {
+      actions.push({
+        label: "Reactivate",
+        icon: RotateCcw,
+        tone: "success",
+        onClick: () =>
+          ask(
+            "active",
+            "Reactivate this account?",
+            `${user.fullName} will be able to sign in again.`,
+            "Reactivate account",
+            "success",
+          ),
+      });
+    }
+
+    if (status === "suspended" || (status === "pending" && user.role !== "rescuer")) {
+      actions.push({
+        label: "Deactivate",
+        icon: UserX,
+        tone: "danger",
+        onClick: () =>
+          ask(
+            "deactivated",
+            "Deactivate this account?",
+            `Access is removed permanently for ${user.fullName}. History is kept.`,
+            "Deactivate account",
+            "danger",
+          ),
+      });
+    }
   }
 
   return (
@@ -101,6 +198,7 @@ export function UserDetailDrawer({
       labelledBy="user-detail-title"
       eyebrow="Account"
       title={user.fullName}
+      titleClassName="text-[0.9375rem] font-semibold leading-tight tracking-tight text-ink"
       meta={
         <>
           <Badge tone={ROLE_TONES[user.role]} surface="light">
@@ -116,179 +214,126 @@ export function UserDetailDrawer({
           )}
         </>
       }
-      panelClassName="max-w-xl"
-      footer={
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex h-9 items-center rounded-lg border border-ink/12 px-3.5 text-[0.75rem] font-medium text-ink/60 transition-colors hover:border-ink/20 hover:text-ink"
-        >
-          Close
-        </button>
-      }
+      panelClassName="max-w-2xl"
     >
-      <div className="flex-1 overflow-y-auto px-5 py-4">
-        <div className="flex items-center gap-3">
-          <span className="grid h-11 w-11 place-items-center rounded-full bg-ink/[0.06] text-[0.75rem] font-semibold text-ink/60">
-            {initials(user.fullName)}
-          </span>
-          <div className="min-w-0">
-            <p className="truncate text-[0.875rem] font-semibold text-ink">{user.fullName}</p>
-            <p className="truncate text-[0.75rem] text-ink/50">{user.email}</p>
-          </div>
-        </div>
-
-        <FormAlert message={error} className="mt-4" />
-
-        {loading && !detail && (
-          <div className="mt-4 space-y-2" aria-hidden="true">
-            {Array.from({ length: 4 }, (_, index) => (
-              <div key={index} className="h-9 animate-pulse rounded-lg bg-ink/[0.05]" />
-            ))}
-          </div>
-        )}
-
-        <Section title="Identity">
-          <DetailRow icon={Mail} label="Email" value={user.email} />
-          <DetailRow icon={Phone} label="Phone" value={user.phoneNumber ?? "—"} />
-          <DetailRow icon={MapPin} label="Barangay" value={user.barangay ?? "Unassigned"} />
-          <DetailRow
-            icon={CalendarDays}
-            label="Joined"
-            value={dateFormatter.format(new Date(user.createdAt))}
-          />
-          <DetailRow icon={BadgeCheck} label="Email verified" value={user.emailVerifiedAt ? "Yes" : "No"} />
-          <DetailRow icon={CalendarDays} label="Last login" value={formatLastLogin(user.lastLoginAt)} />
-        </Section>
-
-        {detail && (
-          <Section title="Activity">
-            <DetailRow icon={PawPrint} label="Reports submitted" value={String(detail.counts.reports)} />
-            <DetailRow
-              icon={ShieldCheck}
-              label="Reports verified"
-              value={String(detail.counts.verifiedReports)}
+      <ScrollArea className="min-h-0 flex-1">
+        <div className="space-y-5 px-5 py-5">
+          <div className="relative flex items-start gap-3.5 overflow-hidden rounded-xl border border-ink/[0.07] bg-white p-4">
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-gradient-to-br from-clay/[0.07] via-transparent to-transparent"
             />
-            <DetailRow icon={UserCheck} label="Rescue assignments" value={String(detail.counts.rescues)} />
-            <DetailRow
-              icon={PawPrint}
-              label="Adoption requests"
-              value={String(detail.counts.adoptionRequests)}
-            />
-          </Section>
-        )}
+            <span className="relative grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-clay/10 text-[0.8125rem] font-semibold text-clay ring-1 ring-inset ring-clay/15">
+              {initials(user.fullName)}
+            </span>
+            <div className="relative min-w-0 flex-1">
+              <p className="truncate text-[0.9375rem] font-semibold text-ink">
+                {user.fullName}
+              </p>
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.75rem] text-ink/50">
+                <Mail className="h-3 w-3 shrink-0 text-ink/30" strokeWidth={1.8} />
+                {user.email}
+              </p>
+              <p className="mt-0.5 flex items-center gap-1.5 truncate text-[0.75rem] text-ink/50">
+                <MapPin className="h-3 w-3 shrink-0 text-ink/30" strokeWidth={1.8} />
+                {user.barangay ?? "Barangay not set"}
+              </p>
+            </div>
+          </div>
 
-        <Section title="Access">
-          {isSelf ? (
-            <p className="text-[0.75rem] leading-[1.6] text-ink/50">
-              You can’t change the status of your own account.
-            </p>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {status === "pending" && user.role === "rescuer" && (
-                <ActionButton
-                  label="Approve"
-                  tone="success"
-                  onClick={() => {
-                    onApprove(user.id, status);
-                    onClose();
-                  }}
+          <FormAlert message={error} />
+
+          <section>
+            <SectionTitle icon={UserRound} label="Identity" />
+            <dl className="mt-2.5 grid gap-px overflow-hidden rounded-xl border border-ink/[0.07] bg-ink/[0.06] sm:grid-cols-2">
+              <InfoCell label="Email" value={user.email} />
+              <InfoCell label="Phone" value={user.phoneNumber ?? "Not provided"} />
+              <InfoCell label="Barangay" value={user.barangay ?? "Unassigned"} />
+              <InfoCell
+                label="Joined"
+                value={dateFormatter.format(new Date(user.createdAt))}
+              />
+              <InfoCell
+                label="Email verified"
+                value={user.emailVerifiedAt ? "Verified" : "Not verified"}
+              />
+              <InfoCell label="Last login" value={formatLastLogin(user.lastLoginAt)} />
+            </dl>
+          </section>
+
+          <section>
+            <SectionTitle icon={Activity} label="Activity" />
+            {detail ? (
+              <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <StatCell
+                  icon={PawPrint}
+                  label="Reports"
+                  value={detail.counts.reports}
                 />
-              )}
-              {status === "active" && (
-                <>
-                  <ActionButton
-                    label="Suspend"
-                    tone="danger"
-                    onClick={() =>
-                      ask(
-                        "suspended",
-                        "Suspend this account?",
-                        `${user.fullName} will be signed out and cannot sign in until reactivated.`,
-                        "Suspend account",
-                        "danger",
-                      )
-                    }
-                  />
-                  <ActionButton
-                    label="Deactivate"
-                    tone="danger"
-                    onClick={() =>
-                      ask(
-                        "deactivated",
-                        "Deactivate this account?",
-                        `Access is removed permanently for ${user.fullName}. History is kept.`,
-                        "Deactivate account",
-                        "danger",
-                      )
-                    }
-                  />
-                </>
-              )}
-              {status === "suspended" && (
-                <>
-                  <ActionButton
-                    label="Reactivate"
-                    tone="success"
-                    onClick={() =>
-                      ask(
-                        "active",
-                        "Reactivate this account?",
-                        `${user.fullName} will be able to sign in again.`,
-                        "Reactivate",
-                        "success",
-                      )
-                    }
-                  />
-                  <ActionButton
-                    label="Deactivate"
-                    tone="danger"
-                    onClick={() =>
-                      ask(
-                        "deactivated",
-                        "Deactivate this account?",
-                        `Access is removed permanently for ${user.fullName}. History is kept.`,
-                        "Deactivate account",
-                        "danger",
-                      )
-                    }
-                  />
-                </>
-              )}
-              {status === "deactivated" && (
-                <ActionButton
-                  label="Reactivate"
-                  tone="success"
-                  onClick={() =>
-                    ask(
-                      "active",
-                      "Reactivate this account?",
-                      `${user.fullName} will be able to sign in again.`,
-                      "Reactivate",
-                      "success",
-                    )
-                  }
+                <StatCell
+                  icon={ShieldCheck}
+                  label="Verified"
+                  value={detail.counts.verifiedReports}
                 />
-              )}
-              {status === "pending" && user.role !== "rescuer" && (
-                <ActionButton
-                  label="Deactivate"
-                  tone="danger"
-                  onClick={() =>
-                    ask(
-                      "deactivated",
-                      "Deactivate this account?",
-                      `Access is removed permanently for ${user.fullName}. History is kept.`,
-                      "Deactivate account",
-                      "danger",
-                    )
-                  }
+                <StatCell
+                  icon={UserCheck}
+                  label="Assignments"
+                  value={detail.counts.rescues}
                 />
+                <StatCell
+                  icon={BadgeCheck}
+                  label="Applications"
+                  value={detail.counts.adoptionRequests}
+                />
+              </div>
+            ) : (
+              <div className="mt-2.5 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-hidden="true">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div
+                    key={index}
+                    className={`h-[4.5rem] animate-pulse rounded-xl bg-ink/[0.04] ${
+                      loading ? "" : "opacity-50"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <SectionTitle icon={ShieldCheck} label="Access" />
+            <div className="mt-2.5 flex flex-col gap-3 rounded-xl border border-ink/[0.07] bg-white p-3.5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="max-w-sm text-[0.75rem] leading-[1.6] text-ink/50">
+                {isSelf
+                  ? "You can’t change the status of your own account."
+                  : status === "active"
+                    ? "This account can sign in normally. Suspend to block sign-in, or deactivate to close access permanently."
+                    : status === "pending"
+                      ? "This account is waiting for approval before it can be used."
+                      : "This account cannot sign in. Reactivate it to restore access."}
+              </p>
+              {actions.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  {actions.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <Button
+                        key={action.label}
+                        size="sm"
+                        variant={action.tone === "danger" ? "dangerGhost" : "primary"}
+                        onClick={action.onClick}
+                      >
+                        <Icon className="h-3 w-3" strokeWidth={2} />
+                        {action.label}
+                      </Button>
+                    );
+                  })}
+                </div>
               )}
             </div>
-          )}
-        </Section>
-      </div>
+          </section>
+        </div>
+      </ScrollArea>
 
       <ConfirmDialog
         open={pending !== null}
@@ -310,57 +355,46 @@ export function UserDetailDrawer({
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function SectionTitle({ icon: Icon, label }: { icon: LucideIcon; label: string }) {
   return (
-    <section className="mt-5">
-      <h3 className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink/40">
-        {title}
-      </h3>
-      <div className="mt-2 space-y-1.5">{children}</div>
-    </section>
+    <h3 className="flex items-center gap-1.5 text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-ink/40">
+      <Icon className="h-3.5 w-3.5 text-ink/30" strokeWidth={1.9} />
+      {label}
+    </h3>
   );
 }
 
-function DetailRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Mail;
-  label: string;
-  value: string;
-}) {
+function InfoCell({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-ink/[0.015] px-3 py-2 text-[0.75rem]">
-      <span className="flex items-center gap-2 text-ink/50">
-        <Icon className="h-3.5 w-3.5 text-ink/35" strokeWidth={1.8} />
+    <div className="min-w-0 bg-white px-3.5 py-3">
+      <dt className="text-[0.5625rem] font-medium uppercase tracking-[0.1em] text-ink/35">
         {label}
-      </span>
-      <span className="truncate text-right font-medium text-ink/75">{value}</span>
+      </dt>
+      <dd className="mt-0.5 truncate text-[0.8125rem] leading-[1.5] text-ink/75">
+        {value}
+      </dd>
     </div>
   );
 }
 
-function ActionButton({
+function StatCell({
+  icon: Icon,
   label,
-  tone,
-  onClick,
+  value,
 }: {
+  icon: LucideIcon;
   label: string;
-  tone: "success" | "danger";
-  onClick: () => void;
+  value: number | ReactNode;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`inline-flex h-8 items-center rounded-lg px-3 text-[0.75rem] font-medium transition-colors ${
-        tone === "danger"
-          ? "bg-[#b42318]/10 text-[#991b1b] hover:bg-[#b42318]/15"
-          : "bg-moss/10 text-moss hover:bg-moss/15"
-      }`}
-    >
-      {label}
-    </button>
+    <div className="rounded-xl border border-ink/[0.07] bg-white px-3 py-2.5">
+      <Icon className="h-3.5 w-3.5 text-ink/30" strokeWidth={1.9} />
+      <p className="mt-1.5 font-mono text-[1rem] font-semibold tabular-nums leading-none text-ink/80">
+        {value}
+      </p>
+      <p className="mt-1 text-[0.5625rem] font-medium uppercase tracking-[0.1em] text-ink/35">
+        {label}
+      </p>
+    </div>
   );
 }

@@ -8,10 +8,16 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 interface AdminShellProps {
   admin: { fullName: string; email: string };
   pendingCount: number;
+  unreadNotifications: number;
   children: React.ReactNode;
 }
 
-export function AdminShell({ admin, pendingCount, children }: AdminShellProps) {
+export function AdminShell({
+  admin,
+  pendingCount,
+  unreadNotifications,
+  children,
+}: AdminShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -35,6 +41,7 @@ export function AdminShell({ admin, pendingCount, children }: AdminShellProps) {
         <AdminNavbar
           onOpenMobile={() => setMobileOpen(true)}
           admin={admin}
+          unreadNotifications={unreadNotifications}
         />
 
         <main className="flex-1 p-4">{children}</main>

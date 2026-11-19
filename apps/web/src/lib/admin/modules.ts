@@ -104,12 +104,12 @@ export const ADMIN_MODULES: Record<string, AdminModuleMeta> = {
     title: "E-learning",
     group: "Community",
     description:
-      "Publish responsible ownership and animal welfare modules, lessons, and quizzes.",
+      "Publish responsible ownership and animal welfare modules with lesson files and thumbnails.",
     features: [
       "Module and lesson authoring",
-      "Quizzes with passing scores",
+      "File and thumbnail uploads",
       "Per-user progress tracking",
-      "Attempt history for certification",
+      "Learner completion reports",
     ],
   },
   analytics: {

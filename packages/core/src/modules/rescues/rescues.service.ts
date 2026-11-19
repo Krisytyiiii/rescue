@@ -358,6 +358,20 @@ export class RescuesService {
         );
       }
 
+      if (operation.report.reporterUserId) {
+        await notificationsService.notify(
+          {
+            recipientUserId: operation.report.reporterUserId,
+            notificationType: "rescue_assignment",
+            title: "Rescue could not be completed",
+            body: `${operation.report.reportCode}: ${note}`,
+            referenceType: "report",
+            referenceId: operation.reportId,
+          },
+          tx,
+        );
+      }
+
       await writeAuditLog(tx, {
         userId: admin.userId,
         action: "fail_rescue_operation",
@@ -429,6 +443,20 @@ export class RescuesService {
         entityId: animal.id,
         newValue: { animalCode: animal.animalCode, reportId: report.id },
       });
+
+      if (report.reporterUserId) {
+        await notificationsService.notify(
+          {
+            recipientUserId: report.reporterUserId,
+            notificationType: "report_status",
+            title: "Rescue complete — animal is safe",
+            body: `${report.reportCode} was rescued and admitted as ${animal.animalCode}. Thank you for reporting.`,
+            referenceType: "animal",
+            referenceId: animal.id,
+          },
+          tx,
+        );
+      }
     });
 
     return { id: animal.id, animalCode: animal.animalCode };

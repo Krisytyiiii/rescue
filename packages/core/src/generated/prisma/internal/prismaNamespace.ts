@@ -2926,6 +2926,7 @@ export const ConversationScalarFieldEnum = {
   contextId: 'contextId',
   subject: 'subject',
   status: 'status',
+  assignedToUserId: 'assignedToUserId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'

@@ -76,7 +76,10 @@ export class AdoptionsService {
         {
           notificationType: "adoption_status",
           title: "New adoption application",
-          body: `${created.requestCode} for ${animal.animalCode}${animal.name ? ` (${animal.name})` : ""}`,
+          body: `${created.requestCode} · ${created.adopter.firstName} ${created.adopter.lastName} applied for ${animal.animalCode}${animal.name ? ` (${animal.name})` : ""}`.slice(
+            0,
+            255,
+          ),
           referenceType: "adoption_request",
           referenceId: created.id,
         },
@@ -270,6 +273,16 @@ export class AdoptionsService {
 
     return prisma.$transaction(async (tx) => {
       const updated = await this.repo.update(id, { status: "withdrawn" }, tx);
+      await notificationsService.notifyAdmins(
+        {
+          notificationType: "adoption_status",
+          title: "Application withdrawn",
+          body: `${current.requestCode}: the applicant withdrew their application.`,
+          referenceType: "adoption_request",
+          referenceId: id,
+        },
+        tx,
+      );
       await writeAuditLog(tx, {
         userId: user.userId,
         action: "withdraw_adoption_request",
@@ -306,6 +319,15 @@ export class AdoptionsService {
       animalCondition: input.animalCondition,
       remarks: input.remarks,
       conductedBy: admin.userId,
+    });
+
+    await notificationsService.notify({
+      recipientUserId: request.adopterUserId,
+      notificationType: "adoption_status",
+      title: "Adoption follow-up recorded",
+      body: `A follow-up for ${request.requestCode} was logged for ${input.followupDate.toLocaleDateString("en-PH")}.`,
+      referenceType: "adoption_request",
+      referenceId: requestId,
     });
 
     await writeAuditLog(prisma, {

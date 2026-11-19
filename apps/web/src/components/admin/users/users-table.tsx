@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { FormAlert } from "@/components/ui/form-alert";
+import { useToast } from "@/components/ui/toast";
 
 import { UserDetailDrawer } from "./user-detail-drawer";
 import {
@@ -37,8 +37,8 @@ interface ApproveTarget {
  */
 export function UsersTable({ rows, currentUserId }: UsersTableProps) {
   const router = useRouter();
+  const toast = useToast();
   const [overrides, setOverrides] = useState<Record<string, UserStatus>>({});
-  const [actionError, setActionError] = useState("");
   const [drawerRow, setDrawerRow] = useState<UserRow | null>(null);
   const [approveTarget, setApproveTarget] = useState<ApproveTarget | null>(null);
 
@@ -47,17 +47,37 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
     setOverrides({});
   }, [rows]);
 
-  useEffect(() => {
-    if (!actionError) return;
-    const timer = window.setTimeout(() => setActionError(""), 8_000);
-    return () => window.clearTimeout(timer);
-  }, [actionError]);
-
   function statusOf(row: UserRow): UserStatus {
     return overrides[row.id] ?? row.accountStatus;
   }
 
+  function successCopy(next: UserStatus, name: string) {
+    switch (next) {
+      case "suspended":
+        return {
+          title: "Account suspended",
+          description: `${name} has been signed out and can’t sign in until reactivated.`,
+        };
+      case "deactivated":
+        return {
+          title: "Account deactivated",
+          description: `${name} no longer has access. Their history is kept.`,
+        };
+      case "active":
+        return {
+          title: "Account reactivated",
+          description: `${name} can sign in again.`,
+        };
+      default:
+        return {
+          title: "Account updated",
+          description: `${name}’s account status was updated.`,
+        };
+    }
+  }
+
   async function updateStatus(id: string, next: UserStatus, previous: UserStatus) {
+    const name = rows.find((row) => row.id === id)?.fullName ?? "This account";
     setOverrides((current) => ({ ...current, [id]: next }));
 
     try {
@@ -66,38 +86,50 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: next }),
       });
-      const body = await response.json().catch(() => null);
 
       if (!response.ok) {
         setOverrides((current) => ({ ...current, [id]: previous }));
-        setActionError(body?.error?.message ?? "Could not update this account.");
+        toast.error("Couldn’t update this account", {
+          description: `We couldn’t change the status for ${name}. Please try again.`,
+        });
         return;
       }
 
+      const copy = successCopy(next, name);
+      toast.success(copy.title, { description: copy.description });
       router.refresh();
     } catch {
       setOverrides((current) => ({ ...current, [id]: previous }));
-      setActionError("Network error. Check your connection and try again.");
+      toast.error("Couldn’t update this account", {
+        description: `We couldn’t reach the server. Check your connection and try again.`,
+      });
     }
   }
 
   async function approve(id: string, previous: UserStatus) {
+    const name = rows.find((row) => row.id === id)?.fullName ?? "This rescuer";
     setOverrides((current) => ({ ...current, [id]: "active" }));
 
     try {
       const response = await fetch(`/api/admin/rescuers/${id}/approve`, { method: "POST" });
-      const body = await response.json().catch(() => null);
 
       if (!response.ok) {
         setOverrides((current) => ({ ...current, [id]: previous }));
-        setActionError(body?.error?.message ?? "Could not approve this rescuer.");
+        toast.error("Couldn’t approve this rescuer", {
+          description: `We couldn’t approve ${name}. Please try again.`,
+        });
         return;
       }
 
+      toast.success("Rescuer approved", {
+        description: `${name} can now claim rescue assignments.`,
+      });
       router.refresh();
     } catch {
       setOverrides((current) => ({ ...current, [id]: previous }));
-      setActionError("Network error. Check your connection and try again.");
+      toast.error("Couldn’t approve this rescuer", {
+        description: "We couldn’t reach the server. Check your connection and try again.",
+      });
     }
   }
 
@@ -134,8 +166,6 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
 
   return (
     <div className="px-4">
-      {actionError && <FormAlert message={actionError} className="mb-3" />}
-
       <div className="overflow-x-auto rounded-lg border border-ink/[0.07]">
         <table className="w-full border-collapse text-left">
           <thead>

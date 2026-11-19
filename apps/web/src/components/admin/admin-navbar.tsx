@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Bell,
   ChevronDown,
   ExternalLink,
   LogOut,
@@ -17,6 +18,7 @@ import { PawMark, Wordmark } from "@/components/brand";
 interface AdminNavbarProps {
   onOpenMobile: () => void;
   admin: { fullName: string; email: string };
+  unreadNotifications: number;
 }
 
 function initials(name: string): string {
@@ -26,11 +28,48 @@ function initials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function AdminNavbar({ onOpenMobile, admin }: AdminNavbarProps) {
+export function AdminNavbar({
+  onOpenMobile,
+  admin,
+  unreadNotifications,
+}: AdminNavbarProps) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [unread, setUnread] = useState(unreadNotifications);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setUnread(unreadNotifications);
+  }, [unreadNotifications]);
+
+  // Keep the bell badge live without waiting for a full navigation.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refresh() {
+      try {
+        const response = await fetch("/api/admin/notifications/unread-count");
+        if (!response.ok) return;
+        const payload = (await response.json()) as { data?: { unread?: number } };
+        if (!cancelled && typeof payload.data?.unread === "number") {
+          setUnread(payload.data.unread);
+        }
+      } catch {
+        // Realtime is an enhancement; the server-rendered value remains.
+      }
+    }
+
+    function handleRealtime() {
+      void refresh();
+    }
+
+    window.addEventListener("admin:realtime", handleRealtime);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("admin:realtime", handleRealtime);
+    };
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -83,7 +122,23 @@ export function AdminNavbar({ onOpenMobile, admin }: AdminNavbarProps) {
         <Wordmark />
       </Link>
 
-      <div ref={menuRef} className="relative ml-auto">
+      <div className="ml-auto flex items-center gap-1">
+        <Link
+          href="/admin/notifications"
+          aria-label={
+            unread > 0 ? `Notifications, ${unread} unread` : "Notifications"
+          }
+          className="relative grid h-9 w-9 place-items-center rounded-lg text-ink/55 transition-colors hover:bg-ink/5 hover:text-ink"
+        >
+          <Bell className="h-5 w-5" strokeWidth={1.8} />
+          {unread > 0 && (
+            <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-clay px-1 text-[0.5625rem] font-semibold leading-none text-white">
+              {unread > 99 ? "99+" : unread}
+            </span>
+          )}
+        </Link>
+
+        <div ref={menuRef} className="relative">
         <button
           type="button"
           onClick={() => setMenuOpen((open) => !open)}
@@ -169,6 +224,7 @@ export function AdminNavbar({ onOpenMobile, admin }: AdminNavbarProps) {
             </div>
           </div>
         )}
+        </div>
       </div>
     </header>
   );

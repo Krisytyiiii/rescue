@@ -12,8 +12,15 @@ import pg from "pg";
 const migrationName = process.argv[2];
 if (!migrationName) throw new Error("Pass the migration folder name");
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is not set");
+const rawConnectionString = process.env.DATABASE_URL;
+if (!rawConnectionString) throw new Error("DATABASE_URL is not set");
+
+// Supabase's pooler presents a certificate chain that Node's default trust
+// store rejects. `sslmode=no-verify` keeps the connection encrypted while
+// accepting the provider certificate.
+const parsed = new URL(rawConnectionString);
+parsed.searchParams.set("sslmode", "no-verify");
+const connectionString = parsed.toString();
 
 const migrationPath = `prisma/migrations/${migrationName}/migration.sql`;
 const migrationSql = fs.readFileSync(migrationPath, "utf8");

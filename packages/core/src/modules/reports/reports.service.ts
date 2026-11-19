@@ -96,7 +96,11 @@ export class ReportsService {
         {
           notificationType: "report_status",
           title: `New ${created.urgencyLevel} report`,
-          body: `${created.reportCode}: ${created.description.slice(0, 120)}`,
+          body: `${created.reportCode} · ${created.barangay?.name ?? "Unknown barangay"} · ${
+            created.reporter
+              ? `${created.reporter.firstName} ${created.reporter.lastName}`
+              : "Anonymous"
+          }: ${created.description}`.slice(0, 255),
           referenceType: "report",
           referenceId: created.id,
         },
@@ -239,17 +243,35 @@ export class ReportsService {
         tx,
       );
 
+      const rescuerName = `${rescuer.firstName} ${rescuer.lastName}`;
       await notificationsService.notify(
         {
           recipientUserId: rescuer.id,
           notificationType: "rescue_assignment",
           title: "New rescue assignment",
-          body: `${updated.reportCode}: ${updated.description.slice(0, 120)}`,
+          body: `${updated.reportCode} · ${updated.barangay?.name ?? "Unknown barangay"}: ${updated.description}`.slice(
+            0,
+            255,
+          ),
           referenceType: "report",
           referenceId: id,
         },
         tx,
       );
+
+      if (updated.reporterUserId) {
+        await notificationsService.notify(
+          {
+            recipientUserId: updated.reporterUserId,
+            notificationType: "report_status",
+            title: "Rescuer assigned to your report",
+            body: `${updated.reportCode}: ${rescuerName} will handle your case.`,
+            referenceType: "report",
+            referenceId: id,
+          },
+          tx,
+        );
+      }
 
       await writeAuditLog(tx, {
         userId: admin.userId,

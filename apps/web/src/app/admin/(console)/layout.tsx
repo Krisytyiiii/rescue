@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 
 import { AdminShell } from "@/components/admin/admin-shell";
+import { AdminSupabaseRealtime } from "@/components/admin/supabase-realtime";
 import { ToastProvider } from "@/components/ui/toast";
-import { authService } from "@furescue/core";
+import { authService, messagingService } from "@furescue/core";
 
 import { readSession } from "@/lib/auth/session";
 
@@ -21,13 +22,25 @@ export default async function AdminConsoleLayout({
     redirect("/admin/login");
   }
 
-  const pending = await authService.listPendingRescuers();
+  const [pending, notificationCounts] = await Promise.all([
+    authService.listPendingRescuers(),
+    messagingService.getNotificationCounts({
+      userId: admin.id,
+      role: admin.role,
+      barangayId: admin.barangayId,
+    }),
+  ]);
 
   return (
     <AdminShell
       admin={{ fullName: admin.fullName, email: admin.email }}
       pendingCount={pending.length}
+      unreadNotifications={notificationCounts.unread}
     >
+      <AdminSupabaseRealtime
+        channelName="admin-realtime"
+        tables={["notifications"]}
+      />
       <ToastProvider>{children}</ToastProvider>
     </AdminShell>
   );
