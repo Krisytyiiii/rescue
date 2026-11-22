@@ -33,6 +33,30 @@ export function isMailerConfigured(): boolean {
 }
 
 /**
+ * Gmail only allows sending as the authenticated account or a verified
+ * "Send mail as" alias. A From on a domain we don't own is accepted at SMTP
+ * time and then silently dropped during the recipient's DMARC checks, so fall
+ * back to the Gmail account while keeping the display name.
+ */
+function resolveFromAddress(): string {
+  const configured = env.SMTP_FROM.trim();
+  const match = configured.match(/^(.*?)<([^>]+)>$/);
+  const displayName = match?.[1]?.trim() ?? "";
+  const fromEmail = (match?.[2] ?? configured).trim().toLowerCase();
+  const userEmail = env.SMTP_USER?.trim().toLowerCase();
+
+  const isGmail = env.SMTP_HOST?.toLowerCase() === "smtp.gmail.com";
+  if (isGmail && userEmail && !fromEmail.endsWith("@gmail.com")) {
+    console.warn(
+      `[mail] SMTP_FROM "${fromEmail}" can't be sent through Gmail. Using "${userEmail}".`,
+    );
+    return displayName ? `${displayName} <${userEmail}>` : userEmail;
+  }
+
+  return configured;
+}
+
+/**
  * Single outbound mail path. Returns false (instead of throwing) when SMTP is
  * not configured so local development can continue with the console fallback.
  */
@@ -45,6 +69,6 @@ export async function sendMail(message: MailMessage): Promise<boolean> {
     return false;
   }
 
-  await transport.sendMail({ from: env.SMTP_FROM, ...message });
+  await transport.sendMail({ from: resolveFromAddress(), ...message });
   return true;
 }
