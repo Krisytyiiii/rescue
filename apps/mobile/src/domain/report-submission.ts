@@ -3,6 +3,8 @@
  * `createReportSchema` in core.
  */
 
+import type { ReportStatus } from "./rescuer";
+
 export const REPORT_TYPES = ["stray", "injured", "abandoned"] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
 
@@ -50,4 +52,26 @@ export interface CreatedReport {
   id: string;
   reportCode: string;
   status: string;
+}
+
+export interface ReportStatusUpdate {
+  status: ReportStatus;
+  remarks: string | null;
+  changedAt: string;
+}
+
+/** One of the resident's own reports, shown in the report history. */
+export interface MyReport {
+  id: string;
+  reportCode: string;
+  reportType: ReportType;
+  species: ReportSpecies;
+  urgencyLevel: UrgencyLevel;
+  status: ReportStatus;
+  description: string;
+  submittedAt: string;
+  barangay: string | null;
+  locationLandmark: string | null;
+  media: Array<{ fileUrl: string }>;
+  latestUpdate: ReportStatusUpdate | null;
 }

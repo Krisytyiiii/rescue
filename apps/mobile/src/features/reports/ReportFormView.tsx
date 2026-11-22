@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -6,6 +7,7 @@ import {
   type RefObject,
 } from "react";
 import * as ImagePicker from "expo-image-picker";
+import { useFocusEffect } from "expo-router";
 import {
   ActivityIndicator,
   Image,
@@ -38,6 +40,8 @@ import type {
 } from "@/domain/report-submission";
 import { MAX_REPORT_PHOTOS } from "@/domain/report-submission";
 
+import { ReportHistorySection } from "./ReportHistorySection";
+import { useReportHistoryViewModel } from "./useReportHistoryViewModel";
 import { useReportViewModel } from "./useReportViewModel";
 
 const REPORT_TYPE_OPTIONS: Array<{ value: ReportType; label: string; hint: string }> = [
@@ -143,6 +147,19 @@ export function ReportFormView() {
     reset,
   } = useReportViewModel();
 
+  const {
+    reports: historyReports,
+    loading: historyLoading,
+    error: historyError,
+    reload: reloadHistory,
+  } = useReportHistoryViewModel();
+
+  useFocusEffect(
+    useCallback(() => {
+      void reloadHistory();
+    }, [reloadHistory]),
+  );
+
   const [reportType, setReportType] = useState<ReportType>("stray");
   const [species, setSpecies] = useState<ReportSpecies>("dog");
   const [urgency, setUrgency] = useState<UrgencyLevel>("medium");
@@ -192,7 +209,7 @@ export function ReportFormView() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setMapExpanded(false);
-    await submit({
+    const result = await submit({
       reportType,
       species,
       urgencyLevel: urgency,
@@ -201,6 +218,7 @@ export function ReportFormView() {
       locationLandmark: landmark.trim() || undefined,
       barangayId,
     });
+    if (result) void reloadHistory();
   };
 
   const handleAnother = () => {
@@ -290,6 +308,13 @@ export function ReportFormView() {
               Send the location and what you saw. A verified report reaches the
               City Vet and the rescue team.
             </Text>
+
+            <ReportHistorySection
+              reports={historyReports}
+              loading={historyLoading}
+              error={historyError}
+              onRetry={() => void reloadHistory()}
+            />
 
             <View style={styles.locationCard}>
               <View style={styles.locationIcon}>

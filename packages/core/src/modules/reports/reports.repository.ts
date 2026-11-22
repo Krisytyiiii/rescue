@@ -53,6 +53,7 @@ export class ReportsRepository {
       ...(query.species ? { species: query.species } : {}),
       ...(query.urgencyLevel ? { urgencyLevel: query.urgencyLevel } : {}),
       ...(query.barangayId ? { barangayId: query.barangayId } : {}),
+      ...(query.reporterUserId ? { reporterUserId: query.reporterUserId } : {}),
       ...(query.from || query.to
         ? {
             submittedAt: {

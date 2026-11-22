@@ -1,6 +1,7 @@
 import type { SessionStorage } from "@/domain/ports";
 import type {
   CreatedReport,
+  MyReport,
   NewReportInput,
   ReportPhotoUpload,
 } from "@/domain/report-submission";
@@ -9,7 +10,10 @@ import { Platform } from "react-native";
 
 import { API_BASE_URL } from "./config";
 import { ApiError, requestJson } from "./http";
-import type { ReportSubmissionDataSource } from "./reports";
+import type {
+  ReportHistoryDataSource,
+  ReportSubmissionDataSource,
+} from "./reports";
 
 function photoFile(photo: ReportPhotoUpload): { name: string; type: string } {
   const supported = ["image/jpeg", "image/png", "image/webp"] as const;
@@ -26,8 +30,20 @@ function photoFile(photo: ReportPhotoUpload): { name: string; type: string } {
 }
 
 /** HTTP implementation of the resident report port. */
-export class HttpReportsGateway implements ReportSubmissionDataSource {
+export class HttpReportsGateway
+  implements ReportSubmissionDataSource, ReportHistoryDataSource
+{
   constructor(private readonly session: SessionStorage) {}
+
+  async listMyReports(): Promise<MyReport[]> {
+    const token = (await this.session.read())?.token;
+    const payload = await requestJson<{ reports: MyReport[] }>("/api/reports/mine", {
+      token,
+      networkMessage: "Can't load your reports. Check your connection.",
+      fallbackMessage: "We couldn't load your reports.",
+    });
+    return payload.reports;
+  }
 
   async createReport(input: NewReportInput): Promise<CreatedReport> {
     const token = (await this.session.read())?.token;

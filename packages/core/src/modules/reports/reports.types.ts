@@ -68,6 +68,8 @@ export interface ListReportsQuery {
   species?: "dog" | "cat" | "unknown";
   urgencyLevel?: "low" | "medium" | "high" | "critical";
   barangayId?: number;
+  /** Internal scope: restrict the list to reports submitted by one user. */
+  reporterUserId?: string;
   search?: string;
   from?: Date;
   to?: Date;

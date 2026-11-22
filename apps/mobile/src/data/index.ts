@@ -19,7 +19,10 @@ import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
 import type { OnboardingDataSource } from "./onboarding";
 import type { ReportMapDataSource } from "./report-map";
-import type { ReportSubmissionDataSource } from "./reports";
+import type {
+  ReportHistoryDataSource,
+  ReportSubmissionDataSource,
+} from "./reports";
 import type { RescuerHistoryDataSource } from "./rescuer-history";
 import type { RescuerHomeDataSource } from "./rescuer-home";
 import type { RescuerQueueDataSource } from "./rescuer-queue";
@@ -91,6 +94,10 @@ export const onboardingDataSource: OnboardingDataSource = httpOnboardingGateway;
 export const reportSubmissionDataSource: ReportSubmissionDataSource =
   httpReportsGateway;
 
+/** Resident report history: `GET /api/reports/mine`. */
+export const reportHistoryDataSource: ReportHistoryDataSource =
+  httpReportsGateway;
+
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
 export type { AdoptionsDataSource } from "./adoptions";
@@ -98,7 +105,10 @@ export type { AnimalsDataSource } from "./animals";
 export type { CommunityDataSource } from "./community";
 export type { OnboardingDataSource } from "./onboarding";
 export type { ReportMapDataSource } from "./report-map";
-export type { ReportSubmissionDataSource } from "./reports";
+export type {
+  ReportHistoryDataSource,
+  ReportSubmissionDataSource,
+} from "./reports";
 export type { RescuerHomeDataSource } from "./rescuer-home";
 export type { RescuerQueueDataSource } from "./rescuer-queue";
 export type { RescuerHistoryDataSource } from "./rescuer-history";
