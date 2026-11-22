@@ -2,7 +2,9 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -13,7 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CheckIcon, LockIcon } from "@/components/icons";
+import { CheckIcon, ChevronDownIcon, LockIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import { RescuerScreenHeader } from "@/features/rescuer/RescuerScreenHeader";
 import { useEditProfileViewModel } from "@/features/rescuer/useEditProfileViewModel";
@@ -22,7 +24,21 @@ export default function EditProfileScreen() {
   const router = useRouter();
   const { user, form, barangays, loading, saving, error, update, save } =
     useEditProfileViewModel();
-  const [showBarangays, setShowBarangays] = useState(false);
+  const [barangayOpen, setBarangayOpen] = useState(false);
+  const [barangayQuery, setBarangayQuery] = useState("");
+
+  const selectedBarangay = barangays.find((item) => item.id === form?.barangayId);
+  const filteredBarangays = barangayQuery.trim()
+    ? barangays.filter((item) =>
+        item.name.toLowerCase().includes(barangayQuery.trim().toLowerCase()),
+      )
+    : barangays;
+
+  const selectBarangay = (id: number | null) => {
+    update("barangayId", id);
+    setBarangayOpen(false);
+    setBarangayQuery("");
+  };
 
   const handleSave = async () => {
     const saved = await save();
@@ -48,8 +64,14 @@ export default function EditProfileScreen() {
             showsVerticalScrollIndicator={false}
           >
             {loading || !form ? (
-              <View style={styles.loading}>
-                <ActivityIndicator color={Brand.clay} />
+              <View style={styles.skeleton}>
+                <View style={[styles.skel, styles.skelLocked]} />
+                {[0, 1, 2, 3].map((index) => (
+                  <View key={index} style={[styles.skel, styles.skelField]} />
+                ))}
+                <View style={[styles.skel, styles.skelLabel]} />
+                <View style={[styles.skel, styles.skelSelect]} />
+                <View style={[styles.skel, styles.skelButton]} />
               </View>
             ) : (
               <>
@@ -94,49 +116,28 @@ export default function EditProfileScreen() {
                 </View>
 
                 <View style={styles.section}>
-                  <Text style={styles.sectionTitle}>Barangay</Text>
+                  <Text style={styles.fieldLabel}>
+                    Barangay <Text style={styles.optional}>(optional)</Text>
+                  </Text>
                   <Pressable
                     accessibilityRole="button"
-                    onPress={() => setShowBarangays((current) => !current)}
+                    accessibilityLabel="Select barangay"
+                    onPress={() => setBarangayOpen(true)}
                     style={({ pressed }) => [
                       styles.select,
                       pressed && styles.pressed,
                     ]}
                   >
-                    <Text style={styles.selectValue}>
-                      {form.barangayId == null
-                        ? "Not set"
-                        : barangays.find((item) => item.id === form.barangayId)
-                            ?.name ?? `Barangay ${form.barangayId}`}
+                    <Text
+                      style={[
+                        styles.selectValue,
+                        selectedBarangay ? null : styles.selectPlaceholder,
+                      ]}
+                    >
+                      {selectedBarangay?.name ?? "Select barangay"}
                     </Text>
-                    <Text style={styles.selectAction}>
-                      {showBarangays ? "Close" : "Change"}
-                    </Text>
+                    <ChevronDownIcon size={16} color={Brand.ink55} />
                   </Pressable>
-
-                  {showBarangays ? (
-                    <View style={styles.chips}>
-                      <BarangayChip
-                        label="Not set"
-                        selected={form.barangayId == null}
-                        onPress={() => {
-                          update("barangayId", null);
-                          setShowBarangays(false);
-                        }}
-                      />
-                      {barangays.map((barangay) => (
-                        <BarangayChip
-                          key={barangay.id}
-                          label={barangay.name}
-                          selected={form.barangayId === barangay.id}
-                          onPress={() => {
-                            update("barangayId", barangay.id);
-                            setShowBarangays(false);
-                          }}
-                        />
-                      ))}
-                    </View>
-                  ) : null}
                 </View>
 
                 {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -172,6 +173,86 @@ export default function EditProfileScreen() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+
+      <Modal
+        visible={barangayOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setBarangayOpen(false)}
+      >
+        <View style={styles.modalRoot}>
+          <Pressable
+            style={styles.backdrop}
+            onPress={() => setBarangayOpen(false)}
+            accessibilityLabel="Close barangay picker"
+          />
+          <View style={styles.sheet}>
+            <View style={styles.sheetHandle} />
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>Barangay</Text>
+              <Pressable
+                onPress={() => setBarangayOpen(false)}
+                hitSlop={10}
+                accessibilityRole="button"
+              >
+                <Text style={styles.sheetDone}>Done</Text>
+              </Pressable>
+            </View>
+            <TextInput
+              value={barangayQuery}
+              onChangeText={setBarangayQuery}
+              placeholder="Search barangay"
+              placeholderTextColor="rgba(16, 36, 26, 0.35)"
+              autoCapitalize="none"
+              autoCorrect={false}
+              selectionColor={Brand.clay}
+              style={styles.search}
+            />
+            <FlatList
+              data={filteredBarangays}
+              keyExtractor={(item) => String(item.id)}
+              keyboardShouldPersistTaps="handled"
+              style={styles.sheetList}
+              ListHeaderComponent={
+                <Pressable
+                  onPress={() => selectBarangay(null)}
+                  style={({ pressed }) => [
+                    styles.optionRow,
+                    pressed && styles.optionPressed,
+                  ]}
+                >
+                  <Text style={styles.optionText}>Not sure yet</Text>
+                  {form?.barangayId == null ? (
+                    <CheckIcon size={16} color={Brand.clay} />
+                  ) : null}
+                </Pressable>
+              }
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>
+                  No barangay matches that name.
+                </Text>
+              }
+              renderItem={({ item }) => {
+                const selected = form?.barangayId === item.id;
+                return (
+                  <Pressable
+                    onPress={() => selectBarangay(item.id)}
+                    style={({ pressed }) => [
+                      styles.optionRow,
+                      pressed && styles.optionPressed,
+                    ]}
+                  >
+                    <Text style={styles.optionText}>{item.name}</Text>
+                    {selected ? (
+                      <CheckIcon size={16} color={Brand.clay} />
+                    ) : null}
+                  </Pressable>
+                );
+              }}
+            />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -207,33 +288,6 @@ function Field({
   );
 }
 
-function BarangayChip({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected }}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        selected && styles.chipSelected,
-        pressed && styles.pressed,
-      ]}
-    >
-      <Text style={[styles.chipText, selected && styles.chipTextSelected]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Brand.paper2 },
   flex: { flex: 1 },
@@ -246,7 +300,16 @@ const styles = StyleSheet.create({
     paddingBottom: 48,
     gap: 18,
   },
-  loading: { paddingVertical: 60, alignItems: "center" },
+  skeleton: { gap: 10 },
+  skel: {
+    borderRadius: 16,
+    backgroundColor: "rgba(16, 36, 26, 0.07)",
+  },
+  skelLocked: { height: 62 },
+  skelField: { height: 64 },
+  skelLabel: { width: 96, height: 12, marginTop: 6, borderRadius: 6 },
+  skelSelect: { height: 50 },
+  skelButton: { height: 54, marginTop: 6, borderRadius: 27 },
   lockedCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -311,11 +374,10 @@ const styles = StyleSheet.create({
     color: Brand.ink,
   },
   section: { gap: 9 },
-  sectionTitle: {
-    fontFamily: FontFamily.medium,
-    fontSize: 10,
-    letterSpacing: 1.1,
-    textTransform: "uppercase",
+  optional: {
+    fontFamily: FontFamily.sans,
+    textTransform: "none",
+    letterSpacing: 0,
     color: Brand.ink55,
   },
   select: {
@@ -336,35 +398,7 @@ const styles = StyleSheet.create({
     fontSize: 13.5,
     color: Brand.ink,
   },
-  selectAction: {
-    fontFamily: FontFamily.medium,
-    fontSize: 11,
-    color: Brand.clay,
-  },
-  chips: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    paddingTop: 4,
-  },
-  chip: {
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: Brand.paper,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  chipSelected: {
-    borderColor: Brand.moss,
-    backgroundColor: Brand.moss,
-  },
-  chipText: {
-    fontFamily: FontFamily.medium,
-    fontSize: 11.5,
-    color: Brand.ink70,
-  },
-  chipTextSelected: { color: Brand.paper },
+  selectPlaceholder: { color: "rgba(16, 36, 26, 0.42)" },
   error: {
     fontFamily: FontFamily.medium,
     fontSize: 12,
@@ -401,6 +435,83 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: Brand.ink55,
     textAlign: "center",
+  },
+  modalRoot: { flex: 1, justifyContent: "flex-end" },
+  backdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(9, 24, 16, 0.42)",
+  },
+  sheet: {
+    maxHeight: "78%",
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    backgroundColor: Brand.paper,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 24,
+  },
+  sheetHandle: {
+    alignSelf: "center",
+    width: 42,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(16, 36, 26, 0.18)",
+    marginBottom: 12,
+  },
+  sheetHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  sheetTitle: {
+    fontFamily: FontFamily.semibold,
+    fontSize: 17,
+    color: Brand.ink,
+  },
+  sheetDone: {
+    fontFamily: FontFamily.medium,
+    fontSize: 13,
+    color: Brand.clay,
+  },
+  search: {
+    height: 46,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper2,
+    paddingHorizontal: 14,
+    fontFamily: FontFamily.medium,
+    fontSize: 13.5,
+    color: Brand.ink,
+  },
+  sheetList: { marginTop: 8 },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(16, 36, 26, 0.07)",
+  },
+  optionPressed: { opacity: 0.6 },
+  optionText: {
+    flex: 1,
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    color: Brand.ink,
+  },
+  emptyText: {
+    paddingVertical: 22,
+    textAlign: "center",
+    fontFamily: FontFamily.sans,
+    fontSize: 12.5,
+    color: Brand.ink55,
   },
   pressed: { opacity: 0.7 },
 });

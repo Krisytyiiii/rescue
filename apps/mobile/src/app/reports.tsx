@@ -3,7 +3,6 @@ import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
 import type { ReactNode } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -70,9 +69,7 @@ export default function ReportsScreen() {
           showsVerticalScrollIndicator={false}
         >
           {loading && !insights ? (
-            <View style={styles.loading}>
-              <ActivityIndicator color={Brand.clay} />
-            </View>
+            <ReportsSkeleton />
           ) : error && !insights ? (
             <Text style={styles.error}>{error}</Text>
           ) : insights ? (
@@ -247,6 +244,44 @@ export default function ReportsScreen() {
   );
 }
 
+function ReportsSkeleton() {
+  return (
+    <View style={styles.skeleton}>
+      <View style={[styles.skel, styles.skelHero]} />
+
+      <View style={styles.skelGrid}>
+        <View style={[styles.skel, styles.skelMetric]} />
+        <View style={[styles.skel, styles.skelMetric]} />
+        <View style={[styles.skel, styles.skelMetric]} />
+      </View>
+
+      <View style={styles.skelSection}>
+        <View style={[styles.skel, styles.skelHeading]} />
+        <View style={[styles.skel, styles.skelChart]} />
+      </View>
+
+      <View style={styles.skelSection}>
+        <View style={[styles.skel, styles.skelHeading]} />
+        <View style={[styles.skel, styles.skelCard]} />
+      </View>
+
+      <View style={styles.skelSection}>
+        <View style={[styles.skel, styles.skelHeading]} />
+        <View style={[styles.skel, styles.skelCard]} />
+      </View>
+
+      <View style={styles.skelSection}>
+        <View style={[styles.skel, styles.skelHeading]} />
+        <View style={styles.skelList}>
+          <View style={[styles.skel, styles.skelRow]} />
+          <View style={[styles.skel, styles.skelRow]} />
+          <View style={[styles.skel, styles.skelRow]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 function HeroFact({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.heroFact}>
@@ -380,7 +415,24 @@ const styles = StyleSheet.create({
     paddingTop: 4,
     paddingBottom: 130,
   },
-  loading: { paddingVertical: 60, alignItems: "center" },
+  skeleton: { gap: 10 },
+  skel: {
+    borderRadius: 18,
+    backgroundColor: "rgba(16, 36, 26, 0.07)",
+  },
+  skelHero: {
+    height: 196,
+    borderRadius: 26,
+    backgroundColor: "rgba(11, 46, 28, 0.16)",
+  },
+  skelGrid: { flexDirection: "row", gap: 10 },
+  skelMetric: { flex: 1, height: 70 },
+  skelSection: { marginTop: 18, gap: 10 },
+  skelHeading: { width: 128, height: 14, borderRadius: 7 },
+  skelChart: { height: 116, borderRadius: 20 },
+  skelCard: { height: 148, borderRadius: 20 },
+  skelList: { gap: 8 },
+  skelRow: { height: 74, borderRadius: 18 },
   error: {
     marginTop: 16,
     fontFamily: FontFamily.medium,

@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState, type ElementRef } from "react";
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -94,13 +93,13 @@ export default function ChatScreen() {
             keyboardShouldPersistTaps="handled"
           >
             {!ready && messages.length === 0 ? (
-              <View style={styles.center}>
-                {loading || !loadError ? (
-                  <ActivityIndicator size="small" color={Brand.forest} />
-                ) : (
+              loading || !loadError ? (
+                <ChatSkeleton />
+              ) : (
+                <View style={styles.center}>
                   <Text style={styles.loadError}>{loadError}</Text>
-                )}
-              </View>
+                </View>
+              )
             ) : messages.length === 0 ? (
               <View style={styles.intro}>
                 <View style={styles.introAvatar}>
@@ -251,6 +250,18 @@ export default function ChatScreen() {
   );
 }
 
+function ChatSkeleton() {
+  return (
+    <View style={styles.chatSkeleton}>
+      <View style={[styles.skelBubble, { width: "64%" }]} />
+      <View style={[styles.skelBubble, styles.skelBubbleMine, { width: "48%" }]} />
+      <View style={[styles.skelBubble, { width: "72%" }]} />
+      <View style={[styles.skelBubble, styles.skelBubbleMine, { width: "38%" }]} />
+      <View style={[styles.skelBubble, { width: "56%" }]} />
+    </View>
+  );
+}
+
 function Bubble({
   message,
   onLongPress,
@@ -351,6 +362,16 @@ const styles = StyleSheet.create({
   center: {
     paddingVertical: 40,
     alignItems: "center",
+  },
+  chatSkeleton: { gap: 8, paddingTop: 4 },
+  skelBubble: {
+    height: 46,
+    borderRadius: 18,
+    backgroundColor: "rgba(16, 36, 26, 0.07)",
+  },
+  skelBubbleMine: {
+    alignSelf: "flex-end",
+    backgroundColor: "rgba(31, 122, 77, 0.14)",
   },
   loadError: {
     fontFamily: FontFamily.medium,
