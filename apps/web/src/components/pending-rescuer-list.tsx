@@ -12,6 +12,7 @@ interface PendingRescuer {
   fullName: string;
   email: string;
   appliedAt: string;
+  profilePhotoUrl: string | null;
 }
 
 function initials(name: string): string {
@@ -91,9 +92,17 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden="true"
-                  className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.75rem] font-semibold uppercase tracking-wide text-ink/55"
+                  className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink/[0.06] text-[0.75rem] font-semibold uppercase tracking-wide text-ink/55"
                 >
-                  {initials(rescuer.fullName)}
+                  {rescuer.profilePhotoUrl ? (
+                    <img
+                      src={rescuer.profilePhotoUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials(rescuer.fullName)
+                  )}
                 </span>
 
                 <div className="min-w-0 flex-1">

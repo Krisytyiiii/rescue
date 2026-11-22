@@ -21,6 +21,13 @@ export interface Session {
   user: AuthUser;
 }
 
+/** A local photo selected for the profile avatar, before it is uploaded. */
+export interface ProfilePhotoUpload {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+}
+
 export interface LoginInput {
   email: string;
   password: string;

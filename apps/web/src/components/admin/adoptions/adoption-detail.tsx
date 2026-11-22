@@ -176,8 +176,16 @@ export function AdoptionDetail({ request, onClose, onAction }: AdoptionDetailPro
                 Applicant
               </p>
               <div className="mt-2 flex items-center gap-2.5">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-clay/10 text-[0.75rem] font-semibold text-clay">
-                  {initials(request.adopter.name)}
+                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/10 text-[0.75rem] font-semibold text-clay">
+                  {request.adopter.profilePhotoUrl ? (
+                    <img
+                      src={request.adopter.profilePhotoUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initials(request.adopter.name)
+                  )}
                 </span>
                 <div className="min-w-0">
                   <p className="truncate text-[0.875rem] font-semibold text-ink/85">

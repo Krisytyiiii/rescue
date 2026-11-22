@@ -33,7 +33,7 @@ export default async function AdminConsoleLayout({
 
   return (
     <AdminShell
-      admin={{ fullName: admin.fullName, email: admin.email }}
+      admin={{ fullName: admin.fullName, email: admin.email, profilePhotoUrl: admin.profilePhotoUrl }}
       pendingCount={pending.length}
       unreadNotifications={notificationCounts.unread}
     >

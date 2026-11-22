@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, type ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -69,7 +69,14 @@ export function RescuerProfileView() {
             <View style={styles.heroOrb} />
             <View style={styles.heroTop}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initials}</Text>
+                {user?.profilePhotoUrl ? (
+                  <Image
+                    source={{ uri: user.profilePhotoUrl }}
+                    style={styles.avatarImage}
+                  />
+                ) : (
+                  <Text style={styles.avatarText}>{initials}</Text>
+                )}
               </View>
               <Pressable
                 accessibilityRole="button"
@@ -402,10 +409,12 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Brand.sage,
   },
+  avatarImage: { width: "100%", height: "100%" },
   avatarText: {
     fontFamily: FontFamily.display,
     fontSize: 24,

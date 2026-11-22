@@ -3,11 +3,14 @@ import type {
   Barangay,
   GoogleAuthIntent,
   GoogleSignupInput,
+  ProfilePhotoUpload,
   Session,
   SignupResult,
   UpdateProfileInput,
 } from "@/domain/auth";
 import type { AuthGateway } from "@/domain/ports";
+import { File as ExpoFile, UploadType } from "expo-file-system";
+import { Platform } from "react-native";
 
 import { API_BASE_URL } from "./config";
 import { ApiError } from "./http";
@@ -143,6 +146,103 @@ export class HttpAuthGateway implements AuthGateway {
     }).then((data) => data.user);
   }
 
+  async uploadProfilePhoto(
+    token: string,
+    photo: ProfilePhotoUpload,
+  ): Promise<string> {
+    const endpoint = `${API_BASE_URL}/api/profile/uploads`;
+    const headers = { authorization: `Bearer ${token}` };
+    const supported = ["image/jpeg", "image/png", "image/webp"] as const;
+    const type = supported.includes(photo.mimeType as (typeof supported)[number])
+      ? (photo.mimeType as string)
+      : "image/jpeg";
+    const extension = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+    const base =
+      photo.fileName?.replace(/[^a-zA-Z0-9._-]/g, "_") || `profile.${extension}`;
+    const name = /\.[a-z0-9]+$/i.test(base) ? base : `${base}.${extension}`;
+
+    if (Platform.OS !== "web") {
+      try {
+        const nativeFile = new ExpoFile(photo.uri);
+        if (!nativeFile.exists) {
+          throw new ApiError(
+            "That photo is no longer available. Please choose it again.",
+            "UPLOAD_FAILED",
+          );
+        }
+
+        const result = await nativeFile.upload(endpoint, {
+          httpMethod: "POST",
+          uploadType: UploadType.MULTIPART,
+          fieldName: "file",
+          mimeType: type,
+          headers,
+        });
+
+        const envelope = parseUpload(result.body);
+        if (
+          result.status < 200 ||
+          result.status >= 300 ||
+          !envelope?.ok ||
+          !envelope.data?.url
+        ) {
+          throw new ApiError(
+            envelope?.error?.message ?? "We couldn't upload that photo.",
+            "UPLOAD_FAILED",
+            result.status,
+          );
+        }
+        return envelope.data.url;
+      } catch (cause) {
+        if (cause instanceof ApiError) throw cause;
+        if (__DEV__) console.warn("[api] profile upload failed", cause);
+        throw new ApiError(
+          __DEV__
+            ? `We couldn't upload that photo. (${cause instanceof Error ? cause.message : "unknown error"})`
+            : "We couldn't upload that photo. Check your connection and try again.",
+          "UPLOAD_FAILED",
+        );
+      }
+    }
+
+    const form = new FormData();
+    const blob = await fetch(photo.uri)
+      .then((response) => response.blob())
+      .catch(() => {
+        throw new ApiError(
+          "We couldn't read that photo. Try choosing it again.",
+          "UPLOAD_FAILED",
+        );
+      });
+    form.append("file", blob, name);
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body: form,
+      });
+    } catch (cause) {
+      throw new ApiError(
+        __DEV__
+          ? `We couldn't upload that photo. (${cause instanceof Error ? cause.message : "network error"})`
+          : "We couldn't upload that photo. Check your connection and try again.",
+        "UPLOAD_FAILED",
+      );
+    }
+
+    const envelope = parseUpload(await response.text().catch(() => ""));
+    if (!response.ok || !envelope?.ok || !envelope.data?.url) {
+      throw new ApiError(
+        envelope?.error?.message ?? "We couldn't upload that photo.",
+        "UPLOAD_FAILED",
+        response.status,
+      );
+    }
+    return envelope.data.url;
+  }
+
   fetchBarangays(): Promise<Barangay[]> {
     return requestJson<BarangaysPayload>("/api/barangays", {
       networkMessage: "Can't load the barangay list. Check your connection.",
@@ -180,5 +280,19 @@ export class HttpAuthGateway implements AuthGateway {
     }
 
     return { status: "pending", user: data.user };
+  }
+}
+
+interface UploadEnvelope {
+  ok: boolean;
+  data?: { url?: string };
+  error?: { message?: string };
+}
+
+function parseUpload(body: string): UploadEnvelope | null {
+  try {
+    return JSON.parse(body) as UploadEnvelope;
+  } catch {
+    return null;
   }
 }

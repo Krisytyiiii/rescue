@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ArrowUpRightIcon } from "@/components/icons";
@@ -38,7 +38,14 @@ export default function ProfileScreen() {
 
           <View style={styles.card}>
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
+              {user?.profilePhotoUrl ? (
+                <Image
+                  source={{ uri: user.profilePhotoUrl }}
+                  style={styles.avatarImage}
+                />
+              ) : (
+                <Text style={styles.avatarText}>{initials}</Text>
+              )}
             </View>
             <Text style={styles.name}>
               {user ? user.fullName : "FuRescue account"}
@@ -117,10 +124,12 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
+    overflow: "hidden",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Brand.forest,
   },
+  avatarImage: { width: "100%", height: "100%" },
   avatarText: {
     fontFamily: FontFamily.display,
     fontSize: 26,

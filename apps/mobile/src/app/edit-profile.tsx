@@ -1,8 +1,10 @@
 import { useRouter } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -22,7 +24,7 @@ import { useEditProfileViewModel } from "@/features/rescuer/useEditProfileViewMo
 
 export default function EditProfileScreen() {
   const router = useRouter();
-  const { user, form, barangays, loading, saving, error, update, save } =
+  const { user, form, barangays, loading, saving, uploadingPhoto, error, update, uploadPhoto, save } =
     useEditProfileViewModel();
   const [barangayOpen, setBarangayOpen] = useState(false);
   const [barangayQuery, setBarangayQuery] = useState("");
@@ -44,6 +46,26 @@ export default function EditProfileScreen() {
     const saved = await save();
     if (saved) router.back();
   };
+
+  const pickPhoto = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+    const asset = result.assets[0];
+    await uploadPhoto({
+      uri: asset.uri,
+      fileName: asset.fileName,
+      mimeType: asset.mimeType,
+    });
+  };
+
+  const initials = form
+    ? `${form.firstName.charAt(0)}${form.lastName.charAt(0)}`.toUpperCase() || "F"
+    : "F";
 
   return (
     <View style={styles.root}>
@@ -75,6 +97,58 @@ export default function EditProfileScreen() {
               </View>
             ) : (
               <>
+                <View style={styles.photoCard}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Change profile photo"
+                    onPress={() => void pickPhoto()}
+                    disabled={uploadingPhoto}
+                    style={({ pressed }) => [
+                      styles.photoAvatar,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    {form.profilePhotoUrl ? (
+                      <Image
+                        source={{ uri: form.profilePhotoUrl }}
+                        style={styles.photoImage}
+                      />
+                    ) : (
+                      <Text style={styles.photoInitials}>{initials}</Text>
+                    )}
+                    {uploadingPhoto ? (
+                      <View style={styles.photoOverlay}>
+                        <ActivityIndicator color={Brand.paper} />
+                      </View>
+                    ) : null}
+                  </Pressable>
+
+                  <View style={styles.photoBody}>
+                    <Text style={styles.photoTitle}>Profile photo</Text>
+                    <Text style={styles.photoHint}>
+                      This is shown on your profile and to people you message.
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={uploadingPhoto}
+                      onPress={() => void pickPhoto()}
+                      style={({ pressed }) => [
+                        styles.photoAction,
+                        pressed && styles.pressed,
+                        uploadingPhoto && styles.disabled,
+                      ]}
+                    >
+                      <Text style={styles.photoActionText}>
+                        {uploadingPhoto
+                          ? "Uploading…"
+                          : form.profilePhotoUrl
+                            ? "Change photo"
+                            : "Add photo"}
+                      </Text>
+                    </Pressable>
+                  </View>
+                </View>
+
                 <View style={styles.lockedCard}>
                   <View style={styles.lockedIcon}>
                     <LockIcon size={15} color={Brand.moss} />
@@ -310,6 +384,70 @@ const styles = StyleSheet.create({
   skelLabel: { width: 96, height: 12, marginTop: 6, borderRadius: 6 },
   skelSelect: { height: 50 },
   skelButton: { height: 54, marginTop: 6, borderRadius: 27 },
+  photoCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    padding: 14,
+  },
+  photoAvatar: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(31,122,77,0.12)",
+  },
+  photoImage: { width: "100%", height: "100%" },
+  photoInitials: {
+    fontFamily: FontFamily.display,
+    fontSize: 26,
+    color: Brand.forest,
+  },
+  photoOverlay: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(9,24,16,0.45)",
+  },
+  photoBody: { flex: 1, gap: 4 },
+  photoTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: 13,
+    color: Brand.ink,
+  },
+  photoHint: {
+    fontFamily: FontFamily.sans,
+    fontSize: 11,
+    lineHeight: 15,
+    color: Brand.ink55,
+  },
+  photoAction: {
+    alignSelf: "flex-start",
+    marginTop: 4,
+    height: 30,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(31,122,77,0.24)",
+    backgroundColor: "rgba(31,122,77,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoActionText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10.5,
+    color: Brand.moss,
+  },
   lockedCard: {
     flexDirection: "row",
     alignItems: "center",

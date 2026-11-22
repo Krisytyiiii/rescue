@@ -39,6 +39,7 @@ export function toAdoptionRow(request: AdoptionDetail): AdoptionRow {
           .trim() || "Applicant",
       email: request.adopter.email,
       phoneNumber: request.adopter.phoneNumber,
+      profilePhotoUrl: request.adopter.profilePhotoUrl,
     },
     reviewer: person(request.reviewer),
     reviewedAt: iso(request.reviewedAt),

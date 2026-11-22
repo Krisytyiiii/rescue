@@ -5,6 +5,7 @@ import type {
   GoogleAuthOutcome,
   GoogleSignupInput,
   LoginInput,
+  ProfilePhotoUpload,
   RestoreResult,
   Session,
   SignupInput,
@@ -12,7 +13,6 @@ import type {
   UpdateProfileInput,
   VerifyEmailInput,
 } from "./auth";
-
 /**
  * Outbound port: everything the app needs from the auth backend.
  * Implemented by the data layer, consumed by the repository.
@@ -24,6 +24,8 @@ export interface AuthGateway {
   resendVerification(email: string): Promise<void>;
   fetchMe(token: string): Promise<AuthUser>;
   updateProfile(token: string, input: UpdateProfileInput): Promise<AuthUser>;
+  /** Uploads one local profile photo and returns its public URL. */
+  uploadProfilePhoto(token: string, photo: ProfilePhotoUpload): Promise<string>;
   fetchBarangays(): Promise<Barangay[]>;
   googleAuthUrl(intent: GoogleAuthIntent, redirectUrl: string): string;
   completeGoogleSignup(input: GoogleSignupInput): Promise<SignupResult>;
@@ -58,6 +60,8 @@ export interface AuthRepository {
   restoreSession(): Promise<RestoreResult>;
   getCachedUser(): Promise<AuthUser | null>;
   updateProfile(input: UpdateProfileInput): Promise<AuthUser>;
+  /** Uploads a local profile photo and returns its public URL. */
+  uploadProfilePhoto(photo: ProfilePhotoUpload): Promise<string>;
   signOut(): Promise<void>;
   loadBarangays(): Promise<Barangay[]>;
   /** Runs the Google OAuth browser hand-off and resolves what to show next. */

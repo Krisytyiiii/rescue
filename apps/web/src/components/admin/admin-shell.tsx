@@ -6,7 +6,7 @@ import { AdminNavbar } from "@/components/admin/admin-navbar";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 
 interface AdminShellProps {
-  admin: { fullName: string; email: string };
+  admin: { fullName: string; email: string; profilePhotoUrl?: string | null };
   pendingCount: number;
   unreadNotifications: number;
   children: React.ReactNode;

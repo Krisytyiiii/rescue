@@ -265,6 +265,7 @@ export default async function AdminDashboardPage() {
     fullName: user.fullName,
     email: user.email,
     appliedAt: user.createdAt?.toISOString() ?? new Date().toISOString(),
+    profilePhotoUrl: user.profilePhotoUrl,
   }));
   const latestRescuers = [...rescuers]
     .sort((a, b) => b.appliedAt.localeCompare(a.appliedAt))

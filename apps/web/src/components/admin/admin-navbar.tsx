@@ -19,7 +19,7 @@ import { PawMark, Wordmark } from "@/components/brand";
 
 interface AdminNavbarProps {
   onOpenMobile: () => void;
-  admin: { fullName: string; email: string };
+  admin: { fullName: string; email: string; profilePhotoUrl?: string | null };
   unreadNotifications: number;
 }
 
@@ -183,9 +183,17 @@ export function AdminNavbar({
         >
           <span
             aria-hidden="true"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-clay/15 text-[0.6875rem] font-semibold uppercase tracking-wide text-clay"
+            className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/15 text-[0.6875rem] font-semibold uppercase tracking-wide text-clay"
           >
-            {initials(admin.fullName)}
+            {admin.profilePhotoUrl ? (
+              <img
+                src={admin.profilePhotoUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              initials(admin.fullName)
+            )}
           </span>
           <span className="hidden min-w-0 text-left lg:block">
             <span className="block max-w-[180px] truncate text-[0.8125rem] font-medium leading-tight text-ink">

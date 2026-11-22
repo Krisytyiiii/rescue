@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { authRepository } from "@/data";
-import type { AuthUser, Barangay } from "@/domain/auth";
+import type { AuthUser, Barangay, ProfilePhotoUpload } from "@/domain/auth";
 import type { AuthRepository } from "@/domain/ports";
 
 interface Options {
@@ -14,6 +14,7 @@ export interface ProfileForm {
   lastName: string;
   phoneNumber: string;
   barangayId: number | null;
+  profilePhotoUrl: string | null;
 }
 
 const PHONE_PATTERN = /^\+639\d{9}$/;
@@ -25,6 +26,7 @@ function formFromUser(user: AuthUser): ProfileForm {
     lastName: user.lastName,
     phoneNumber: user.phoneNumber ?? "",
     barangayId: user.barangayId,
+    profilePhotoUrl: user.profilePhotoUrl,
   };
 }
 
@@ -35,6 +37,7 @@ export function useEditProfileViewModel({ auth = authRepository }: Options = {})
   const [barangays, setBarangays] = useState<Barangay[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -70,6 +73,30 @@ export function useEditProfileViewModel({ auth = authRepository }: Options = {})
     setForm((current) => (current ? { ...current, [key]: value } : current));
   }, []);
 
+  const uploadPhoto = useCallback(
+    async (photo: ProfilePhotoUpload): Promise<boolean> => {
+      setUploadingPhoto(true);
+      setError(null);
+      try {
+        const url = await auth.uploadProfilePhoto(photo);
+        setForm((current) =>
+          current ? { ...current, profilePhotoUrl: url } : current,
+        );
+        return true;
+      } catch (cause) {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : "We couldn't upload that photo. Please try again.",
+        );
+        return false;
+      } finally {
+        setUploadingPhoto(false);
+      }
+    },
+    [auth],
+  );
+
   const save = useCallback(async (): Promise<boolean> => {
     if (!form) return false;
 
@@ -97,6 +124,7 @@ export function useEditProfileViewModel({ auth = authRepository }: Options = {})
         lastName,
         phoneNumber: phoneNumber || null,
         barangayId: form.barangayId,
+        profilePhotoUrl: form.profilePhotoUrl,
       });
       setUser(updated);
       setForm(formFromUser(updated));
@@ -119,8 +147,10 @@ export function useEditProfileViewModel({ auth = authRepository }: Options = {})
     barangays,
     loading,
     saving,
+    uploadingPhoto,
     error,
     update,
+    uploadPhoto,
     save,
     retry: load,
   };

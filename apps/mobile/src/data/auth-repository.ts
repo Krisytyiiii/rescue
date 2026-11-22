@@ -5,6 +5,7 @@ import type {
   GoogleAuthOutcome,
   GoogleSignupInput,
   LoginInput,
+  ProfilePhotoUpload,
   RestoreResult,
   Session,
   SignupInput,
@@ -88,6 +89,12 @@ export class DefaultAuthRepository implements AuthRepository {
     const user = await this.gateway.updateProfile(cached.token, input);
     await this.storage.save({ token: cached.token, user });
     return user;
+  }
+
+  async uploadProfilePhoto(photo: ProfilePhotoUpload): Promise<string> {
+    const cached = await this.storage.read();
+    if (!cached) throw new Error("Sign in to change your photo");
+    return this.gateway.uploadProfilePhoto(cached.token, photo);
   }
 
   signOut(): Promise<void> {

@@ -61,7 +61,14 @@ export const adoptionDetailInclude = {
     },
   },
   adopter: {
-    select: { id: true, firstName: true, lastName: true, email: true, phoneNumber: true },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phoneNumber: true,
+      profilePhotoUrl: true,
+    },
   },
   reviewer: { select: { id: true, firstName: true, lastName: true } },
   followups: { orderBy: { followupDate: "desc" } },

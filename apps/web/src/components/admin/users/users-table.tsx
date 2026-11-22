@@ -200,9 +200,17 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
                 >
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2.5">
-                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.625rem] font-semibold text-ink/60">
-                        {initials(row.fullName)}
-                      </span>
+                      {row.profilePhotoUrl ? (
+                        <img
+                          src={row.profilePhotoUrl}
+                          alt=""
+                          className="h-8 w-8 shrink-0 rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.625rem] font-semibold text-ink/60">
+                          {initials(row.fullName)}
+                        </span>
+                      )}
                       <span className="min-w-0">
                         <span className="flex items-center gap-1.5">
                           <span className="truncate text-[0.8125rem] font-medium text-ink">

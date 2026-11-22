@@ -39,6 +39,7 @@ export interface AdoptionRow {
     name: string;
     email: string;
     phoneNumber: string | null;
+    profilePhotoUrl: string | null;
   };
   reviewer: { id: string; name: string } | null;
   reviewedAt: string | null;
