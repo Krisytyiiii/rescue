@@ -133,7 +133,7 @@ export class ReportsRepository {
                    cos(radians(r.longitude::float8) - radians(${longitude})) +
                    sin(radians(${latitude})) * sin(radians(r.latitude::float8))
                  ))
-               ))) AS distance_meters
+               )) AS distance_meters
         FROM reports r
         WHERE r.deleted_at IS NULL
           AND r.status IN ('submitted', 'verified', 'assigned', 'in_progress')
