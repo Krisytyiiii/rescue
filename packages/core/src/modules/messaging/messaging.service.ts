@@ -26,6 +26,7 @@ import type {
   NotificationCounts,
   NotificationWithRelations,
   ParticipantCandidateRow,
+  ResidentContactRow,
 } from "./messaging.types.ts";
 
 function humanize(value: string): string {
@@ -290,6 +291,22 @@ export class MessagingService {
     return this.startDirect(current, input.userId, input.body);
   }
 
+  /**
+   * A resident may message the City Vet team and the rescuer assigned to any
+   * of their own reports.
+   */
+  async startResidentConversation(
+    input: { userId: string; body: string },
+    actor?: Actor,
+  ): Promise<ConversationDetailRow> {
+    const current = requireRole(actor, "community_user");
+    if (input.userId === current.userId) {
+      throw new ConflictError("Choose someone else to message");
+    }
+    await this.assertResidentCanMessage(current, input.userId);
+    return this.startDirect(current, input.userId, input.body);
+  }
+
   /** Existing direct thread with one contact, or null before the first message. */
   async getRescuerDirect(
     userId: string,
@@ -301,6 +318,27 @@ export class MessagingService {
     }
     await this.assertRescuerCanMessage(current, userId);
 
+    return this.getDirectThread(current, userId);
+  }
+
+  /** Resident: existing direct thread with an admin or an assigned rescuer. */
+  async getResidentDirect(
+    userId: string,
+    actor?: Actor,
+  ): Promise<ConversationDetailRow | null> {
+    const current = requireRole(actor, "community_user");
+    if (userId === current.userId) {
+      throw new ConflictError("Choose someone else to message");
+    }
+    await this.assertResidentCanMessage(current, userId);
+
+    return this.getDirectThread(current, userId);
+  }
+
+  private async getDirectThread(
+    current: Actor,
+    userId: string,
+  ): Promise<ConversationDetailRow | null> {
     const existing = await this.repo.findDirectConversation(
       current.userId,
       userId,
@@ -336,6 +374,24 @@ export class MessagingService {
     actor?: Actor,
   ) {
     const current = requireRole(actor, "rescuer");
+    return this.sendInThread(current, id, input);
+  }
+
+  /** Reply inside a thread the resident is already part of. */
+  async sendAsResident(
+    id: string,
+    input: { body: string; attachmentUrl?: string },
+    actor?: Actor,
+  ) {
+    const current = requireRole(actor, "community_user");
+    return this.sendInThread(current, id, input);
+  }
+
+  private async sendInThread(
+    current: Actor,
+    id: string,
+    input: { body: string; attachmentUrl?: string },
+  ) {
     const conversation = await this.repo.getById(id);
     const isParticipant = conversation.participants.some(
       (participant) => participant.userId === current.userId,
@@ -371,6 +427,83 @@ export class MessagingService {
     return toMessage(message);
   }
 
+  /**
+   * People a resident can chat with: the City Vet team (admins) plus the
+   * rescuers assigned to the resident's reports.
+   */
+  async listResidentContacts(actor?: Actor): Promise<ResidentContactRow[]> {
+    const current = requireRole(actor, "community_user");
+
+    const [admins, operations] = await Promise.all([
+      prisma.user.findMany({
+        where: {
+          deletedAt: null,
+          accountStatus: "active",
+          role: { roleName: "admin" },
+        },
+        orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilePhotoUrl: true,
+        },
+      }),
+      prisma.rescueOperation.findMany({
+        where: {
+          report: { reporterUserId: current.userId, deletedAt: null },
+        },
+        orderBy: { assignedAt: "desc" },
+        select: {
+          rescuer: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              profilePhotoUrl: true,
+            },
+          },
+          report: { select: { reportCode: true } },
+        },
+      }),
+    ]);
+
+    const contacts = new Map<string, ResidentContactRow>();
+
+    for (const admin of admins) {
+      contacts.set(admin.id, {
+        userId: admin.id,
+        fullName: fullName(admin),
+        role: "admin",
+        profilePhotoUrl: admin.profilePhotoUrl,
+        reportCodes: [],
+      });
+    }
+
+    for (const operation of operations) {
+      const rescuer = operation.rescuer;
+      if (!rescuer) continue;
+
+      const existing = contacts.get(rescuer.id);
+      if (existing) {
+        if (!existing.reportCodes.includes(operation.report.reportCode)) {
+          existing.reportCodes.push(operation.report.reportCode);
+        }
+        continue;
+      }
+
+      contacts.set(rescuer.id, {
+        userId: rescuer.id,
+        fullName: fullName(rescuer),
+        role: "rescuer",
+        profilePhotoUrl: rescuer.profilePhotoUrl,
+        reportCodes: [operation.report.reportCode],
+      });
+    }
+
+    return [...contacts.values()];
+  }
+
   private async assertRescuerCanMessage(current: Actor, userId: string) {
     const allowed = await prisma.rescueOperation.findFirst({
       where: {
@@ -386,6 +519,28 @@ export class MessagingService {
     if (!allowed) {
       throw new ConflictError(
         "You can only message your dispatcher or a reporter from your assignments",
+      );
+    }
+  }
+
+  private async assertResidentCanMessage(current: Actor, userId: string) {
+    const target = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null, accountStatus: "active" },
+      select: { role: { select: { roleName: true } } },
+    });
+    if (!target) throw new NotFoundError("Person");
+    if (target.role.roleName === "admin") return;
+
+    const assigned = await prisma.rescueOperation.findFirst({
+      where: {
+        rescuerUserId: userId,
+        report: { reporterUserId: current.userId, deletedAt: null },
+      },
+      select: { id: true },
+    });
+    if (!assigned) {
+      throw new ConflictError(
+        "You can only message the City Vet team or the rescuer assigned to your report",
       );
     }
   }

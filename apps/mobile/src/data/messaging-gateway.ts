@@ -1,6 +1,6 @@
 import { fetch as expoFetch } from "expo/fetch";
 
-import type { ChatMessage, ChatThread } from "@/domain/messaging";
+import type { ChatMessage, ChatThread, ResidentContact } from "@/domain/messaging";
 import type { SessionStorage } from "@/domain/ports";
 
 import { API_BASE_URL } from "./config";
@@ -61,8 +61,15 @@ export interface MessagingDataSource {
   ): () => void;
 }
 
-/** Real backend implementation of direct rescuer messaging. */
-export class HttpMessagingGateway implements MessagingDataSource {
+/** Port for the resident's chat contacts (City Vet team + assigned rescuers). */
+export interface ResidentContactsDataSource {
+  loadContacts(): Promise<ResidentContact[]>;
+}
+
+/** Real backend implementation of direct messaging. */
+export class HttpMessagingGateway
+  implements MessagingDataSource, ResidentContactsDataSource
+{
   constructor(private readonly session: SessionStorage) {}
 
   private async context(): Promise<{ token?: string; userId: string }> {
@@ -130,6 +137,20 @@ export class HttpMessagingGateway implements MessagingDataSource {
       throw error;
     }
     return conversation ? this.toThread(conversation, contactUserId, userId) : null;
+  }
+
+  /** People a resident may message: the City Vet team and assigned rescuers. */
+  async loadContacts(): Promise<ResidentContact[]> {
+    const { token } = await this.context();
+    const payload = await requestJson<{ contacts: ResidentContact[] }>(
+      "/api/messages/contacts",
+      {
+        token,
+        networkMessage: "Can't reach FuRescue. Check your connection.",
+        fallbackMessage: "We couldn't load your contacts.",
+      },
+    );
+    return payload.contacts;
   }
 
   async startThread(contactUserId: string, body: string): Promise<ChatThread> {

@@ -19,6 +19,7 @@ import type { AdoptionApplicationDataSource } from "./adoption-applications";
 import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
+import type { ResidentContactsDataSource } from "./messaging-gateway";
 import type { OnboardingDataSource } from "./onboarding";
 import type { ReportMapDataSource } from "./report-map";
 import type {
@@ -94,6 +95,10 @@ export const communityDataSource: CommunityDataSource = httpCommunityGateway;
 /** Direct messages from a rescuer to their dispatcher or a reporter. */
 export const messagingDataSource = httpMessagingGateway;
 
+/** Resident chat contacts: the City Vet team and assigned rescuers. */
+export const residentContactsDataSource: ResidentContactsDataSource =
+  httpMessagingGateway;
+
 /** Explore map markers: live report coordinates from `GET /api/reports/map`. */
 export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
@@ -123,4 +128,7 @@ export type {
 export type { RescuerHomeDataSource } from "./rescuer-home";
 export type { RescuerQueueDataSource } from "./rescuer-queue";
 export type { RescuerHistoryDataSource } from "./rescuer-history";
-export type { MessagingDataSource } from "./messaging-gateway";
+export type {
+  MessagingDataSource,
+  ResidentContactsDataSource,
+} from "./messaging-gateway";

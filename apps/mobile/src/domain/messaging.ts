@@ -14,6 +14,16 @@ export interface ChatMessage {
   isDeleted?: boolean;
 }
 
+/** A resident's direct-chat contact (City Vet team member or assigned rescuer). */
+export interface ResidentContact {
+  userId: string;
+  fullName: string;
+  role: "admin" | "rescuer";
+  profilePhotoUrl: string | null;
+  /** Report codes that link this person to the resident's reports. */
+  reportCodes: string[];
+}
+
 /** A rescuer's direct conversation with one dispatcher or reporter. */
 export interface ChatThread {
   id: string;

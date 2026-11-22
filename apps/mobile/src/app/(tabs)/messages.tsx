@@ -13,11 +13,26 @@ import { ChatIcon, PawIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
-import { useMessagesViewModel } from "@/features/messages/useMessagesViewModel";
+import {
+  useChatContactsViewModel,
+  type ChatContactRole,
+} from "@/features/messages/useChatContactsViewModel";
+
+function roleLabel(
+  role: ChatContactRole,
+  viewerRole: "rescuer" | "community_user" | null,
+): string {
+  if (role === "admin") {
+    return viewerRole === "rescuer" ? "Dispatcher" : "City Vet team";
+  }
+  return role === "rescuer" ? "Rescuer" : "Reporter";
+}
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { contacts, loading, error, reload } = useMessagesViewModel();
+  const { contacts, viewerRole, loading, error, reload } =
+    useChatContactsViewModel();
+  const isRescuer = viewerRole === "rescuer";
 
   useFocusEffect(
     useCallback(() => {
@@ -47,8 +62,9 @@ export default function MessagesScreen() {
               <PawIcon size={20} color={Brand.ink55} />
               <Text style={styles.emptyTitle}>No contacts yet</Text>
               <Text style={styles.emptyBody}>
-                Your dispatcher and the reporters of your assigned reports will
-                appear here.
+                {isRescuer
+                  ? "Your dispatcher and the reporters of your assigned reports will appear here."
+                  : "The City Vet team and the rescuers assigned to your reports will appear here."}
               </Text>
             </View>
           ) : (
@@ -90,8 +106,10 @@ export default function MessagesScreen() {
                       {contact.fullName}
                     </Text>
                     <Text style={styles.contactMeta} numberOfLines={1}>
-                      {contact.role === "admin" ? "Dispatcher" : "Reporter"} ·{" "}
-                      {contact.reportCodes.join(", ")}
+                      {roleLabel(contact.role, viewerRole)}
+                      {contact.reportCodes.length > 0
+                        ? ` · ${contact.reportCodes.join(", ")}`
+                        : ""}
                     </Text>
                   </View>
 

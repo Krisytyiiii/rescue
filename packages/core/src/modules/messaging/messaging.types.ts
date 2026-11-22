@@ -184,6 +184,16 @@ export interface NotificationCounts {
   read: number;
 }
 
+/** A person a resident may open a direct chat with. */
+export interface ResidentContactRow {
+  userId: string;
+  fullName: string;
+  role: "admin" | "rescuer";
+  profilePhotoUrl: string | null;
+  /** Report codes that link this person to the resident's reports. */
+  reportCodes: string[];
+}
+
 export interface ParticipantCandidateRow {
   userId: string;
   fullName: string;

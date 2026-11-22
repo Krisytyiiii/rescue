@@ -17,12 +17,15 @@ const HEARTBEAT_MS = 20_000;
 
 /**
  * GET /api/messages/direct/stream?userId=... - Server-sent events stream of a
- * rescuer's direct thread. Emits the full conversation whenever it changes so
- * the mobile chat updates without polling from the device.
+ * direct thread. Emits the full conversation whenever it changes so the
+ * mobile chat updates without polling from the device.
  */
 export async function GET(request: Request) {
   const session = await readSession();
-  if (!session || session.role !== "rescuer") {
+  if (
+    !session ||
+    (session.role !== "rescuer" && session.role !== "community_user")
+  ) {
     return new Response("Unauthorized", { status: 401 });
   }
 
@@ -81,7 +84,10 @@ export async function GET(request: Request) {
       const tick = async () => {
         if (closed) return;
         try {
-          const conversation = await messagingService.getRescuerDirect(userId, actor);
+          const conversation =
+            session.role === "rescuer"
+              ? await messagingService.getRescuerDirect(userId, actor)
+              : await messagingService.getResidentDirect(userId, actor);
           const next = JSON.stringify(conversation);
           if (next === last) return;
           last = next;

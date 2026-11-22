@@ -11,7 +11,7 @@ import {
 import { readSession } from "@/lib/auth/session";
 import { broadcastAdminChange } from "@/lib/admin/realtime-broadcast";
 
-/** POST /api/messages/conversations/:id/messages - rescuer reply. */
+/** POST /api/messages/conversations/:id/messages - reply in a thread. */
 export async function POST(
   request: Request,
   context: { params: Promise<{ id: string }> },
@@ -23,9 +23,9 @@ export async function POST(
       { status: 401 },
     );
   }
-  if (session.role !== "rescuer") {
+  if (session.role !== "rescuer" && session.role !== "community_user") {
     return NextResponse.json(
-      { ok: false, error: { code: "FORBIDDEN", message: "Rescuer account required" } },
+      { ok: false, error: { code: "FORBIDDEN", message: "Account not allowed to chat" } },
       { status: 403 },
     );
   }
@@ -54,7 +54,10 @@ export async function POST(
       role: user.role,
       barangayId: user.barangayId,
     };
-    const message = await messagingService.sendAsRescuer(id, parsed.data, actor);
+    const message =
+      session.role === "rescuer"
+        ? await messagingService.sendAsRescuer(id, parsed.data, actor)
+        : await messagingService.sendAsResident(id, parsed.data, actor);
     await broadcastAdminChange("messages");
     return NextResponse.json({ ok: true, data: message });
   } catch (error) {

@@ -11,8 +11,8 @@ import { readSession } from "@/lib/auth/session";
 import { broadcastAdminChange } from "@/lib/admin/realtime-broadcast";
 
 /**
- * DELETE /api/messages/:id?scope=me|everyone - rescuer message deletion.
- * `me` hides the message only for the signed-in rescuer; `everyone` soft
+ * DELETE /api/messages/:id?scope=me|everyone - message deletion.
+ * `me` hides the message only for the signed-in person; `everyone` soft
  * deletes it for the whole conversation (own messages only).
  */
 export async function DELETE(
@@ -26,9 +26,9 @@ export async function DELETE(
       { status: 401 },
     );
   }
-  if (session.role !== "rescuer") {
+  if (session.role !== "rescuer" && session.role !== "community_user") {
     return NextResponse.json(
-      { ok: false, error: { code: "FORBIDDEN", message: "Rescuer account required" } },
+      { ok: false, error: { code: "FORBIDDEN", message: "Account not allowed to chat" } },
       { status: 403 },
     );
   }

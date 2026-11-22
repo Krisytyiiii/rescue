@@ -10,7 +10,11 @@ import {
 
 import { readSession } from "@/lib/auth/session";
 
-/** GET /api/messages/direct?userId=... - the rescuer's thread with one contact. */
+/**
+ * GET /api/messages/direct?userId=... - the signed-in person's thread with one
+ * contact. Rescuers and residents share this endpoint; the service enforces
+ * who each role is allowed to message.
+ */
 export async function GET(request: Request) {
   const session = await readSession();
   if (!session) {
@@ -19,9 +23,9 @@ export async function GET(request: Request) {
       { status: 401 },
     );
   }
-  if (session.role !== "rescuer") {
+  if (session.role !== "rescuer" && session.role !== "community_user") {
     return NextResponse.json(
-      { ok: false, error: { code: "FORBIDDEN", message: "Rescuer account required" } },
+      { ok: false, error: { code: "FORBIDDEN", message: "Account not allowed to chat" } },
       { status: 403 },
     );
   }
@@ -41,7 +45,10 @@ export async function GET(request: Request) {
       role: user.role,
       barangayId: user.barangayId,
     };
-    const conversation = await messagingService.getRescuerDirect(userId, actor);
+    const conversation =
+      session.role === "rescuer"
+        ? await messagingService.getRescuerDirect(userId, actor)
+        : await messagingService.getResidentDirect(userId, actor);
     return NextResponse.json({ ok: true, data: conversation });
   } catch (error) {
     if (isAppError(error)) {
@@ -58,7 +65,7 @@ export async function GET(request: Request) {
   }
 }
 
-/** POST /api/messages/direct - start or continue a direct thread as a rescuer. */
+/** POST /api/messages/direct - start or continue a direct thread. */
 export async function POST(request: Request) {
   const session = await readSession();
   if (!session) {
@@ -67,9 +74,9 @@ export async function POST(request: Request) {
       { status: 401 },
     );
   }
-  if (session.role !== "rescuer") {
+  if (session.role !== "rescuer" && session.role !== "community_user") {
     return NextResponse.json(
-      { ok: false, error: { code: "FORBIDDEN", message: "Rescuer account required" } },
+      { ok: false, error: { code: "FORBIDDEN", message: "Account not allowed to chat" } },
       { status: 403 },
     );
   }
@@ -97,10 +104,10 @@ export async function POST(request: Request) {
       role: user.role,
       barangayId: user.barangayId,
     };
-    const conversation = await messagingService.startRescuerConversation(
-      parsed.data,
-      actor,
-    );
+    const conversation =
+      session.role === "rescuer"
+        ? await messagingService.startRescuerConversation(parsed.data, actor)
+        : await messagingService.startResidentConversation(parsed.data, actor);
     return NextResponse.json({ ok: true, data: conversation });
   } catch (error) {
     if (isAppError(error)) {
