@@ -12,9 +12,25 @@ export type ReportSpecies = (typeof REPORT_SPECIES)[number];
 export const URGENCY_LEVELS = ["low", "medium", "high", "critical"] as const;
 export type UrgencyLevel = (typeof URGENCY_LEVELS)[number];
 
+export const MAX_REPORT_PHOTOS = 4;
+
 export interface Coordinates {
   latitude: number;
   longitude: number;
+}
+
+/** A local photo selected on the device, before it is uploaded. */
+export interface ReportPhotoUpload {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+}
+
+/** One uploaded photo attached to a report. */
+export interface ReportMedia {
+  mediaType: "photo";
+  fileUrl: string;
+  fileSizeKb?: number;
 }
 
 export interface NewReportInput {
@@ -27,6 +43,7 @@ export interface NewReportInput {
   longitude: number;
   barangayId?: number;
   locationLandmark?: string;
+  media?: ReportMedia[];
 }
 
 export interface CreatedReport {

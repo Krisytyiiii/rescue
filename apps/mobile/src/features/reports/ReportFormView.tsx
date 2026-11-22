@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import * as ImagePicker from "expo-image-picker";
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -26,6 +28,7 @@ import type {
   ReportType,
   UrgencyLevel,
 } from "@/domain/report-submission";
+import { MAX_REPORT_PHOTOS } from "@/domain/report-submission";
 
 import { useReportViewModel } from "./useReportViewModel";
 
@@ -74,6 +77,11 @@ export function ReportFormView() {
     submitting,
     error,
     created,
+    photos,
+    uploadingPhotos,
+    photoError,
+    addPhotos,
+    removePhoto,
     submit,
     reset,
   } = useReportViewModel();
@@ -88,7 +96,12 @@ export function ReportFormView() {
   const mapRef = useRef<MapView | null>(null);
 
   const descriptionReady = description.trim().length >= 10;
-  const canSubmit = Boolean(coordinates) && descriptionReady && !submitting;
+  const canSubmit =
+    Boolean(coordinates) &&
+    descriptionReady &&
+    !submitting &&
+    !uploadingPhotos;
+  const remainingPhotos = MAX_REPORT_PHOTOS - photos.length;
 
   // Recenter once the device fixes its position (or the user retries).
   useEffect(() => {
@@ -140,6 +153,31 @@ export function ReportFormView() {
     setLandmark("");
     setBarangayId(undefined);
     reset();
+  };
+
+  const handlePickPhotos = async () => {
+    if (remainingPhotos <= 0 || uploadingPhotos) return;
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: remainingPhotos,
+      quality: 0.8,
+    });
+    if (result.canceled) return;
+
+    await addPhotos(
+      result.assets.map((asset) => ({
+        uri: asset.uri,
+        fileName: asset.fileName,
+        mimeType: asset.mimeType,
+      })),
+    );
   };
 
   if (created) {
@@ -412,6 +450,58 @@ export function ReportFormView() {
               <Text style={styles.helper}>
                 {description.trim().length}/10 characters minimum
               </Text>
+            </Field>
+
+            <Field label="Photos (optional)">
+              <Text style={styles.photoHint}>
+                Add up to {MAX_REPORT_PHOTOS} photos so responders know what to
+                expect.
+              </Text>
+              <View style={styles.photoGrid}>
+                {photos.map((url) => (
+                  <View key={url} style={styles.photoTile}>
+                    <Image source={{ uri: url }} style={styles.photoImage} />
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Remove photo"
+                      onPress={() => removePhoto(url)}
+                      style={({ pressed }) => [
+                        styles.photoRemove,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text style={styles.photoRemoveGlyph}>×</Text>
+                    </Pressable>
+                  </View>
+                ))}
+
+                {remainingPhotos > 0 ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Add photos"
+                    accessibilityState={{ disabled: uploadingPhotos }}
+                    disabled={uploadingPhotos}
+                    onPress={() => void handlePickPhotos()}
+                    style={({ pressed }) => [
+                      styles.photoAdd,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    {uploadingPhotos ? (
+                      <ActivityIndicator color={Brand.clay} size="small" />
+                    ) : (
+                      <>
+                        <Text style={styles.photoAddGlyph}>+</Text>
+                        <Text style={styles.photoAddText}>Add</Text>
+                      </>
+                    )}
+                  </Pressable>
+                ) : null}
+              </View>
+              <Text style={styles.helper}>
+                {photos.length} of {MAX_REPORT_PHOTOS} photos
+              </Text>
+              {photoError ? <Text style={styles.error}>{photoError}</Text> : null}
             </Field>
 
             <Field label="Nearest landmark (optional)">
@@ -750,6 +840,69 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.sans,
     fontSize: 11,
     color: Brand.ink55,
+  },
+  photoHint: {
+    marginBottom: 10,
+    fontFamily: FontFamily.sans,
+    fontSize: 12,
+    lineHeight: 17,
+    color: Brand.ink70,
+  },
+  photoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  photoTile: {
+    width: 84,
+    height: 84,
+    borderRadius: 14,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+  },
+  photoImage: { width: "100%", height: "100%" },
+  photoRemove: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(20,24,21,0.72)",
+  },
+  photoRemoveGlyph: {
+    marginTop: -1,
+    fontFamily: FontFamily.medium,
+    fontSize: 16,
+    lineHeight: 18,
+    color: Brand.paper,
+  },
+  photoAdd: {
+    width: 84,
+    height: 84,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 2,
+  },
+  photoAddGlyph: {
+    fontFamily: FontFamily.medium,
+    fontSize: 22,
+    lineHeight: 24,
+    color: Brand.clay,
+  },
+  photoAddText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 11,
+    color: Brand.ink70,
   },
   error: {
     marginTop: 18,

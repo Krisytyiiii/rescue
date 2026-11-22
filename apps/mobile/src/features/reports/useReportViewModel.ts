@@ -5,13 +5,15 @@ import { authRepository, reportSubmissionDataSource } from "@/data";
 import type { ReportSubmissionDataSource } from "@/data";
 import type { Barangay } from "@/domain/auth";
 import type { AuthRepository } from "@/domain/ports";
+import { MAX_REPORT_PHOTOS } from "@/domain/report-submission";
 import type {
   Coordinates,
   CreatedReport,
   NewReportInput,
+  ReportPhotoUpload,
 } from "@/domain/report-submission";
 
-type ReportDraft = Omit<NewReportInput, "latitude" | "longitude">;
+type ReportDraft = Omit<NewReportInput, "latitude" | "longitude" | "media">;
 
 /**
  * Owns the report form's async concerns: current coordinates, the public
@@ -28,6 +30,9 @@ export function useReportViewModel(
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreatedReport | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const locate = useCallback(async () => {
     setLocating(true);
@@ -77,10 +82,48 @@ export function useReportViewModel(
     };
   }, [auth]);
 
+  const addPhotos = useCallback(
+    async (uploads: ReportPhotoUpload[]) => {
+      if (uploads.length === 0) return;
+
+      setPhotoError(null);
+      setUploadingPhotos(true);
+
+      try {
+        const remaining = MAX_REPORT_PHOTOS - photos.length;
+        for (const upload of uploads.slice(0, remaining)) {
+          const url = await data.uploadPhoto(upload);
+          setPhotos((current) =>
+            current.length >= MAX_REPORT_PHOTOS || current.includes(url)
+              ? current
+              : [...current, url],
+          );
+        }
+      } catch (cause) {
+        setPhotoError(
+          cause instanceof Error
+            ? cause.message
+            : "We couldn't upload that photo.",
+        );
+      } finally {
+        setUploadingPhotos(false);
+      }
+    },
+    [data, photos.length],
+  );
+
+  const removePhoto = useCallback((url: string) => {
+    setPhotos((current) => current.filter((item) => item !== url));
+  }, []);
+
   const submit = useCallback(
     async (draft: ReportDraft) => {
       if (!coordinates) {
         setError("We need your location before sending the report.");
+        return null;
+      }
+      if (uploadingPhotos) {
+        setError("Please wait for your photos to finish uploading.");
         return null;
       }
 
@@ -92,6 +135,7 @@ export function useReportViewModel(
           ...draft,
           latitude: coordinates.latitude,
           longitude: coordinates.longitude,
+          media: photos.map((url) => ({ mediaType: "photo", fileUrl: url })),
         });
         setCreated(result);
         return result;
@@ -106,12 +150,14 @@ export function useReportViewModel(
         setSubmitting(false);
       }
     },
-    [coordinates, data],
+    [coordinates, data, photos, uploadingPhotos],
   );
 
   const reset = useCallback(() => {
     setCreated(null);
     setError(null);
+    setPhotos([]);
+    setPhotoError(null);
     void locate();
   }, [locate]);
 
@@ -125,6 +171,11 @@ export function useReportViewModel(
     submitting,
     error,
     created,
+    photos,
+    uploadingPhotos,
+    photoError,
+    addPhotos,
+    removePhoto,
     submit,
     reset,
   };
