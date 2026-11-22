@@ -19,7 +19,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
-  ChatIcon,
   CloseIcon,
   PawIcon,
   PlusCircleIcon,
@@ -149,10 +148,6 @@ export function CommunityFeedView() {
                   {`${posts.length} adoption post${posts.length === 1 ? "" : "s"}`}
                 </Text>
               )}
-            </View>
-
-            <View style={styles.headerBadge}>
-              <ChatIcon size={17} color="#3D7E9A" />
             </View>
           </View>
         </View>
@@ -1036,16 +1031,6 @@ const styles = StyleSheet.create({
   },
   headerMetaSkeleton: {
     marginTop: 5,
-  },
-  headerBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: "rgba(255,255,255,0.72)",
-    alignItems: "center",
-    justifyContent: "center",
   },
   intro: {
     marginTop: 6,
