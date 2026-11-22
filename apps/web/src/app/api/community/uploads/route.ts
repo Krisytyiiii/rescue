@@ -84,26 +84,13 @@ async function storeInSupabase(
   return client.storage.from(bucket).getPublicUrl(fileName).data.publicUrl;
 }
 
-/** Stores one adoption-post photo for a signed-in community member. */
+/** Stores one adoption-post photo for any signed-in user. */
 export async function POST(request: Request) {
   const session = await readSession();
   if (!session) {
     return NextResponse.json(
       { ok: false, error: { code: "UNAUTHORIZED", message: "Sign in required" } },
       { status: 401 },
-    );
-  }
-
-  if (session.role !== "community_user" && session.role !== "admin") {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: "FORBIDDEN",
-          message: "Only community members can upload adoption photos",
-        },
-      },
-      { status: 403 },
     );
   }
 

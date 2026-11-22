@@ -23,9 +23,6 @@ export class AnimalsService {
     const current = requireActor(actor);
     const isCommunityPost = input.originType === "community_post";
 
-    if (isCommunityPost && !["community_user", "admin"].includes(current.role)) {
-      throw new ForbiddenError("Only community users can submit adoption posts");
-    }
     if (!isCommunityPost) {
       requireRole(current, "admin", "rescuer");
     }

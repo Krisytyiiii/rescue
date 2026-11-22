@@ -71,7 +71,7 @@ export async function GET() {
 }
 
 /**
- * POST /api/community/posts - a resident posts an animal for adoption.
+ * POST /api/community/posts - any signed-in user posts an animal for adoption.
  *
  * The submission is always created as a `pending_review` listing, so nothing
  * reaches the public feed until the City Vet team approves it.
@@ -79,19 +79,6 @@ export async function GET() {
 export async function POST(request: Request) {
   const auth = await readActor();
   if (auth.response) return auth.response;
-
-  if (auth.actor.role !== "community_user" && auth.actor.role !== "admin") {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: {
-          code: "FORBIDDEN",
-          message: "Only community members can post animals for adoption",
-        },
-      },
-      { status: 403 },
-    );
-  }
 
   const body = await request.json().catch(() => null);
   const parsed = createCommunityPostSchema.safeParse(body);
