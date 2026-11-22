@@ -3,6 +3,7 @@ import { randomBytes, randomInt } from "node:crypto";
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env.ts";
 import {
+  AppError,
   BadRequestError,
   ConflictError,
   EmailNotVerifiedError,
@@ -219,20 +220,27 @@ export class AuthService {
       expiresMinutes: env.EMAIL_VERIFICATION_TTL_MINUTES,
     });
 
+    let delivered = false;
     try {
-      const delivered = await sendMail({ to: user.email, ...template });
-      if (!delivered && env.NODE_ENV !== "production") {
-        console.info(
-          `[auth] SMTP not configured. Verification code for ${user.email}: ${code}`,
-        );
-      }
+      delivered = await sendMail({ to: user.email, ...template });
     } catch (error) {
       console.error("[auth] Failed to send verification email", error);
+    }
+
+    if (!delivered) {
+      // Local development can continue with the code in the server console,
+      // but production must not pretend the email was sent.
       if (env.NODE_ENV !== "production") {
         console.info(
-          `[auth] Verification code for ${user.email}: ${code}`,
+          `[auth] SMTP not configured or send failed. Verification code for ${user.email}: ${code}`,
         );
+        return;
       }
+      throw new AppError(
+        "INTERNAL_ERROR",
+        "We couldn't send the verification email. Please try again in a moment.",
+        503,
+      );
     }
   }
 

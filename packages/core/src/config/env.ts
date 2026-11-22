@@ -20,7 +20,11 @@ const envSchema = z.object({
   EMAIL_VERIFICATION_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
 
   SMTP_HOST: z.preprocess(
-    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    (value) => {
+      if (typeof value !== "string") return value;
+      const trimmed = value.trim();
+      return trimmed === "" ? undefined : trimmed;
+    },
     z.string().min(1).optional(),
   ),
   SMTP_PORT: z.coerce.number().int().positive().default(587),
@@ -36,7 +40,7 @@ const envSchema = z.object({
     (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
     z.string().optional(),
   ),
-  SMTP_FROM: z.string().default("FuRescue <no-reply@furescue.app>"),
+  SMTP_FROM: z.string().trim().default("FuRescue <no-reply@furescue.app>"),
 
   DATABASE_URL: z.string().min(1),
   DIRECT_URL: z.string().min(1).optional(),

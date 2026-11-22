@@ -22,6 +22,11 @@ function getTransporter(): Transporter | null {
       auth: env.SMTP_USER
         ? { user: env.SMTP_USER, pass: env.SMTP_PASS }
         : undefined,
+      // Fail fast instead of letting a blocked/slow SMTP connection hang the
+      // serverless invocation until the platform kills it.
+      connectionTimeout: 10_000,
+      greetingTimeout: 10_000,
+      socketTimeout: 15_000,
     });
   }
 
@@ -44,9 +49,14 @@ function resolveFromAddress(): string {
   const displayName = match?.[1]?.trim() ?? "";
   const fromEmail = (match?.[2] ?? configured).trim().toLowerCase();
   const userEmail = env.SMTP_USER?.trim().toLowerCase();
+  const host = env.SMTP_HOST?.trim().toLowerCase() ?? "";
 
-  const isGmail = env.SMTP_HOST?.toLowerCase() === "smtp.gmail.com";
-  if (isGmail && userEmail && !fromEmail.endsWith("@gmail.com")) {
+  // Gmail only sends as the authenticated account. Treat both a Gmail host and
+  // a Gmail SMTP user as the signal, so a stray space/alias in SMTP_HOST can't
+  // stop the fallback and cause the recipient to drop the message (DMARC).
+  const usesGmail = host === "smtp.gmail.com" || host.endsWith("gmail.com");
+  const gmailUser = Boolean(userEmail?.endsWith("@gmail.com"));
+  if (userEmail && (usesGmail || gmailUser) && fromEmail !== userEmail) {
     console.warn(
       `[mail] SMTP_FROM "${fromEmail}" can't be sent through Gmail. Using "${userEmail}".`,
     );
