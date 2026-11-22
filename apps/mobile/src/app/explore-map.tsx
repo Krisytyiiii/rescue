@@ -1,6 +1,6 @@
 import * as Location from "expo-location";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -11,7 +11,8 @@ import {
   Text,
   View,
 } from "react-native";
-import MapView, { Marker, UrlTile } from "react-native-maps";
+import MapView, { Circle, Marker, UrlTile } from "react-native-maps";
+import type { Region } from "react-native-maps";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
@@ -50,6 +51,14 @@ const INITIAL_REGION = {
 
 const FIT_PADDING = { top: 90, right: 56, bottom: 210, left: 56 };
 
+type MapMode = "pins" | "heatmap";
+
+/** Heat density rings are sized from the visible latitude span. */
+function heatRadii(region: Region): [number, number, number] {
+  const base = Math.max(140, region.latitudeDelta * 111_320 * 0.045);
+  return [base * 1.7, base, base * 0.55];
+}
+
 export default function ExploreMapScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -67,6 +76,8 @@ export default function ExploreMapScreen() {
 
   const mapRef = useRef<MapView | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [mode, setMode] = useState<MapMode>("pins");
+  const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 
@@ -123,13 +134,16 @@ export default function ExploreMapScreen() {
 
   const activeFilterLabel =
     filter === "all" ? "All" : REPORT_STATUS_META[filter].label;
+  const [heatOuter, heatMid, heatInner] = heatRadii(region);
 
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <RescuerScreenHeader
           title="Explore map"
-          subtitle={`${visible.length} reports · ${activeFilterLabel}`}
+          subtitle={`${visible.length} reports · ${activeFilterLabel} · ${
+            mode === "heatmap" ? "Heatmap" : "Dots"
+          }`}
           onBack={() => router.back()}
         />
 
@@ -152,40 +166,75 @@ export default function ExploreMapScreen() {
               left: 12,
             }}
             onMapReady={() => setMapReady(true)}
+            onRegionChangeComplete={setRegion}
           >
             <UrlTile urlTemplate={TILE_URL} maximumZ={19} flipY={false} />
 
-            {visible.map((marker) => {
-              const meta = REPORT_STATUS_META[marker.reportStatus];
-              const active = marker.id === selectedId;
-
-              return (
-                <Marker
-                  key={marker.id}
-                  coordinate={{
+            {mode === "heatmap"
+              ? visible.map((marker) => {
+                  const meta = REPORT_STATUS_META[marker.reportStatus];
+                  const center = {
                     latitude: marker.latitude,
                     longitude: marker.longitude,
-                  }}
-                  onPress={() => select(marker.id)}
-                  zIndex={active ? 1000 : 0}
-                  anchor={{ x: 0.5, y: 0.5 }}
-                  accessibilityLabel={`${marker.reportCode}, ${meta.label}`}
-                >
-                  <View style={styles.pinTouch}>
-                    <View
-                      style={[
-                        styles.pin,
-                        {
-                          backgroundColor: meta.pin,
-                          borderColor: Brand.paper,
-                        },
-                        active && styles.pinActive,
-                      ]}
-                    />
-                  </View>
-                </Marker>
-              );
-            })}
+                  };
+
+                  return (
+                    <Fragment key={marker.id}>
+                      <Circle
+                        center={center}
+                        radius={heatOuter}
+                        fillColor={`${meta.pin}1A`}
+                        strokeColor="transparent"
+                        strokeWidth={0}
+                      />
+                      <Circle
+                        center={center}
+                        radius={heatMid}
+                        fillColor={`${meta.pin}38`}
+                        strokeColor="transparent"
+                        strokeWidth={0}
+                      />
+                      <Circle
+                        center={center}
+                        radius={heatInner}
+                        fillColor={`${meta.pin}7A`}
+                        strokeColor="transparent"
+                        strokeWidth={0}
+                      />
+                    </Fragment>
+                  );
+                })
+              : visible.map((marker) => {
+                  const meta = REPORT_STATUS_META[marker.reportStatus];
+                  const active = marker.id === selectedId;
+
+                  return (
+                    <Marker
+                      key={marker.id}
+                      coordinate={{
+                        latitude: marker.latitude,
+                        longitude: marker.longitude,
+                      }}
+                      onPress={() => select(marker.id)}
+                      zIndex={active ? 1000 : 0}
+                      anchor={{ x: 0.5, y: 0.5 }}
+                      accessibilityLabel={`${marker.reportCode}, ${meta.label}`}
+                    >
+                      <View style={styles.pinTouch}>
+                        <View
+                          style={[
+                            styles.pin,
+                            {
+                              backgroundColor: meta.pin,
+                              borderColor: Brand.paper,
+                            },
+                            active && styles.pinActive,
+                          ]}
+                        />
+                      </View>
+                    </Marker>
+                  );
+                })}
           </MapView>
 
           <View style={styles.filterBar}>
@@ -215,6 +264,19 @@ export default function ExploreMapScreen() {
                 );
               })}
             </ScrollView>
+          </View>
+
+          <View style={styles.modeToggle}>
+            <ModeOption
+              label="Dots"
+              active={mode === "pins"}
+              onPress={() => setMode("pins")}
+            />
+            <ModeOption
+              label="Heatmap"
+              active={mode === "heatmap"}
+              onPress={() => setMode("heatmap")}
+            />
           </View>
 
           <View style={styles.mapActions}>
@@ -296,6 +358,34 @@ export default function ExploreMapScreen() {
         </View>
       </SafeAreaView>
     </View>
+  );
+}
+
+function ModeOption({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={`${label} map`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.modeOption,
+        active && styles.modeOptionActive,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Text style={[styles.modeLabel, active && styles.modeLabelActive]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -555,13 +645,47 @@ const styles = StyleSheet.create({
   chipCountActive: {
     color: "rgba(255,255,255,0.6)",
   },
+  modeToggle: {
+    position: "absolute",
+    left: 14,
+    top: 52,
+    flexDirection: "row",
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    padding: 3,
+    gap: 2,
+    shadowColor: "#10231A",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
+  modeOption: {
+    height: 28,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modeOptionActive: {
+    backgroundColor: Brand.forest,
+  },
+  modeLabel: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10,
+    color: Brand.ink70,
+  },
+  modeLabelActive: {
+    color: Brand.paper,
+  },
   mapActions: {
     position: "absolute",
     right: 14,
     top: 56,
     gap: 8,
-  },
-  mapButton: {
+  },  mapButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -607,7 +731,7 @@ const styles = StyleSheet.create({
   },
   notice: {
     position: "absolute",
-    top: 54,
+    top: 96,
     left: 14,
     right: 64,
     borderRadius: 12,
