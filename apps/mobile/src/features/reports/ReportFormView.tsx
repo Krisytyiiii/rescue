@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import * as ImagePicker from "expo-image-picker";
 import {
   ActivityIndicator,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -11,17 +18,18 @@ import {
   Text,
   TextInput,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import MapView, {
   Marker,
   UrlTile,
   type MapPressEvent,
   type MarkerDragStartEndEvent,
-  type Region,
 } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CheckIcon, MapPinIcon, PawIcon } from "@/components/icons";
+import { CheckIcon, CloseIcon, ExpandIcon, MapPinIcon, PawIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   ReportSpecies,
@@ -66,6 +74,55 @@ const DEFAULT_REGION = {
   longitudeDelta: 0.02,
 };
 
+interface MapCanvasProps {
+  coordinates: { latitude: number; longitude: number } | null;
+  style?: StyleProp<ViewStyle>;
+  mapRef?: RefObject<MapView | null>;
+  onPress: (event: MapPressEvent) => void;
+  onDragEnd: (event: MarkerDragStartEndEvent) => void;
+}
+
+/** Shared tiled map with the draggable report pin. */
+function MapCanvas({
+  coordinates,
+  style,
+  mapRef,
+  onPress,
+  onDragEnd,
+}: MapCanvasProps) {
+  return (
+    <MapView
+      ref={mapRef}
+      style={style}
+      initialRegion={{
+        latitude: coordinates?.latitude ?? DEFAULT_REGION.latitude,
+        longitude: coordinates?.longitude ?? DEFAULT_REGION.longitude,
+        latitudeDelta: DEFAULT_REGION.latitudeDelta,
+        longitudeDelta: DEFAULT_REGION.longitudeDelta,
+      }}
+      onPress={onPress}
+      showsUserLocation
+      showsMyLocationButton={false}
+      toolbarEnabled={false}
+    >
+      <UrlTile
+        urlTemplate={TILE_URL}
+        maximumZ={19}
+        flipY={false}
+        shouldReplaceMapContent
+      />
+      {coordinates ? (
+        <Marker
+          coordinate={coordinates}
+          draggable
+          onDragEnd={onDragEnd}
+          pinColor={Brand.clay}
+        />
+      ) : null}
+    </MapView>
+  );
+}
+
 export function ReportFormView() {
   const {
     coordinates,
@@ -93,6 +150,7 @@ export function ReportFormView() {
   const [description, setDescription] = useState("");
   const [landmark, setLandmark] = useState("");
   const [barangayId, setBarangayId] = useState<number | undefined>();
+  const [mapExpanded, setMapExpanded] = useState(false);
   const mapRef = useRef<MapView | null>(null);
 
   const descriptionReady = description.trim().length >= 10;
@@ -133,6 +191,7 @@ export function ReportFormView() {
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
+    setMapExpanded(false);
     await submit({
       reportType,
       species,
@@ -270,39 +329,92 @@ export function ReportFormView() {
             </View>
 
             <View style={styles.mapCard}>
-              <MapView
-                ref={mapRef}
+              <MapCanvas
+                mapRef={mapRef}
                 style={styles.map}
-                initialRegion={{
-                  latitude: coordinates?.latitude ?? DEFAULT_REGION.latitude,
-                  longitude: coordinates?.longitude ?? DEFAULT_REGION.longitude,
-                  latitudeDelta: DEFAULT_REGION.latitudeDelta,
-                  longitudeDelta: DEFAULT_REGION.longitudeDelta,
-                }}
+                coordinates={coordinates}
                 onPress={handleMapPress}
-                showsUserLocation
-                showsMyLocationButton={false}
-                toolbarEnabled={false}
+                onDragEnd={handleMarkerDrag}
+              />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Open full-screen map"
+                onPress={() => setMapExpanded(true)}
+                style={({ pressed }) => [
+                  styles.mapExpand,
+                  pressed && styles.pressed,
+                ]}
               >
-                <UrlTile
-                  urlTemplate={TILE_URL}
-                  maximumZ={19}
-                  flipY={false}
-                  shouldReplaceMapContent
-                />
-                {coordinates ? (
-                  <Marker
-                    coordinate={coordinates}
-                    draggable
-                    onDragEnd={handleMarkerDrag}
-                    pinColor={Brand.clay}
-                  />
-                ) : null}
-              </MapView>
+                <ExpandIcon size={16} color={Brand.moss} />
+              </Pressable>
               <Text style={styles.mapHint}>
                 Tap the map or drag the pin to adjust the exact spot.
               </Text>
             </View>
+
+            <Modal
+              visible={mapExpanded}
+              animationType="fade"
+              onRequestClose={() => setMapExpanded(false)}
+              statusBarTranslucent
+            >
+              <View style={styles.fullscreenRoot}>
+                <MapCanvas
+                  key={`${coordinates?.latitude ?? "x"}-${coordinates?.longitude ?? "y"}`}
+                  style={styles.fullscreenMap}
+                  coordinates={coordinates}
+                  onPress={handleMapPress}
+                  onDragEnd={handleMarkerDrag}
+                />
+                <SafeAreaView
+                  style={styles.fullscreenOverlay}
+                  edges={["top"]}
+                  pointerEvents="box-none"
+                >
+                  <View style={styles.fullscreenHeader} pointerEvents="box-none">
+                    <View style={styles.fullscreenTitleWrap}>
+                      <Text style={styles.fullscreenTitle}>Pin the location</Text>
+                      <Text style={styles.fullscreenMeta}>
+                        {coordinates
+                          ? `${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`
+                          : "Waiting for your location"}
+                      </Text>
+                    </View>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Close full-screen map"
+                      onPress={() => setMapExpanded(false)}
+                      style={({ pressed }) => [
+                        styles.fullscreenClose,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <CloseIcon size={18} color={Brand.ink} />
+                    </Pressable>
+                  </View>
+                </SafeAreaView>
+                <SafeAreaView
+                  style={styles.fullscreenFooter}
+                  edges={["bottom"]}
+                  pointerEvents="box-none"
+                >
+                  <Text style={styles.fullscreenHint}>
+                    Tap anywhere or drag the pin, then close to keep it.
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => setMapExpanded(false)}
+                    style={({ pressed }) => [
+                      styles.primary,
+                      styles.fullscreenDone,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text style={styles.primaryText}>Use this location</Text>
+                  </Pressable>
+                </SafeAreaView>
+              </View>
+            </Modal>
 
             <Field label="What did you see?">
               <View style={styles.optionGrid}>
@@ -684,6 +796,73 @@ const styles = StyleSheet.create({
     lineHeight: 15,
     color: Brand.ink55,
   },
+  mapExpand: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(250,248,243,0.94)",
+    borderWidth: 1,
+    borderColor: Brand.line,
+  },
+  fullscreenRoot: { flex: 1, backgroundColor: Brand.ink },
+  fullscreenMap: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  fullscreenOverlay: { position: "absolute", top: 0, left: 0, right: 0 },
+  fullscreenHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    margin: 14,
+    padding: 14,
+    borderRadius: 18,
+    backgroundColor: "rgba(250,248,243,0.96)",
+  },
+  fullscreenTitleWrap: { flex: 1 },
+  fullscreenTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    color: Brand.ink,
+  },
+  fullscreenMeta: {
+    marginTop: 2,
+    fontFamily: FontFamily.sans,
+    fontSize: 11.5,
+    color: Brand.ink55,
+  },
+  fullscreenClose: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(31,122,77,0.10)",
+  },
+  fullscreenFooter: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  fullscreenHint: {
+    marginBottom: 10,
+    textAlign: "center",
+    fontFamily: FontFamily.medium,
+    fontSize: 11.5,
+    color: Brand.paper,
+  },
+  fullscreenDone: { marginTop: 0, height: 52 },
   locationIcon: {
     width: 38,
     height: 38,
