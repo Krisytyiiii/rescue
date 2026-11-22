@@ -9,6 +9,7 @@ import { AdoptionsRepository, adoptionsRepository } from "./adoptions.repository
 import {
   ADOPTION_STATUS_TRANSITIONS,
   INTERVIEW_VENUE,
+  OPEN_ADOPTION_STATUSES,
   type CreateAdoptionInput,
   type ListAdoptionsQuery,
   type ReviewAdoptionInput,
@@ -87,6 +88,73 @@ export class AdoptionsService {
       );
 
       return created;
+    });
+  }
+
+  /**
+   * Animals currently listed for adoption, with the caller's open application
+   * (if any) so the resident app can avoid duplicate submissions.
+   */
+  async listAvailable(actor?: Actor) {
+    const user = requireActor(actor);
+
+    const animals = await prisma.animal.findMany({
+      where: {
+        deletedAt: null,
+        listingStatus: "published",
+        lifecycleStatus: { in: ["available", "adoption_pending"] },
+      },
+      orderBy: [{ intakeDate: "desc" }, { createdAt: "desc" }],
+      select: {
+        id: true,
+        animalCode: true,
+        name: true,
+        species: true,
+        breedType: true,
+        sex: true,
+        estimatedAgeMonths: true,
+        size: true,
+        colorMarkings: true,
+        temperament: true,
+        description: true,
+        primaryPhotoUrl: true,
+        intakeDate: true,
+        lifecycleStatus: true,
+        listingStatus: true,
+        media: {
+          where: { mediaType: "photo" },
+          orderBy: { sortOrder: "asc" },
+          select: { fileUrl: true },
+        },
+      },
+    });
+
+    const applications = animals.length
+      ? await prisma.adoptionRequest.findMany({
+          where: {
+            adopterUserId: user.userId,
+            animalId: { in: animals.map((animal) => animal.id) },
+            status: { in: [...OPEN_ADOPTION_STATUSES] },
+            deletedAt: null,
+          },
+          select: { id: true, animalId: true, requestCode: true, status: true },
+        })
+      : [];
+
+    const byAnimal = new Map(applications.map((item) => [item.animalId, item]));
+
+    return animals.map((animal) => {
+      const application = byAnimal.get(animal.id);
+      return {
+        ...animal,
+        application: application
+          ? {
+              id: application.id,
+              requestCode: application.requestCode,
+              status: application.status,
+            }
+          : null,
+      };
     });
   }
 

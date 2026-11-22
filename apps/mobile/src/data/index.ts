@@ -1,6 +1,7 @@
 import type { AuthRepository } from "@/domain/ports";
 import type { RescuerAssignmentRepository } from "@/domain/rescuer";
 
+import { HttpAdoptionApplicationsGateway } from "./adoption-applications-gateway";
 import { HttpAdoptionsGateway } from "./adoptions-gateway";
 import { HttpAnimalsGateway } from "./animals-gateway";
 import { HttpAuthGateway } from "./auth-gateway";
@@ -14,6 +15,7 @@ import { HttpReportsGateway } from "./reports-gateway";
 import { HttpRescuerGateway } from "./rescuer-gateway";
 import { SecureSessionStorage } from "./session-storage";
 
+import type { AdoptionApplicationDataSource } from "./adoption-applications";
 import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
@@ -36,6 +38,10 @@ const httpRescuerGateway = new HttpRescuerGateway(sessionStorage);
 const httpAnimalsGateway = new HttpAnimalsGateway(sessionStorage);
 const httpAdoptionsGateway = new HttpAdoptionsGateway(sessionStorage);
 const httpCommunityGateway = new HttpCommunityGateway(sessionStorage);
+const httpAdoptionApplicationsGateway = new HttpAdoptionApplicationsGateway(
+  sessionStorage,
+  httpCommunityGateway,
+);
 const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
 const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
 const httpOnboardingGateway = new HttpOnboardingGateway();
@@ -78,6 +84,10 @@ export const animalsDataSource: AnimalsDataSource = httpAnimalsGateway;
 /** Read-only adoption applications shown in the rescuer Adoption screen. */
 export const adoptionsDataSource: AdoptionsDataSource = httpAdoptionsGateway;
 
+/** Resident adoption listing and application flow. */
+export const adoptionApplicationDataSource: AdoptionApplicationDataSource =
+  httpAdoptionApplicationsGateway;
+
 /** Resident community adoption feed: published posts plus your own pending. */
 export const communityDataSource: CommunityDataSource = httpCommunityGateway;
 
@@ -100,6 +110,7 @@ export const reportHistoryDataSource: ReportHistoryDataSource =
 
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
+export type { AdoptionApplicationDataSource } from "./adoption-applications";
 export type { AdoptionsDataSource } from "./adoptions";
 export type { AnimalsDataSource } from "./animals";
 export type { CommunityDataSource } from "./community";
