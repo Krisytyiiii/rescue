@@ -520,7 +520,7 @@ export function AdoptionWorkbench({
                 setPage(1);
               }}
               placeholder="Search request, adopter, animal…"
-              className="w-56 shrink-0 sm:w-64"
+              className="w-full sm:w-64"
             />
             <Select
               name="adoption-species"

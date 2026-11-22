@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   Image,
@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChatIcon, CheckIcon, PawIcon } from "@/components/icons";
+import { ChatIcon, CheckIcon, PawIcon, BookIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
-import { Brand, FontFamily } from "@/constants/theme";
+import { BottomTabInset, Brand, FontFamily } from "@/constants/theme";
 import type { AdoptableAnimal } from "@/domain/adoption-applications";
 import type { CommunityPost } from "@/domain/community";
 import {
@@ -192,6 +192,19 @@ export function ResidentAdoptionsView() {
           )}
         </ScrollView>
       </SafeAreaView>
+
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open learning modules"
+        onPress={() => router.push("/modules" as Href)}
+        style={({ pressed }) => [
+          styles.modulesFab,
+          pressed && styles.pressed,
+        ]}
+      >
+        <BookIcon size={17} color={Brand.paper} />
+        <Text style={styles.modulesFabText}>Modules</Text>
+      </Pressable>
 
       <AdoptionApplySheet
         visible={selected !== null}
@@ -749,5 +762,27 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(31,122,77,0.10)",
   },
   retryText: { fontFamily: FontFamily.medium, fontSize: 11.5, color: Brand.forest },
+  modulesFab: {
+    position: "absolute",
+    right: 20,
+    bottom: BottomTabInset + 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 17,
+    height: 46,
+    borderRadius: 999,
+    backgroundColor: Brand.forest,
+    shadowColor: "#0f3a24",
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  modulesFabText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 12,
+    color: Brand.paper,
+  },
   pressed: { opacity: 0.7 },
 });

@@ -32,7 +32,7 @@ export function ReportsActivityCard({ data }: { data: TrendPoint[] }) {
   );
 
   return (
-    <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/[0.07] px-4 py-3.5">
         <div>
           <h2 className="text-[0.9375rem] font-semibold text-ink">Reports activity</h2>
@@ -78,7 +78,7 @@ export function ReportsActivityCard({ data }: { data: TrendPoint[] }) {
         </div>
       </div>
 
-      <div className="px-4 pt-4">
+      <div className="min-w-0 overflow-hidden px-4 pt-4">
         <AnalyticsAreaChart
           ariaLabel={`Reports and adoptions per day over the last ${range} days`}
           series={SERIES}

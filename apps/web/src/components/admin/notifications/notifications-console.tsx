@@ -335,7 +335,7 @@ export function NotificationsConsole({ notifications }: NotificationsConsoleProp
                 showIcon={false}
                 label="Search notifications"
                 placeholder="Title or body"
-                className="w-56"
+                className="w-full sm:w-56"
               />
             </div>
           </div>

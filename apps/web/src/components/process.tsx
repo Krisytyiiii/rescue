@@ -1,4 +1,4 @@
-import { ArrowRight, ArrowUpRight, House, Siren, Stethoscope } from "lucide-react";
+import { ArrowRight, House, Siren, Stethoscope } from "lucide-react";
 
 import { Reveal } from "@/components/ui/reveal";
 import { steps } from "@/lib/site";
@@ -9,7 +9,7 @@ const icons = {
   house: House,
 };
 
-export function Process() {
+export function Process({ details }: { details: string[] }) {
   return (
     <section
       id="process"
@@ -80,7 +80,7 @@ export function Process() {
                       {step.title}
                     </h3>
                     <p className="label mt-3 text-[0.5625rem] text-paper/35">
-                      {step.detail}
+                      {details[index] ?? step.title}
                     </p>
                   </div>
 
@@ -107,16 +107,6 @@ export function Process() {
               We train every volunteer. No experience needed — only a
               willingness to get your shoes dirty.
             </p>
-            <a
-              href="#support"
-              className="group inline-flex items-center gap-2 border-b border-paper/30 pb-1 text-[0.9375rem] font-medium text-paper transition-colors hover:border-clay-soft hover:text-clay-soft"
-            >
-              Join the rescue list
-              <ArrowUpRight
-                className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45"
-                strokeWidth={1.7}
-              />
-            </a>
           </div>
         </Reveal>
       </div>

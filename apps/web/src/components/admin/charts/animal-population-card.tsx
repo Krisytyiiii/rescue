@@ -38,7 +38,7 @@ export function AnimalPopulationCard({
     : 0;
 
   return (
-    <section className="flex flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <div className="border-b border-ink/[0.07] px-4 py-3.5">
         <h2 className="text-[0.9375rem] font-semibold text-ink">Animal population</h2>
         <p className="mt-0.5 text-[0.75rem] text-ink/45">Dogs and cats on record</p>

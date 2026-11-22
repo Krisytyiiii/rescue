@@ -352,7 +352,7 @@ export function AuditConsole({
               onValueChange={setQuery}
               placeholder="Search code, record, or person"
               label="Search audit logs"
-              className="w-64"
+              className="w-full sm:w-64"
             />
             {hasFilters && (
               <Button size="sm" variant="ghost" onClick={clearFilters}>

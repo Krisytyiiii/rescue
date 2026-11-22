@@ -13,9 +13,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   CheckIcon,
   ChevronDownIcon,
-  ChevronLeftIcon,
   PawIcon,
 } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
 import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { AdoptionRequest, AdoptionStatus } from "@/domain/adoptions";
@@ -62,14 +62,7 @@ export function ResidentApplicationsView() {
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.headerWrap}>
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <ChevronLeftIcon size={20} color={Brand.ink} />
-            </Pressable>
+            <BackButton onPress={() => router.back()} />
 
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>My applications</Text>
@@ -381,16 +374,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  back: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: Brand.paper,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerText: {
     flex: 1,

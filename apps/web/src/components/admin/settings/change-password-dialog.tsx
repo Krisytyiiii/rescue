@@ -78,7 +78,10 @@ export function ChangePasswordDialog({ onClose }: { onClose: () => void }) {
       titleClassName="text-[0.9375rem] font-semibold text-ink"
       panelClassName="max-w-lg"
     >
-      <form onSubmit={submit} className="space-y-3 p-5">
+      <form
+        onSubmit={submit}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-5"
+      >
         <div className="flex items-start gap-2.5 rounded-lg bg-ink/[0.02] px-3 py-2.5">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-ink/[0.05] text-ink/45">
             <KeyRound className="h-4 w-4" strokeWidth={1.8} />

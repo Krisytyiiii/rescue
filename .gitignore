@@ -12,6 +12,9 @@ coverage/
 # Local secrets — never commit
 ADMIN_CREDENTIALS.md
 
+# Local APK artifacts; release builds are attached to GitHub Releases
+apps/web/public/downloads/
+
 *.log
 .DS_Store
 Thumbs.db

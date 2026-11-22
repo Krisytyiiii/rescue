@@ -7,6 +7,7 @@ import {
   HeartHandshake,
   LayoutDashboard,
   MessageSquare,
+  Newspaper,
   PawPrint,
   ScrollText,
   Settings,
@@ -60,6 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Community",
     items: [
+      { href: "/admin/community", label: "Community feed", icon: Newspaper },
       { href: "/admin/users", label: "Users & access", icon: Users },
       { href: "/admin/messaging", label: "Chat", icon: MessageSquare },
       { href: "/admin/learning", label: "E-learning", icon: GraduationCap },

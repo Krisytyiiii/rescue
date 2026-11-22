@@ -243,7 +243,7 @@ export function AdoptionAnimalsList({
               setPage(1);
             }}
             placeholder="Search animal, breed, or code…"
-            className="w-56 shrink-0 sm:w-64"
+            className="w-full sm:w-64"
           />
           <Select
             name="adoption-animal-species"

@@ -725,7 +725,7 @@ export function MessagingConsole({
                 showIcon={false}
                 label="Search conversations"
                 placeholder="Person, code, message"
-                className="w-56"
+                className="w-full sm:w-56"
               />
             </div>
           </div>
@@ -746,7 +746,7 @@ export function MessagingConsole({
         </div>
 
             <div className="grid min-h-[560px] lg:h-[calc(100dvh-20rem)] lg:min-h-[560px] lg:grid-cols-[320px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)_290px]">
-              <div className="group flex max-h-[340px] min-h-0 flex-col border-b border-ink/[0.07] lg:max-h-none lg:border-b-0 lg:border-r">
+              <div className="group flex max-h-[340px] min-h-0 min-w-0 flex-col border-b border-ink/[0.07] lg:max-h-none lg:border-b-0 lg:border-r">
                 <ScrollArea className="min-h-0 flex-1">
                   {filtered.length === 0 ? (
                     <SearchEmpty
@@ -840,7 +840,7 @@ export function MessagingConsole({
                 </ScrollArea>
               </div>
 
-              <div className="flex min-h-0 flex-col">
+              <div className="flex min-h-0 min-w-0 flex-col">
                 {!selectedId ? (
                   <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-ink/[0.04] text-ink/30">
@@ -997,7 +997,7 @@ export function MessagingConsole({
                                     }`}
                                   >
                                     <div
-                                      className={`rounded-xl px-3 py-2 text-[0.75rem] leading-[1.55] ${
+                                      className={`min-w-0 break-words rounded-xl px-3 py-2 text-[0.75rem] leading-[1.55] ${
                                         message.isDeleted
                                           ? "border border-dashed border-ink/15 bg-ink/[0.015] italic text-ink/35"
                                           : mine

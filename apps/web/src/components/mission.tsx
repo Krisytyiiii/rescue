@@ -5,13 +5,29 @@ import { PawMark } from "@/components/brand";
 import { Counter } from "@/components/ui/counter";
 import { Reveal } from "@/components/ui/reveal";
 
-const missionStats = [
-  { value: 1284, label: "Animals rescued", note: "since 2021" },
-  { value: 2180, label: "Sterilisations", note: "free for community pets" },
-  { value: 93, label: "Adoptions stable", note: "12 months after rehoming", suffix: "%" },
-];
+type MissionStat = {
+  value: number;
+  label: string;
+  note: string;
+  suffix?: string;
+};
 
-export function Mission() {
+function monthLabel(date: Date | null) {
+  if (!date) return "Live data";
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  }).format(date);
+}
+
+export function Mission({
+  stats,
+  updatedAt,
+}: {
+  stats: MissionStat[];
+  updatedAt: Date | null;
+}) {
   return (
     <section id="work" className="relative py-20 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
@@ -87,7 +103,7 @@ export function Mission() {
 
           <div className="flex flex-col justify-between lg:col-span-4 lg:pl-4">
             <div>
-              {missionStats.map((stat) => (
+              {stats.map((stat) => (
                 <div
                   key={stat.label}
                   className="border-t border-ink/15 py-6 first:border-t-0 first:pt-0 last:pb-0"
@@ -109,7 +125,7 @@ export function Mission() {
 
             <div className="mt-8 flex items-center justify-between border-t border-ink/15 pt-5">
               <p className="label text-[0.5625rem] leading-relaxed text-ink/40">
-                Updated March 2026
+                Updated {monthLabel(updatedAt)}
               </p>
               <a
                 href="#stories"

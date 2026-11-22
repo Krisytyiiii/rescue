@@ -48,16 +48,6 @@ export function Cta() {
                     <ArrowUpRight className="h-4 w-4" strokeWidth={1.7} />
                   </span>
                 </a>
-                <a
-                  href="mailto:hello@furescue.ph"
-                  className="group inline-flex items-center gap-2 border-b border-paper/30 pb-1 text-[0.875rem] font-medium text-paper transition-colors hover:border-clay-soft hover:text-clay-soft"
-                >
-                  Volunteer or foster
-                  <ArrowUpRight
-                    className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45"
-                    strokeWidth={1.7}
-                  />
-                </a>
               </div>
             </Reveal>
           </div>

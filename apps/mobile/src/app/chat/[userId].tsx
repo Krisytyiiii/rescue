@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChevronLeftIcon, PawIcon, PersonIcon, SendIcon } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
+import { PawIcon, PersonIcon, SendIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
@@ -64,15 +65,7 @@ export default function ChatScreen() {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Back to messages"
-              hitSlop={10}
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <ChevronLeftIcon size={20} color={Brand.ink} />
-            </Pressable>
+            <BackButton onPress={() => router.back()} label="Back to messages" />
 
             <UserAvatar uri={contactPhotoUrl} size={38} />
 
@@ -323,13 +316,6 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: Brand.line,
-  },
-  back: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerAvatar: {
     width: 38,

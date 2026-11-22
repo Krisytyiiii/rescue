@@ -8,17 +8,9 @@ const columns = [
     links: [
       { label: "Meet the rescues", href: "#adopt" },
       { label: "How adoption works", href: "#work" },
+      { label: "Meet the rescuers", href: "#rescuers" },
       { label: "Become a foster", href: "mailto:foster@furescue.ph" },
       { label: "Field notes", href: "#stories" },
-    ],
-  },
-  {
-    title: "Support",
-    links: [
-      { label: "Make a donation", href: "#support" },
-      { label: "Give monthly", href: "#support" },
-      { label: "Volunteer with us", href: "mailto:volunteer@furescue.ph" },
-      { label: "Partner with us", href: "mailto:hello@furescue.ph" },
     ],
   },
 ];
@@ -36,10 +28,6 @@ export function SiteFooter() {
             <p className="mt-5 max-w-[32ch] text-[0.9375rem] leading-[1.7] text-ink/55">
               A volunteer-run animal rescue and adoption network in Mati City,
               Davao Oriental. Kindness, organised.
-            </p>
-            <p className="mt-6 flex items-center gap-2 font-mono text-[0.5625rem] uppercase tracking-[0.12em] text-ink/35">
-              <span className="h-1.5 w-1.5 rounded-full bg-clay" />
-              Rescuing since 2021
             </p>
           </div>
 
@@ -68,15 +56,6 @@ export function SiteFooter() {
               <p>Mati City, Davao Oriental 8200</p>
               <p>Philippines</p>
             </address>
-            <a
-              href="mailto:hello@furescue.ph"
-              className="link-line mt-4 inline-block text-[0.8125rem] font-medium"
-            >
-              hello@furescue.ph
-            </a>
-            <p className="mt-4 font-mono text-[0.5625rem] uppercase tracking-[0.1em] text-ink/35">
-              Sat–Sun · 9am–4pm
-            </p>
           </div>
         </div>
 

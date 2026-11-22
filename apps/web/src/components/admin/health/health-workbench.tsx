@@ -634,7 +634,7 @@ export function HealthWorkbench({
                 setPage(1);
               }}
               placeholder="Search animal, vaccine, diagnosis…"
-              className="w-56 shrink-0 sm:w-64"
+              className="w-full sm:w-64"
             />
 
             <Select

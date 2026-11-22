@@ -1,13 +1,13 @@
 "use client";
 
 import { MotionConfig, motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { useRef } from "react";
 
 import { Counter } from "@/components/ui/counter";
 import { Magnetic } from "@/components/ui/magnetic";
-import { heroStats } from "@/lib/site";
+import type { HeroStat } from "@/lib/site";
 
 const ease = [0.16, 1, 0.3, 1] as const;
 
@@ -26,7 +26,13 @@ const wordVariants = {
   },
 };
 
-export function Hero() {
+export function Hero({
+  stats,
+  homesFound,
+}: {
+  stats: HeroStat[];
+  homesFound: number;
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -55,26 +61,6 @@ export function Hero() {
       <div className="relative mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-6">
           <div className="lg:col-span-7 lg:pr-10">
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease }}
-              className="flex flex-wrap items-center gap-x-3 gap-y-2"
-            >
-              <span className="relative grid h-2 w-2 place-items-center">
-                <span className="live-dot absolute inline-flex h-2 w-2 rounded-full bg-clay" />
-                <span className="relative inline-flex h-1 w-1 rounded-full bg-clay" />
-              </span>
-              <p className="label text-ink/65">
-                Animal rescue &amp; adoption
-              </p>
-              <span aria-hidden="true" className="h-3 w-px bg-ink/20" />
-              <p className="label flex items-center gap-1.5 text-ink/65">
-                <MapPin className="h-3 w-3" strokeWidth={1.6} />
-                Mati City, Davao Oriental
-              </p>
-            </motion.div>
-
             <motion.h1
               variants={lineVariants}
               initial="hidden"
@@ -133,6 +119,14 @@ export function Hero() {
                 See how it works
                 <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.7} />
               </a>
+
+              <a
+                href="#rescuers"
+                className="group inline-flex items-center gap-2 text-[0.9375rem] font-medium text-ink/80 transition-colors hover:text-ink"
+              >
+                Meet the rescuers
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth={1.7} />
+              </a>
             </motion.div>
 
             <motion.div
@@ -141,7 +135,7 @@ export function Hero() {
               transition={{ duration: 1, delay: 0.75 }}
               className="mt-12 grid max-w-[540px] grid-cols-3 border-t border-ink/15 pt-6"
             >
-              {heroStats.map((stat, index) => (
+              {stats.map((stat, index) => (
                 <div
                   key={stat.label}
                   className={index > 0 ? "border-l border-ink/15 pl-5 sm:pl-7" : ""}
@@ -223,7 +217,7 @@ export function Hero() {
                 className="absolute left-0 top-[4%] z-30 grid h-[104px] w-[104px] rotate-[-7deg] place-content-center rounded-full border border-clay/20 bg-clay text-center text-paper shadow-[0_16px_40px_-16px_rgba(31,122,77,0.55)] sm:h-[118px] sm:w-[118px]"
               >
                 <span className="font-display text-[2rem] leading-none sm:text-[2.35rem]">
-                  916
+                  {homesFound.toLocaleString("en-US")}
                 </span>
                 <span className="label mt-1.5 text-[0.5rem] leading-[1.5] text-paper/80">
                   Homes

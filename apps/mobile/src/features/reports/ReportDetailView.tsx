@@ -10,11 +10,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import {
-  ChatIcon,
-  ChevronLeftIcon,
-  PersonIcon,
-} from "@/components/icons";
+import { BackButton } from "@/components/back-button";
+import { ChatIcon, PersonIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import { REPORT_STATUS_META } from "@/domain/report-map";
@@ -52,14 +49,7 @@ export function ReportDetailView({ id }: { id: string }) {
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Back to my reports"
-            onPress={goBack}
-            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-          >
-            <ChevronLeftIcon size={18} color={Brand.ink} />
-          </Pressable>
+          <BackButton onPress={goBack} label="Back to my reports" />
           <View style={styles.headerTitles}>
             <Text style={styles.headerLabel}>Case file</Text>
             <Text style={styles.headerTitle} numberOfLines={1}>
@@ -392,13 +382,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
-  },
-  back: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerTitles: { flex: 1 },
   headerLabel: {

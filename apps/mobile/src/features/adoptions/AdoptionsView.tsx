@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BackButton } from "@/components/back-button";
 import { ChevronDownIcon, HomeIcon, PawIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
@@ -67,14 +68,7 @@ export function AdoptionsView() {
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.headerWrap}>
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <Text style={styles.backGlyph}>←</Text>
-            </Pressable>
+            <BackButton onPress={() => router.back()} />
 
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Adoptions</Text>
@@ -462,21 +456,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  back: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: Brand.paper,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backGlyph: {
-    fontFamily: FontFamily.medium,
-    fontSize: 16,
-    color: Brand.ink,
   },
   headerText: {
     flex: 1,

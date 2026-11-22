@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "FuRescue",
+    "slug": "furescue",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -43,6 +43,15 @@
       ],
       "expo-secure-store",
       [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": false,
+            "enableShrinkResourcesInReleaseBuilds": false
+          }
+        }
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "FuRescue uses your photos so you can attach pictures to an adoption post."
@@ -66,7 +75,7 @@
         }
       },
       "eas": {
-        "projectId": "c0ffe6c1-8632-4274-886e-cc9d918b80f7"
+        "projectId": "29317c6e-7cf2-40eb-9378-f52998221a42"
       }
     },
     "owner": "akeroshii"

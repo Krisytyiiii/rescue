@@ -142,7 +142,7 @@ export function AnimalsWorkbench({
 
   return (
     <>
-      <aside className="border-b border-ink/[0.07] bg-ink/[0.012] p-2.5 lg:border-b-0 lg:border-r">
+      <aside className="min-w-0 border-b border-ink/[0.07] bg-ink/[0.012] p-2.5 lg:border-b-0 lg:border-r">
         <AnimalsSidebar
           counts={counts}
           activeTab={tabForFilters(filters)}

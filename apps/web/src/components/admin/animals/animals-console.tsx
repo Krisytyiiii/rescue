@@ -415,7 +415,7 @@ export function AnimalsConsole({
           clearLabel="Clear filters"
         />
       ) : (
-        <ul className="grid gap-3 p-4 pt-0 sm:grid-cols-2 xl:grid-cols-3">
+        <ul className="grid min-w-0 gap-3 p-4 pt-0 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map((animal) => (
             <AnimalCard
               key={animal.id}
@@ -525,7 +525,7 @@ function AnimalCard({
   ).length;
 
   return (
-    <li className="h-full">
+    <li className="h-full min-w-0">
       <article
         role="button"
         tabIndex={0}
@@ -537,7 +537,7 @@ function AnimalCard({
             onOpen();
           }
         }}
-        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(16,36,26,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
+        className="group flex h-full min-w-0 cursor-pointer flex-col overflow-hidden rounded-xl border border-ink/[0.08] bg-white text-left outline-none transition-shadow hover:shadow-[0_16px_36px_-24px_rgba(16,36,26,0.5)] focus-visible:ring-2 focus-visible:ring-clay/40 focus-visible:ring-offset-2"
       >
         <div className="relative">
           <span

@@ -35,7 +35,7 @@ export function AdoptionViewTabs({
   }
 
   return (
-    <div className="inline-flex rounded-xl border border-ink/[0.08] bg-white p-1.5 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <div className="inline-flex max-w-full overflow-x-auto rounded-xl border border-ink/[0.08] bg-white p-1.5 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <TabFilters
         ariaLabel="Adoption sections"
         value={value}

@@ -98,7 +98,7 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby={description ? "confirm-dialog-description" : undefined}
-        className="dialog-panel max-h-[100dvh] w-full max-w-md overflow-y-auto rounded-t-2xl border border-ink/[0.08] bg-white shadow-[0_28px_70px_-28px_rgba(6,32,20,0.55)] sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
+        className="dialog-panel max-h-[100dvh] w-full min-w-0 max-w-md overflow-y-auto overscroll-contain rounded-t-2xl border border-ink/[0.08] bg-white shadow-[0_28px_70px_-28px_rgba(6,32,20,0.55)] sm:max-h-[calc(100dvh-2rem)] sm:rounded-2xl"
       >
         <div className="flex items-start gap-3 p-4 sm:gap-3.5 sm:p-5">
           <span

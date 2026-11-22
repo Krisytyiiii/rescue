@@ -102,7 +102,7 @@ export function AdminNavbar({
     <header className="sticky top-0 z-30 border-b border-ink/10 bg-white/85 backdrop-blur-md">
       <div className="relative overflow-hidden border-b border-ink/[0.06] bg-gradient-to-r from-[#fbf3e6] via-[#fdfbf7] to-white">
         <div className="pointer-events-none absolute inset-y-0 left-0 w-40 bg-[radial-gradient(120%_140%_at_0%_50%,rgba(201,154,78,0.16),transparent_70%)]" />
-        <div className="relative flex h-9 items-center gap-2.5 px-4">
+        <div className="relative flex h-9 items-center gap-2 px-3 sm:gap-2.5 sm:px-4">
           <span className="relative flex h-2 w-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-clay/40" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-clay" />
@@ -130,7 +130,7 @@ export function AdminNavbar({
         </div>
       </div>
 
-      <div className="flex h-16 items-center gap-3 px-4">
+      <div className="flex h-16 min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4">
       <button
         type="button"
         onClick={onOpenMobile}

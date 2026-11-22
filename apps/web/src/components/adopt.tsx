@@ -2,11 +2,10 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import { ArrowUpRight, Check, Heart, MapPin, X } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Reveal } from "@/components/ui/reveal";
-import { pets, type Pet } from "@/lib/site";
+import type { Pet } from "@/lib/site";
 
 type Filter = "all" | Pet["species"];
 
@@ -20,11 +19,10 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 function statusClass(status: Pet["status"]) {
   if (status === "Reserved") return "bg-ink text-paper";
-  if (status === "Foster needed") return "bg-clay text-paper";
   return "bg-paper/92 text-ink";
 }
 
-export function Adopt() {
+export function Adopt({ pets }: { pets: Pet[] }) {
   const [filter, setFilter] = useState<Filter>("all");
   const [saved, setSaved] = useState<string[]>([]);
   const [active, setActive] = useState<Pet | null>(null);
@@ -102,7 +100,7 @@ export function Adopt() {
           <div className="flex items-center justify-between border-b border-ink/15 pb-5">
             <span className="label text-ink/55">(03) — Waiting for you</span>
             <span className="label hidden text-ink/40 sm:block">
-              6 of 41 animals in our care
+              {pets.length} published {pets.length === 1 ? "profile" : "profiles"}
             </span>
           </div>
         </Reveal>
@@ -208,13 +206,19 @@ export function Adopt() {
                     aria-label={`Read ${pet.name}'s story`}
                   >
                     <div className="relative aspect-[4/5] overflow-hidden bg-sand">
-                      <Image
-                        src={pet.image}
-                        alt={pet.alt}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.045]"
-                      />
+                      {pet.image ? (
+                        <img
+                          src={pet.image}
+                          alt={pet.alt}
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="h-full w-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.045]"
+                        />
+                      ) : (
+                        <span className="grid h-full w-full place-items-center text-ink/20">
+                          <Heart className="h-10 w-10" strokeWidth={1.2} />
+                          <span className="sr-only">No photo attached</span>
+                        </span>
+                      )}
 
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/45 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
@@ -285,21 +289,11 @@ export function Adopt() {
         </motion.div>
 
         <Reveal delay={0.1}>
-          <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-ink/15 pt-6 sm:flex-row sm:items-center">
+          <div className="mt-14 border-t border-ink/15 pt-6">
             <p className="max-w-[48ch] text-[0.875rem] leading-relaxed text-ink/55">
               Can&apos;t adopt right now? Fostering is free — we cover food, vet
               care, and every question you might have.
             </p>
-            <a
-              href="mailto:foster@furescue.ph"
-              className="group inline-flex items-center gap-2 text-[0.875rem] font-medium"
-            >
-              Become a foster home
-              <ArrowUpRight
-                className="h-4 w-4 transition-transform duration-300 group-hover:rotate-45"
-                strokeWidth={1.7}
-              />
-            </a>
           </div>
         </Reveal>
       </div>
@@ -334,13 +328,19 @@ export function Adopt() {
               className="relative z-10 grid max-h-[92dvh] w-full max-w-[980px] overflow-y-auto bg-paper md:max-h-[86dvh] md:grid-cols-2 md:overflow-hidden"
             >
               <div className="relative min-h-[280px] bg-sand sm:min-h-[340px] md:min-h-[600px]">
-                <Image
-                  src={active.image}
-                  alt={active.alt}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 490px"
-                  className="object-cover"
-                />
+                {active.image ? (
+                  <img
+                    src={active.image}
+                    alt={active.alt}
+                    sizes="(max-width: 768px) 100vw, 490px"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="grid h-full w-full place-items-center text-ink/20">
+                    <Heart className="h-12 w-12" strokeWidth={1.2} />
+                    <span className="sr-only">No photo attached</span>
+                  </span>
+                )}
                 <span
                   className={`absolute left-4 top-4 rounded-full px-3 py-1.5 font-mono text-[0.5625rem] uppercase tracking-[0.12em] ${statusClass(
                     active.status,

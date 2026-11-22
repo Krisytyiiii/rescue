@@ -167,7 +167,7 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
   return (
     <div className="px-4">
       <div className="overflow-x-auto rounded-lg border border-ink/[0.07]">
-        <table className="w-full border-collapse text-left">
+        <table className="w-full min-w-[620px] border-collapse text-left">
           <thead>
             <tr className="border-b border-ink/[0.07] bg-ink/[0.015] text-[0.625rem] uppercase tracking-[0.08em] text-ink/40">
               <th className="px-3 py-2.5 font-semibold">User</th>

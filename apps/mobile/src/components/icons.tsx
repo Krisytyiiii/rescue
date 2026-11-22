@@ -318,6 +318,50 @@ export function PawIcon({
   );
 }
 
+export function PlayIcon({
+  size = 18,
+  color = Brand.ink,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="m9 6 9 6-9 6V6Z" />
+    </StrokeIcon>
+  );
+}
+
+export function DocumentIcon({
+  size = 18,
+  color = Brand.ink,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M6 3h8l4 4v14H6V3Z" />
+      <Path d="M14 3v4h4" />
+    </StrokeIcon>
+  );
+}
+
+export function BookIcon({
+  size = 18,
+  color = Brand.ink,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5V5.5Z" />
+      <Path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5A2.5 2.5 0 0 1 4 20.5Z" />
+    </StrokeIcon>
+  );
+}
+
 export function ExpandIcon({
   size = 16,
   color = Brand.ink55,

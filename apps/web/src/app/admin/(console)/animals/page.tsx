@@ -32,7 +32,10 @@ export default async function AdminAnimalsPage() {
   const animals = await fetchAllPages((page, pageSize) =>
     animalsService.list({ page, pageSize }, actor),
   );
-  const rows = animals.map(toAnimalRow);
+  // Resident adoption posts are moderated on the community page.
+  const rows = animals
+    .filter((animal) => animal.originType !== "community_post")
+    .map(toAnimalRow);
   const counts = await animalsService.getAdminCounts();
 
   // Rescued reports that do not yet have an animal record can be turned into
@@ -57,7 +60,7 @@ export default async function AdminAnimalsPage() {
     }));
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       <AdminLiveRefresh />
 
       <div className="mt-1 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">

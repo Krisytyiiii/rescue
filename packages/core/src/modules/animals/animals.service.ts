@@ -303,15 +303,37 @@ export class AnimalsService {
   async getAdminCounts() {
     const [total, inCare, available, adoptionPending, adopted, pendingReview] =
       await prisma.$transaction([
-        prisma.animal.count({ where: { deletedAt: null } }),
         prisma.animal.count({
-          where: { lifecycleStatus: { in: ["rescued", "under_care"] }, deletedAt: null },
+          where: { deletedAt: null, originType: { not: "community_post" } },
         }),
-        prisma.animal.count({ where: { lifecycleStatus: "available", deletedAt: null } }),
         prisma.animal.count({
-          where: { lifecycleStatus: "adoption_pending", deletedAt: null },
+          where: {
+            lifecycleStatus: { in: ["rescued", "under_care"] },
+            deletedAt: null,
+            originType: { not: "community_post" },
+          },
         }),
-        prisma.animal.count({ where: { lifecycleStatus: "adopted", deletedAt: null } }),
+        prisma.animal.count({
+          where: {
+            lifecycleStatus: "available",
+            deletedAt: null,
+            originType: { not: "community_post" },
+          },
+        }),
+        prisma.animal.count({
+          where: {
+            lifecycleStatus: "adoption_pending",
+            deletedAt: null,
+            originType: { not: "community_post" },
+          },
+        }),
+        prisma.animal.count({
+          where: {
+            lifecycleStatus: "adopted",
+            deletedAt: null,
+            originType: { not: "community_post" },
+          },
+        }),
         prisma.animal.count({ where: { listingStatus: "pending_review", deletedAt: null } }),
       ]);
 

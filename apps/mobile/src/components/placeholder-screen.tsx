@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import type { ReactNode } from "react";
 import {
   Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -12,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChevronLeftIcon } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
 import { Brand, FontFamily } from "@/constants/theme";
 
 const WEB_BLUR =
@@ -46,15 +45,7 @@ export function PlaceholderScreen({
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={onBack}
-            hitSlop={8}
-            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-          >
-            <ChevronLeftIcon size={18} color={Brand.ink} />
-          </Pressable>
+          <BackButton onPress={onBack} />
           <Text style={styles.headerTitle}>{eyebrow}</Text>
           <View style={styles.back} />
         </View>
@@ -132,9 +123,6 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
-  },
-  pressed: {
-    opacity: 0.6,
   },
   headerTitle: {
     flex: 1,

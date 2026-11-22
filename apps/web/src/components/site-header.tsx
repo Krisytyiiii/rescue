@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -43,34 +43,6 @@ export function SiteHeader() {
       />
 
       <header className="fixed inset-x-0 top-0 z-50">
-        <div className="relative overflow-hidden border-b border-white/10 bg-[#0b1f13] text-paper">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_160%_at_12%_-40%,rgba(201,154,78,0.28),transparent_58%)]" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-clay/40 to-transparent" />
-          <div className="relative mx-auto flex h-9 max-w-[1440px] items-center gap-2.5 px-5 sm:px-8 lg:px-12">
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-moss/50" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#7fbf8b]" />
-            </span>
-            <span className="shrink-0 text-[0.5625rem] font-semibold uppercase tracking-[0.16em] text-paper/50">
-              Community feed
-            </span>
-            <span aria-hidden="true" className="hidden h-3 w-px shrink-0 bg-paper/15 sm:block" />
-            <p className="min-w-0 flex-1 truncate text-[0.6875rem] leading-none text-paper/70">
-              Residents are posting pets for adoption — browse the latest from your barangay.
-            </p>
-            <Link
-              href="/community"
-              className="group/cta inline-flex shrink-0 items-center gap-1.5 rounded-full border border-paper/15 bg-paper/[0.06] px-2.5 py-1 text-[0.625rem] font-medium text-paper/85 transition-colors hover:border-paper/35 hover:bg-paper/10 hover:text-paper"
-            >
-              Open feed
-              <ArrowUpRight
-                className="h-3 w-3 transition-transform duration-200 group-hover/cta:-translate-y-0.5 group-hover/cta:translate-x-0.5"
-                strokeWidth={2}
-              />
-            </Link>
-          </div>
-        </div>
-
         <div
           className={`transition-colors duration-500 ${
             scrolled
@@ -102,26 +74,11 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-2.5">
             <Link
-              href="/login"
+              href="/admin/login"
               className="hidden h-10 items-center rounded-full px-4 text-[0.8125rem] font-medium text-ink/75 transition-colors hover:text-ink sm:inline-flex"
             >
               Log in
             </Link>
-            <a
-              href="#support"
-              className="hidden h-10 items-center gap-1.5 rounded-full border border-ink/15 px-5 text-[0.8125rem] font-medium transition-colors hover:border-ink/40 hover:bg-ink/[0.03] sm:inline-flex"
-            >
-              Donate
-            </a>
-            <a
-              href="#adopt"
-              className="group hidden h-10 items-center gap-1.5 rounded-full bg-ink pl-5 pr-3 text-[0.8125rem] font-medium text-paper transition-colors hover:bg-moss sm:inline-flex"
-            >
-              Adopt a pet
-              <span className="grid h-6 w-6 place-items-center rounded-full bg-paper/10 transition-transform duration-300 group-hover:rotate-45">
-                <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.8} />
-              </span>
-            </a>
             <button
               type="button"
               onClick={() => setOpen(true)}
@@ -184,29 +141,12 @@ export function SiteHeader() {
 
             <div className="space-y-3 pb-2">
               <Link
-                href="/login"
+                href="/admin/login"
                 onClick={() => setOpen(false)}
                 className="flex h-12 items-center justify-center rounded-full border border-ink/20 text-sm font-medium"
               >
                 Log in
               </Link>
-              <div className="grid grid-cols-[1fr_auto] gap-2">
-                <a
-                  href="#adopt"
-                  onClick={() => setOpen(false)}
-                  className="flex h-12 items-center justify-between rounded-full bg-ink px-6 text-sm font-medium text-paper"
-                >
-                  Meet the rescues
-                  <ArrowUpRight className="h-4 w-4" strokeWidth={1.8} />
-                </a>
-                <a
-                  href="#support"
-                  onClick={() => setOpen(false)}
-                  className="flex h-12 items-center rounded-full border border-ink/20 px-6 text-sm font-medium"
-                >
-                  Donate
-                </a>
-              </div>
               <p className="label text-center !tracking-[0.1em] text-ink/45">
                 Mati City · Davao Oriental
               </p>

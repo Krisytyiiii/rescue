@@ -61,7 +61,7 @@ export function OverlayCard({
 
   return (
     <div
-      className="dialog-overlay fixed inset-0 z-50 flex items-end justify-center bg-[#062013]/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
+      className="dialog-overlay fixed inset-0 z-50 flex items-end justify-center overflow-y-auto overscroll-contain bg-[#062013]/60 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -70,9 +70,9 @@ export function OverlayCard({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`dialog-panel group flex max-h-[100dvh] w-full max-w-5xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_32px_80px_-32px_rgba(6,32,20,0.6)] sm:max-h-[92vh] sm:rounded-2xl ${panelClassName}`}
+        className={`dialog-panel group flex max-h-[100dvh] w-full min-w-0 max-w-5xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-[0_32px_80px_-32px_rgba(6,32,20,0.6)] sm:max-h-[92vh] sm:rounded-2xl ${panelClassName}`}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-ink/[0.07] px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4">
+        <div className="flex min-w-0 items-start justify-between gap-3 border-b border-ink/[0.07] px-4 py-3.5 sm:gap-4 sm:px-5 sm:py-4">
           <div className="min-w-0">
             {eyebrow && (
               <p className="text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-clay">
@@ -102,10 +102,12 @@ export function OverlayCard({
           )}
         </div>
 
-        {children}
+        <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col">
+          {children}
+        </div>
 
         {footer && (
-          <div className="flex flex-col-reverse items-stretch gap-2 border-t border-ink/[0.07] bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:px-5 sm:py-3.5 sm:pb-3.5 [&>a]:w-full [&>button]:w-full sm:[&>a]:w-auto sm:[&>button]:w-auto">
+          <div className="flex flex-col-reverse items-stretch gap-2 border-t border-ink/[0.07] bg-white px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-center sm:justify-end sm:px-5 sm:py-3.5 sm:pb-3.5 [&>a]:w-full [&>button]:w-full [&>div]:w-full sm:[&>a]:w-auto sm:[&>button]:w-auto sm:[&>div]:w-auto">
             {footer}
           </div>
         )}

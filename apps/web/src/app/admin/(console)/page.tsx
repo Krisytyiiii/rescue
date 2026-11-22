@@ -278,7 +278,7 @@ export default async function AdminDashboardPage() {
   }).format(new Date());
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-0">
       <AdminLiveRefresh />
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
@@ -343,7 +343,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Charts */}
-      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div className="mt-4 grid min-w-0 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ReportsActivityCard data={trend} />
         <AnimalPopulationCard
           totalAnimals={totalAnimals}
@@ -355,8 +355,8 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Program at a glance */}
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+      <div className="mt-4 grid min-w-0 gap-4 sm:grid-cols-2">
+        <section className="min-w-0 rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
           <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
             <h3 className="text-[0.9375rem] font-semibold text-ink">Report pipeline</h3>
             <Link
@@ -372,7 +372,7 @@ export default async function AdminDashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+        <section className="min-w-0 rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
           <div className="flex items-center justify-between border-b border-ink/[0.07] px-4 py-3.5">
             <h3 className="text-[0.9375rem] font-semibold text-ink">Animal lifecycle</h3>
             <Link
@@ -400,21 +400,21 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-3 grid gap-4 lg:grid-cols-3">
+        <div className="mt-3 grid min-w-0 gap-4 lg:grid-cols-3">
           {/* Quick actions */}
-          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+          <section className="flex h-full min-w-0 flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
             <div className="flex h-[52px] items-center border-b border-ink/[0.07] px-4">
               <h2 className="text-[0.9375rem] font-semibold text-ink">Quick actions</h2>
             </div>
             <div className="flex-1 p-3">
-              <ul className="grid h-full auto-rows-fr grid-cols-2 gap-2">
+              <ul className="grid h-full min-w-0 auto-rows-fr grid-cols-1 gap-2 min-[360px]:grid-cols-2">
                 {WORKSPACE.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <li key={item.href}>
+                    <li key={item.href} className="min-w-0">
                       <Link
                         href={item.href}
-                        className="group flex h-full items-center gap-2.5 rounded-lg border border-ink/[0.06] bg-ink/[0.015] px-2.5 py-2.5 transition-colors hover:border-clay/30 hover:bg-clay/[0.04]"
+                        className="group flex h-full min-w-0 items-center gap-2.5 rounded-lg border border-ink/[0.06] bg-ink/[0.015] px-2.5 py-2.5 transition-colors hover:border-clay/30 hover:bg-clay/[0.04]"
                       >
                         <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-ink/50 shadow-[0_1px_2px_rgba(20,30,25,0.06)] transition-colors group-hover:text-clay">
                           <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
@@ -435,7 +435,7 @@ export default async function AdminDashboardPage() {
           </section>
 
           {/* Rescuer approvals */}
-          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+          <section className="flex h-full min-w-0 flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
             <div className="flex h-[52px] items-center justify-between gap-3 border-b border-ink/[0.07] px-4">
               <div className="flex min-w-0 items-center gap-2.5">
                 <h2 className="truncate text-[0.9375rem] font-semibold text-ink">Rescuer approvals</h2>
@@ -464,7 +464,7 @@ export default async function AdminDashboardPage() {
           </section>
 
           {/* Team & coverage */}
-          <section className="flex h-full flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+          <section className="flex h-full min-w-0 flex-col rounded-xl border border-ink/[0.08] bg-white shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
           <div className="flex h-[52px] items-center justify-between border-b border-ink/[0.07] px-4">
             <h2 className="text-[0.9375rem] font-semibold text-ink">Team &amp; coverage</h2>
             <Link

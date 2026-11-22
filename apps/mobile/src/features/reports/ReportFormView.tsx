@@ -33,12 +33,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowUpRightIcon,
   CheckIcon,
-  ChevronLeftIcon,
   CloseIcon,
   ExpandIcon,
   MapPinIcon,
   PawIcon,
 } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
 import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
@@ -313,17 +313,7 @@ export function ReportFormView() {
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.formHead}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Back to my reports"
-                onPress={goBack}
-                style={({ pressed }) => [
-                  styles.back,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <ChevronLeftIcon size={18} color={Brand.ink} />
-              </Pressable>
+              <BackButton onPress={goBack} label="Back to my reports" />
               <Text style={styles.formHeadLabel}>New report</Text>
             </View>
 
@@ -802,14 +792,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     marginBottom: 14,
-  },
-  back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(16,36,26,0.05)",
   },
   formHeadLabel: {
     fontFamily: FontFamily.medium,

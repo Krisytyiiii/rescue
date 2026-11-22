@@ -34,10 +34,10 @@ export function AnimalsStats({ counts }: { counts: AnimalCounts }) {
       <StatCard
         label="Needs review"
         value={counts.pendingReview}
-        hint="Posts waiting for approval"
+        hint="Resident posts to review"
         icon={ShieldAlert}
         tone="forest"
-        href="/admin/animals?listing=pending_review"
+        href="/admin/community"
       />
     </div>
   );

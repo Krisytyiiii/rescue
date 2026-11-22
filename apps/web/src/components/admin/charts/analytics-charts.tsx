@@ -130,10 +130,10 @@ export function AnalyticsAreaChart({
   }
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 max-w-full">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full"
+        className="block w-full max-w-full"
         style={{ height }}
         role="img"
         aria-label={ariaLabel}
@@ -295,10 +295,10 @@ export function AnalyticsBarChart({
   const [active, setActive] = useState<number | null>(null);
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 max-w-full">
       <svg
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full"
+        className="block w-full max-w-full"
         style={{ height }}
         role="img"
         aria-label={ariaLabel}
@@ -411,7 +411,7 @@ export function AnalyticsDonutChart({
   let offset = 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+    <div className="flex min-w-0 max-w-full flex-wrap items-center gap-x-5 gap-y-3">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         {active !== null && (
           <FloatingTooltip
@@ -563,7 +563,7 @@ export function AnalyticsGaugeChart({
   const [hovered, setHovered] = useState(false);
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative flex min-w-0 max-w-full flex-col items-center">
       {hovered && (
         <FloatingTooltip
           style={{ left: "50%", top: 0, transform: "translate(-50%, -100%)" }}

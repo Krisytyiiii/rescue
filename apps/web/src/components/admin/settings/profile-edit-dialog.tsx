@@ -143,7 +143,10 @@ export function ProfileEditDialog({
       titleClassName="text-[0.9375rem] font-semibold text-ink"
       panelClassName="max-w-lg"
     >
-      <form onSubmit={submit} className="space-y-3 p-5">
+      <form
+        onSubmit={submit}
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain p-4 sm:p-5"
+      >
         <div className="flex items-center gap-3">
           <UserAvatar
             src={photoUrl}

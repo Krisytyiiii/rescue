@@ -154,7 +154,7 @@ export function AnalyticsConsole({ data }: { data: AnalyticsDashboardDto }) {
         </span>
       </div>
 
-      <section className="rounded-xl border border-ink/[0.08] bg-white p-3 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+      <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-3 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
         <div className="flex flex-wrap items-center gap-2">
           <div
             role="group"
@@ -655,7 +655,7 @@ function ReportsTab({
 }) {
   return (
     <div className="space-y-3">
-      <section className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+      <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
         <h3 className="text-[0.8125rem] font-semibold text-ink">Generate a report</h3>
         <p className="mt-0.5 text-[0.6875rem] text-ink/45">
           Save the current range as a report record for the city vet archive.
@@ -860,7 +860,7 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-[0.8125rem] font-semibold text-ink">{title}</h3>
@@ -887,7 +887,7 @@ function DurationPanel({
 }) {
   const max = Math.max(1, ...durations.map((row) => Math.max(row.meanHours, row.medianHours)));
   return (
-    <section className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-[0.8125rem] font-semibold text-ink">Stage durations</h3>
@@ -950,7 +950,7 @@ function BarPanel({
 }) {
   const max = Math.max(1, ...slices.map((slice) => slice.value));
   return (
-    <section className="rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
+    <section className="min-w-0 overflow-hidden rounded-xl border border-ink/[0.08] bg-white p-4 shadow-[0_1px_2px_rgba(20,30,25,0.04)]">
       <h3 className="text-[0.8125rem] font-semibold text-ink">{title}</h3>
       <p className="mt-0.5 text-[0.6875rem] text-ink/45">{caption}</p>
       <ul className="mt-3 space-y-2.5">

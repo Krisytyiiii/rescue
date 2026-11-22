@@ -62,7 +62,6 @@ const LIFECYCLE_OPTIONS = [
 const LISTING_OPTIONS = [
   { value: "", label: "Any visibility" },
   { value: "draft", label: "Not published" },
-  { value: "pending_review", label: "Waiting for approval" },
   { value: "published", label: "Live for adoption" },
   { value: "rejected", label: "Not approved" },
   { value: "archived", label: "No longer listed" },

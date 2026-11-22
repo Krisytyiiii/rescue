@@ -21,10 +21,10 @@ import {
   ArrowUpRightIcon,
   CheckIcon,
   ChevronDownIcon,
-  ChevronLeftIcon,
   MapPinIcon,
   PawIcon,
 } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
@@ -127,14 +127,7 @@ export default function AssignmentDetailScreen() {
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top", "bottom"]}>
         <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-          >
-            <ChevronLeftIcon size={18} color={Brand.ink} />
-          </Pressable>
+          <BackButton onPress={() => router.back()} />
           <View style={styles.headerCenter}>
             <Text style={styles.headerTitle}>Assignment</Text>
             {assignment ? (

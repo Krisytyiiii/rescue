@@ -404,7 +404,7 @@ export function LearningConsole({ modules }: LearningConsoleProps) {
               showIcon={false}
               label="Search courses"
               placeholder="Title or category"
-              className="w-56"
+              className="w-full sm:w-56"
             />
           </div>
 
@@ -510,7 +510,7 @@ export function LearningConsole({ modules }: LearningConsoleProps) {
                       </div>
                     </div>
 
-                    <div className="relative z-10 grid w-full shrink-0 grid-cols-[4.5rem_5.25rem_6rem_2rem] items-center justify-items-stretch gap-1 sm:w-auto">
+                    <div className="relative z-10 grid w-full shrink-0 grid-cols-[3.5rem_4.5rem_5rem_2rem] items-center justify-items-stretch gap-1 sm:w-auto sm:grid-cols-[4.5rem_5.25rem_6rem_2rem]">
                       <Button
                         size="xs"
                         variant="tertiary"

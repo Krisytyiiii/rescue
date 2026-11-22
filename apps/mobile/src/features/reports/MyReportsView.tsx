@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChevronLeftIcon, PlusCircleIcon } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
+import { PlusCircleIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { ReportHistorySection } from "./ReportHistorySection";
@@ -40,16 +41,7 @@ export function MyReportsView({ showBack = true }: { showBack?: boolean }) {
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.header}>
-          {showBack ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <ChevronLeftIcon size={18} color={Brand.ink} />
-            </Pressable>
-          ) : null}
+          {showBack ? <BackButton onPress={() => router.back()} /> : null}
           <View style={styles.headerTitles}>
             <Text style={styles.title}>My reports</Text>
           </View>
@@ -106,13 +98,6 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 10,
-  },
-  back: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
   },
   headerTitles: { flex: 1 },
   newReport: {

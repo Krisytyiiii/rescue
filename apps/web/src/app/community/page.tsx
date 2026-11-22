@@ -1,21 +1,148 @@
-import Link from "next/link";
-import { ArrowUpRight, MessageSquarePlus, ShieldCheck } from "lucide-react";
+import { prisma } from "@furescue/core";
 
+import { CommunityFeed, type CommunityAnimal } from "@/components/community-feed";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata = {
   title: "Community feed — FuRescue",
   description:
-    "Residents of Mati City post animals looking for homes. Browse community adoption posts.",
+    "Residents of Mati City post animals looking for homes. Browse community adoption posts reviewed by our team.",
 };
 
-export default function CommunityPage() {
+export const dynamic = "force-dynamic";
+
+const breedLabels: Record<string, string> = {
+  aspin: "Aspin",
+  puspin: "Puspin",
+  mixed: "Mixed breed",
+  other: "Other",
+};
+
+const sizeLabels: Record<string, string> = {
+  small: "Small",
+  medium: "Medium",
+  large: "Large",
+};
+
+function ageLabel(months: number | null) {
+  if (months === null || months < 0) return "Age unknown";
+  if (months < 1) return "Newborn";
+  if (months < 12) return `${months} months old`;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  if (rest === 0) return `${years} ${years === 1 ? "year" : "years"} old`;
+  return `${years} yr ${rest} mo old`;
+}
+
+function postedDate(date: Date) {
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  }).format(date);
+}
+
+async function getApprovedPosts(): Promise<{
+  posts: CommunityAnimal[];
+  total: number;
+}> {
+  const where = {
+    deletedAt: null,
+    originType: "community_post" as const,
+    listingStatus: "published" as const,
+  };
+
+  const [rows, total] = await Promise.all([
+    prisma.animal.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        animalCode: true,
+        name: true,
+        species: true,
+        breedType: true,
+        sex: true,
+        estimatedAgeMonths: true,
+        size: true,
+        weightKg: true,
+        colorMarkings: true,
+        temperament: true,
+        description: true,
+        primaryPhotoUrl: true,
+        isNeutered: true,
+        createdAt: true,
+        media: {
+          where: { mediaType: "photo" },
+          orderBy: { sortOrder: "asc" },
+          take: 1,
+          select: { fileUrl: true },
+        },
+        vaccinations: { take: 1, select: { id: true } },
+        postedBy: {
+          select: {
+            firstName: true,
+            lastName: true,
+            role: { select: { roleName: true } },
+            barangay: { select: { name: true } },
+          },
+        },
+      },
+    }),
+    prisma.animal.count({ where }),
+  ]);
+
+  const posts = rows.map((post): CommunityAnimal => {
+    const name = post.name ?? post.animalCode;
+    const weight = post.weightKg === null ? null : Number(post.weightKg);
+    const size = post.size ? (sizeLabels[post.size] ?? post.size) : null;
+    const sizeWithWeight =
+      size && weight && Number.isFinite(weight)
+        ? `${size} · ${weight} kg`
+        : size;
+
+    return {
+      id: post.id,
+      name,
+      image: post.primaryPhotoUrl ?? post.media[0]?.fileUrl ?? null,
+      animalCode: post.animalCode,
+      speciesLabel: post.species === "dog" ? "Dog" : "Cat",
+      breed: breedLabels[post.breedType] ?? post.breedType,
+      age: ageLabel(post.estimatedAgeMonths),
+      sex:
+        post.sex === "male"
+          ? "Male"
+          : post.sex === "female"
+            ? "Female"
+            : "Sex unknown",
+      size: sizeWithWeight,
+      colorMarkings: post.colorMarkings,
+      temperament: post.temperament,
+      description: post.description,
+      isNeutered: post.isNeutered,
+      vaccinated: post.vaccinations.length > 0,
+      barangay: post.postedBy?.barangay?.name ?? "Mati City",
+      postedByName: post.postedBy
+        ? `${post.postedBy.firstName} ${post.postedBy.lastName}`.trim()
+        : "Community member",
+      postedLabel: postedDate(post.createdAt),
+      isResidentPost: post.postedBy?.role.roleName === "community_user",
+    };
+  });
+
+  return { posts, total };
+}
+
+export default async function CommunityPage() {
+  const { posts, total } = await getApprovedPosts();
+
   return (
     <div id="top" className="relative flex min-h-full flex-col">
       <SiteHeader />
 
-      <main id="main" className="flex-1 px-5 pb-24 pt-40 sm:px-8 lg:px-12 lg:pt-48">
+      <main id="main" className="flex-1 px-5 pb-24 pt-32 sm:px-8 lg:px-12 lg:pt-40">
         <div className="mx-auto max-w-[1440px]">
           <div className="max-w-2xl">
             <p className="label text-clay">Community feed</p>
@@ -23,47 +150,12 @@ export default function CommunityPage() {
               Pets looking for homes, posted by the people who know them.
             </h1>
             <p className="mt-5 text-[1rem] leading-[1.7] text-ink/55">
-              A resident-run adoption board for Mati City. Community members share
-              animals in their care, and our team keeps the board safe and readable.
+              Every post below has been reviewed and approved by our team. Read
+              their stories, then reach out to arrange a meet-up.
             </p>
           </div>
 
-          <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:max-w-3xl">
-            <div className="rounded-2xl border border-ink/10 bg-white p-5">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-clay/10 text-clay">
-                <MessageSquarePlus className="h-4 w-4" strokeWidth={1.9} />
-              </span>
-              <p className="mt-3 text-[0.9375rem] font-semibold text-ink">
-                Posting opens soon
-              </p>
-              <p className="mt-1 text-[0.8125rem] leading-[1.6] text-ink/50">
-                Community accounts will be able to publish adoption posts with
-                photos, animal details, and their barangay.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-ink/10 bg-white p-5">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-moss/10 text-moss">
-                <ShieldCheck className="h-4 w-4" strokeWidth={1.9} />
-              </span>
-              <p className="mt-3 text-[0.9375rem] font-semibold text-ink">
-                Moderated for safety
-              </p>
-              <p className="mt-1 text-[0.8125rem] leading-[1.6] text-ink/50">
-                Our team reviews reports and hides posts that break community
-                guidelines. Hidden posts are never shown to residents.
-              </p>
-            </div>
-          </div>
-
-          <Link
-            href="/signup"
-            className="group mt-8 inline-flex h-11 items-center gap-2 rounded-full bg-ink pl-5 pr-3 text-[0.875rem] font-medium text-paper transition-colors hover:bg-moss"
-          >
-            Create a community account
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-paper/10 transition-transform duration-300 group-hover:rotate-45">
-              <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={1.8} />
-            </span>
-          </Link>
+          <CommunityFeed posts={posts} total={total} />
         </div>
       </main>
 

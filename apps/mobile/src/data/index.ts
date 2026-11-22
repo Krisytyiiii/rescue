@@ -8,6 +8,7 @@ import { HttpAuthGateway } from "./auth-gateway";
 import { DefaultAuthRepository } from "./auth-repository";
 import { HttpCommunityGateway } from "./community-gateway";
 import { ExpoGoogleAuthBrowser } from "./google-browser";
+import { HttpLearningGateway } from "./learning-gateway";
 import { HttpMessagingGateway } from "./messaging-gateway";
 import { HttpOnboardingGateway } from "./onboarding-gateway";
 import { HttpReportMapDataSource } from "./report-map-gateway";
@@ -20,6 +21,7 @@ import type { AdoptionApplicationDataSource } from "./adoption-applications";
 import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
+import type { LearningDataSource } from "./learning";
 import type {
   ChatPreviewDataSource,
   ResidentContactsDataSource,
@@ -44,6 +46,7 @@ const httpRescuerGateway = new HttpRescuerGateway(sessionStorage);
 const httpAnimalsGateway = new HttpAnimalsGateway(sessionStorage);
 const httpAdoptionsGateway = new HttpAdoptionsGateway(sessionStorage);
 const httpCommunityGateway = new HttpCommunityGateway(sessionStorage);
+const httpLearningGateway = new HttpLearningGateway(sessionStorage);
 const httpAdoptionApplicationsGateway = new HttpAdoptionApplicationsGateway(
   sessionStorage,
   httpCommunityGateway,
@@ -98,6 +101,9 @@ export const adoptionApplicationDataSource: AdoptionApplicationDataSource =
 /** Resident community adoption feed: published posts plus your own pending. */
 export const communityDataSource: CommunityDataSource = httpCommunityGateway;
 
+/** City Vet learning modules published for residents. */
+export const learningDataSource: LearningDataSource = httpLearningGateway;
+
 /** Direct messages from a rescuer to their dispatcher or a reporter. */
 export const messagingDataSource = httpMessagingGateway;
 
@@ -132,6 +138,7 @@ export type { AdoptionApplicationDataSource } from "./adoption-applications";
 export type { AdoptionsDataSource } from "./adoptions";
 export type { AnimalsDataSource } from "./animals";
 export type { CommunityDataSource } from "./community";
+export type { LearningDataSource } from "./learning";
 export type { OnboardingDataSource } from "./onboarding";
 export type { ReportMapDataSource } from "./report-map";
 export type {

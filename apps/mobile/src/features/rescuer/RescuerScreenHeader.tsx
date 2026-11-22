@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import { ChevronLeftIcon } from "@/components/icons";
+import { BackButton } from "@/components/back-button";
 import { Brand, FontFamily } from "@/constants/theme";
 
 /** Shared top bar for rescuer screens (Queue, History). */
@@ -19,18 +19,7 @@ export function RescuerScreenHeader({
 }) {
   return (
     <View style={styles.header}>
-      {onBack ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Go back"
-          onPress={onBack}
-          style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-        >
-          <ChevronLeftIcon size={18} color={Brand.ink} />
-        </Pressable>
-      ) : (
-        <View style={styles.back} />
-      )}
+      {onBack ? <BackButton onPress={onBack} /> : <View style={styles.back} />}
 
       <View style={styles.titles}>
         <Text style={styles.title}>{title}</Text>
@@ -56,9 +45,6 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
-  },
-  pressed: {
-    opacity: 0.6,
   },
   titles: {
     flex: 1,

@@ -6,7 +6,6 @@ import {
   HeartPulse,
   Home,
   LayoutGrid,
-  ShieldAlert,
 } from "lucide-react";
 
 import type { AnimalCounts } from "./animals-types";
@@ -62,22 +61,16 @@ const TABS: Array<{
     icon: BadgeCheck,
     count: (counts) => counts.adopted,
   },
-  {
-    id: "pending_review",
-    label: "Needs review",
-    icon: ShieldAlert,
-    count: (counts) => counts.pendingReview,
-  },
 ];
 
 /** Vertical tab rail that filters the registry in memory. */
 export function AnimalsSidebar({ counts, activeTab, onSelect }: AnimalsSidebarProps) {
   return (
-    <nav aria-label="Animal filters" className="lg:sticky lg:top-4">
+    <nav aria-label="Animal filters" className="min-w-0 max-w-full lg:sticky lg:top-4">
       <p className="px-2 pb-2 text-[0.5625rem] font-semibold uppercase tracking-[0.14em] text-ink/35">
         Browse animals
       </p>
-      <ul className="flex gap-1 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
+      <ul className="flex min-w-0 max-w-full gap-1 overflow-x-auto [scrollbar-width:none] lg:flex-col lg:overflow-visible [&::-webkit-scrollbar]:hidden">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.id;

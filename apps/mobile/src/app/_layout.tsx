@@ -50,6 +50,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ animation: "fade" }} />
         <Stack.Screen name="login" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="signup" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="auth/google" options={{ animation: "fade" }} />
         <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />
         <Stack.Screen
           name="assignments/[id]"
@@ -89,6 +90,14 @@ export default function RootLayout() {
         />
         <Stack.Screen
           name="community"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="modules/index"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="modules/[id]"
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
