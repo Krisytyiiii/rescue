@@ -720,14 +720,7 @@ function QuickActionCard({
           style={[styles.actionHighlight, { backgroundColor: `${tint}22` }]}
         />
 
-        <View
-          style={[
-            styles.actionGlyph,
-            { backgroundColor: `${tint}16`, borderColor: `${tint}45` },
-          ]}
-        >
-          {icon}
-        </View>
+        <View style={styles.actionGlyph}>{icon}</View>
         <View style={styles.actionArrow}>
           <ArrowUpRightIcon size={13} color={Brand.ink55} />
         </View>
@@ -1399,8 +1392,6 @@ const styles = StyleSheet.create({
   actionGlyph: {
     width: 36,
     height: 36,
-    borderRadius: 12,
-    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
