@@ -57,10 +57,14 @@ export interface RescuerAssignment {
   photoUrl: string | null;
   /** Name of the person who submitted the report. */
   reporter: string;
+  /** Profile photo of the reporter, when they have attached one. */
+  reporterProfilePhotoUrl: string | null;
   /** Account of the reporter, when they have one. */
   reporterUserId: string | null;
   /** Name of the dispatcher who assigned the report, when known. */
   assignedBy: string | null;
+  /** Profile photo of the dispatcher who assigned the report. */
+  assignedByProfilePhotoUrl: string | null;
   /** Account of the dispatcher who assigned the report. */
   assignedByUserId: string | null;
   distanceKm: number | null;
@@ -278,6 +282,8 @@ export interface RescuerContact {
   userId: string;
   fullName: string;
   role: RescuerContactRole;
+  /** Avatar shown in the messages list, or null when none is attached. */
+  profilePhotoUrl: string | null;
   /** Report codes that link this person to the rescuer's work. */
   reportCodes: string[];
 }
@@ -294,6 +300,7 @@ export function selectRescuerContacts(
   const add = (
     userId: string | null,
     fullName: string | null,
+    profilePhotoUrl: string | null,
     role: RescuerContactRole,
     reportCode: string,
   ) => {
@@ -303,12 +310,16 @@ export function selectRescuerContacts(
       if (!existing.reportCodes.includes(reportCode)) {
         existing.reportCodes.push(reportCode);
       }
+      if (!existing.profilePhotoUrl && profilePhotoUrl) {
+        existing.profilePhotoUrl = profilePhotoUrl;
+      }
       return;
     }
     contacts.set(userId, {
       userId,
       fullName,
       role,
+      profilePhotoUrl,
       reportCodes: [reportCode],
     });
   };
@@ -317,12 +328,14 @@ export function selectRescuerContacts(
     add(
       assignment.assignedByUserId,
       assignment.assignedBy,
+      assignment.assignedByProfilePhotoUrl,
       "admin",
       assignment.reportCode,
     );
     add(
       assignment.reporterUserId,
       assignment.reporter,
+      assignment.reporterProfilePhotoUrl,
       "reporter",
       assignment.reportCode,
     );

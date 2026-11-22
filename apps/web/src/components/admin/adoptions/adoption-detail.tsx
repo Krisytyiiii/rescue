@@ -24,6 +24,7 @@ import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OverlayCard } from "@/components/ui/overlay-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import { formatDate, formatDateTime, humanize } from "../animals/animals-utils";
 import {
@@ -50,15 +51,6 @@ const LIFECYCLE_META: Record<string, { label: string; tone: BadgeTone }> = {
   adoption_pending: { label: "Pending adoption", tone: "warning" },
   adopted: { label: "Adopted", tone: "info" },
 };
-
-function initials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]!.toUpperCase())
-    .join("");
-}
 
 function yesNo(value: boolean | null, fallback = "Not answered") {
   if (value === null) return fallback;
@@ -176,17 +168,12 @@ export function AdoptionDetail({ request, onClose, onAction }: AdoptionDetailPro
                 Applicant
               </p>
               <div className="mt-2 flex items-center gap-2.5">
-                <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/10 text-[0.75rem] font-semibold text-clay">
-                  {request.adopter.profilePhotoUrl ? (
-                    <img
-                      src={request.adopter.profilePhotoUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    initials(request.adopter.name)
-                  )}
-                </span>
+                <UserAvatar
+                  src={request.adopter.profilePhotoUrl}
+                  className="h-10 w-10"
+                  fallbackClassName="bg-clay/10 text-clay"
+                  iconClassName="h-4 w-4"
+                />
                 <div className="min-w-0">
                   <p className="truncate text-[0.875rem] font-semibold text-ink/85">
                     {request.adopter.name}

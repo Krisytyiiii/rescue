@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { useToast } from "@/components/ui/toast";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import { UserDetailDrawer } from "./user-detail-drawer";
 import {
@@ -16,7 +17,6 @@ import {
   STATUS_TONES,
   dateFormatter,
   formatLastLogin,
-  initials,
   type UserRow,
   type UserStatus,
 } from "./users-types";
@@ -200,17 +200,11 @@ export function UsersTable({ rows, currentUserId }: UsersTableProps) {
                 >
                   <td className="px-3 py-2.5">
                     <div className="flex items-center gap-2.5">
-                      {row.profilePhotoUrl ? (
-                        <img
-                          src={row.profilePhotoUrl}
-                          alt=""
-                          className="h-8 w-8 shrink-0 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.625rem] font-semibold text-ink/60">
-                          {initials(row.fullName)}
-                        </span>
-                      )}
+                      <UserAvatar
+                        src={row.profilePhotoUrl}
+                        className="h-8 w-8"
+                        iconClassName="h-4 w-4"
+                      />
                       <span className="min-w-0">
                         <span className="flex items-center gap-1.5">
                           <span className="truncate text-[0.8125rem] font-medium text-ink">

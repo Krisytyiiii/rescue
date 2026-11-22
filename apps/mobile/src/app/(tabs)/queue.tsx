@@ -14,9 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowUpRightIcon,
   CloseIcon,
-  PersonIcon,
   SearchIcon,
 } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   AssignmentBoardFilter,
@@ -268,7 +268,7 @@ function AssignmentCard({
       ) : null}
 
       <View style={styles.reporterRow}>
-        <PersonIcon size={12} color={Brand.ink55} />
+        <UserAvatar uri={assignment.reporterProfilePhotoUrl} size={16} />
         <Text style={styles.reporter} numberOfLines={1}>
           Reported by {assignment.reporter || "Anonymous"}
           {assignment.assignedBy ? ` · Assigned by ${assignment.assignedBy}` : ""}

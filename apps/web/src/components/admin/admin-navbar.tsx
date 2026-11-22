@@ -16,18 +16,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 import { PawMark, Wordmark } from "@/components/brand";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface AdminNavbarProps {
   onOpenMobile: () => void;
   admin: { fullName: string; email: string; profilePhotoUrl?: string | null };
   unreadNotifications: number;
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "A";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
 export function AdminNavbar({
@@ -181,20 +175,12 @@ export function AdminNavbar({
             menuOpen ? "bg-ink/[0.06]" : "hover:bg-ink/[0.04]"
           }`}
         >
-          <span
-            aria-hidden="true"
-            className="grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/15 text-[0.6875rem] font-semibold uppercase tracking-wide text-clay"
-          >
-            {admin.profilePhotoUrl ? (
-              <img
-                src={admin.profilePhotoUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              initials(admin.fullName)
-            )}
-          </span>
+          <UserAvatar
+            src={admin.profilePhotoUrl}
+            className="h-9 w-9"
+            fallbackClassName="bg-clay/15 text-clay"
+            iconClassName="h-4 w-4"
+          />
           <span className="hidden min-w-0 text-left lg:block">
             <span className="block max-w-[180px] truncate text-[0.8125rem] font-medium leading-tight text-ink">
               {admin.fullName}

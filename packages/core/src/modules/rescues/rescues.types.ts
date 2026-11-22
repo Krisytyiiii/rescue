@@ -81,7 +81,9 @@ export interface RescuerAssignmentRow {
   longitude: number;
   photoUrl: string | null;
   reporter: string;
+  reporterProfilePhotoUrl: string | null;
   assignedBy: string | null;
+  assignedByProfilePhotoUrl: string | null;
   reporterUserId: string | null;
   assignedByUserId: string | null;
   distanceKm: number | null;
@@ -160,7 +162,11 @@ export interface ReportMarkerRow {
   reporter: string;
   submittedAt: string;
   verifiedAt: string | null;
-  rescuer: { id: string; fullName: string } | null;
+  rescuer: {
+    id: string;
+    fullName: string;
+    profilePhotoUrl: string | null;
+  } | null;
   assignmentStatus: AssignmentStatus | null;
   statusHistory: Array<{
     id: string;

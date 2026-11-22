@@ -29,6 +29,7 @@ import { TabFilters } from "@/components/ui/tab-filters";
 import { Textarea } from "@/components/ui/textarea";
 import { OverlayCard } from "@/components/ui/overlay-card";
 import { useToast } from "@/components/ui/toast";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type {
   ConversationDetailRow,
   ConversationListRow,
@@ -71,15 +72,6 @@ function dayKey(value: string): string {
   yesterday.setDate(today.getDate() - 1);
   if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
   return DAY.format(date);
-}
-
-function initials(name: string): string {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
 }
 
 function roleLabel(role: string): string {
@@ -991,18 +983,14 @@ export function MessagingConsole({
                                     mine ? "justify-end" : "justify-start"
                                   }`}
                                 >
-                                  {!mine &&
-                                    (message.senderProfilePhotoUrl ? (
-                                      <img
-                                        src={message.senderProfilePhotoUrl}
-                                        alt={message.senderName}
-                                        className="h-6 w-6 shrink-0 rounded-full object-cover"
-                                      />
-                                    ) : (
-                                      <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                        {initials(message.senderName)}
-                                      </span>
-                                    ))}
+                                  {!mine && (
+                                    <UserAvatar
+                                      src={message.senderProfilePhotoUrl}
+                                      alt={message.senderName}
+                                      className="h-6 w-6"
+                                      iconClassName="h-3 w-3"
+                                    />
+                                  )}
                                   <div
                                     className={`max-w-[80%] ${
                                       mine ? "items-end" : "items-start"
@@ -1177,17 +1165,12 @@ export function MessagingConsole({
                                         onClick={() => void addParticipant(candidate)}
                                         className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-ink/[0.03]"
                                       >
-                                        {candidate.profilePhotoUrl ? (
-                                          <img
-                                            src={candidate.profilePhotoUrl}
-                                            alt={candidate.fullName}
-                                            className="h-6 w-6 shrink-0 rounded-full object-cover"
-                                          />
-                                        ) : (
-                                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                            {initials(candidate.fullName)}
-                                          </span>
-                                        )}
+                                        <UserAvatar
+                                          src={candidate.profilePhotoUrl}
+                                          alt={candidate.fullName}
+                                          className="h-6 w-6"
+                                          iconClassName="h-3 w-3"
+                                        />
                                         <span className="min-w-0 flex-1">
                                           <span className="block truncate text-[0.6875rem] font-medium text-ink/75">
                                             {candidate.fullName}
@@ -1215,17 +1198,12 @@ export function MessagingConsole({
                               key={participant.userId}
                               className="group/person flex items-center gap-2 rounded-lg border border-ink/[0.06] px-2 py-1.5"
                             >
-                              {participant.profilePhotoUrl ? (
-                                <img
-                                  src={participant.profilePhotoUrl}
-                                  alt={participant.fullName}
-                                  className="h-6 w-6 shrink-0 rounded-full object-cover"
-                                />
-                              ) : (
-                                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                                  {initials(participant.fullName)}
-                                </span>
-                              )}
+                              <UserAvatar
+                                src={participant.profilePhotoUrl}
+                                alt={participant.fullName}
+                                className="h-6 w-6"
+                                iconClassName="h-3 w-3"
+                              />
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-[0.6875rem] font-medium text-ink/75">
                                   {participant.fullName}
@@ -1323,9 +1301,13 @@ export function MessagingConsole({
             {newRecipient ? (
               <>
                 <div className="flex items-center gap-2 rounded-lg border border-ink/[0.08] bg-ink/[0.015] p-2">
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-clay/15 text-[0.5625rem] font-semibold text-clay">
-                    {initials(newRecipient.fullName)}
-                  </span>
+                  <UserAvatar
+                    src={newRecipient.profilePhotoUrl}
+                    alt={newRecipient.fullName}
+                    className="h-8 w-8"
+                    fallbackClassName="bg-clay/15 text-clay"
+                    iconClassName="h-4 w-4"
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[0.75rem] font-semibold text-ink/80">
                       {newRecipient.fullName}
@@ -1393,9 +1375,12 @@ export function MessagingConsole({
                             onClick={() => setNewRecipient(candidate)}
                             className="flex w-full items-center gap-2 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-ink/[0.03]"
                           >
-                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                              {initials(candidate.fullName)}
-                            </span>
+                            <UserAvatar
+                              src={candidate.profilePhotoUrl}
+                              alt={candidate.fullName}
+                              className="h-7 w-7"
+                              iconClassName="h-3.5 w-3.5"
+                            />
                             <span className="min-w-0 flex-1">
                               <span className="block truncate text-[0.75rem] font-medium text-ink/75">
                                 {candidate.fullName}

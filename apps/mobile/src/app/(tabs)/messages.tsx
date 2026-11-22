@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChatIcon, PawIcon } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useMessagesViewModel } from "@/features/messages/useMessagesViewModel";
 
@@ -62,6 +63,7 @@ export default function MessagesScreen() {
                       params: {
                         userId: contact.userId,
                         name: contact.fullName,
+                        photo: contact.profilePhotoUrl ?? undefined,
                         role: contact.role,
                         reports: contact.reportCodes.join(", "),
                       },
@@ -72,16 +74,15 @@ export default function MessagesScreen() {
                     pressed && styles.pressed,
                   ]}
                 >
-                  <View
-                    style={[
-                      styles.avatar,
-                      contact.role === "admin" && styles.avatarAdmin,
-                    ]}
-                  >
-                    <Text style={styles.avatarText}>
-                      {contact.fullName.charAt(0)}
-                    </Text>
-                  </View>
+                  <UserAvatar
+                    uri={contact.profilePhotoUrl}
+                    size={44}
+                    backgroundColor={
+                      contact.role === "admin"
+                        ? "rgba(31,122,77,0.12)"
+                        : "rgba(96,124,255,0.14)"
+                    }
+                  />
 
                   <View style={styles.contactBody}>
                     <Text style={styles.contactName} numberOfLines={1}>

@@ -40,7 +40,9 @@ export const animalDetailInclude = {
       },
     },
   },
-  postedBy: { select: { id: true, firstName: true, lastName: true } },
+  postedBy: {
+    select: { id: true, firstName: true, lastName: true, profilePhotoUrl: true },
+  },
   healthRecords: { orderBy: { recordDate: "desc" }, take: 10 },
   vaccinations: { orderBy: { dateGiven: "desc" }, take: 10 },
   heartRateLogs: { orderBy: { measuredAt: "desc" }, take: 1 },

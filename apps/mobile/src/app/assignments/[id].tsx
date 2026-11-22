@@ -24,8 +24,8 @@ import {
   ChevronLeftIcon,
   MapPinIcon,
   PawIcon,
-  PersonIcon,
 } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   AssignmentStatus,
@@ -177,7 +177,12 @@ export default function AssignmentDetailScreen() {
                   value={REPORT_STATUS_LABEL[assignment.reportStatus]}
                 />
                 <InfoTile
-                  icon={<PersonIcon size={15} color={Brand.moss} />}
+                  icon={
+                    <UserAvatar
+                      uri={assignment.reporterProfilePhotoUrl}
+                      size={16}
+                    />
+                  }
                   label="Reported by"
                   value={assignment.reporter || "Anonymous"}
                 />

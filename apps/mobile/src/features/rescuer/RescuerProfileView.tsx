@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, type ReactNode } from "react";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
@@ -16,6 +16,7 @@ import {
   PhoneIcon,
   ShieldIcon,
 } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { useRescuerProfileViewModel } from "./useRescuerProfileViewModel";
@@ -37,9 +38,6 @@ export function RescuerProfileView() {
     router.replace("/login");
   };
 
-  const initials = user
-    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-    : "F";
   const reports = profile?.reports;
 
   return (
@@ -68,16 +66,12 @@ export function RescuerProfileView() {
           >
             <View style={styles.heroOrb} />
             <View style={styles.heroTop}>
-              <View style={styles.avatar}>
-                {user?.profilePhotoUrl ? (
-                  <Image
-                    source={{ uri: user.profilePhotoUrl }}
-                    style={styles.avatarImage}
-                  />
-                ) : (
-                  <Text style={styles.avatarText}>{initials}</Text>
-                )}
-              </View>
+              <UserAvatar
+                uri={user?.profilePhotoUrl}
+                size={58}
+                backgroundColor={Brand.sage}
+                iconColor={Brand.forest}
+              />
               <Pressable
                 accessibilityRole="button"
                 onPress={() => router.push("/edit-profile" as Href)}

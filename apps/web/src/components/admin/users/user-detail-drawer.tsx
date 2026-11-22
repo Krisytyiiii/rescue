@@ -23,6 +23,7 @@ import { ConfirmDialog, type ConfirmTone } from "@/components/ui/confirm-dialog"
 import { FormAlert } from "@/components/ui/form-alert";
 import { OverlayCard } from "@/components/ui/overlay-card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import {
   ROLE_LABELS,
@@ -31,7 +32,6 @@ import {
   STATUS_TONES,
   dateFormatter,
   formatLastLogin,
-  initials,
   type UserDetail,
   type UserRow,
   type UserStatus,
@@ -223,17 +223,13 @@ export function UserDetailDrawer({
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 bg-gradient-to-br from-clay/[0.07] via-transparent to-transparent"
             />
-            <span className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl bg-clay/10 text-[0.8125rem] font-semibold text-clay ring-1 ring-inset ring-clay/15">
-              {user.profilePhotoUrl ? (
-                <img
-                  src={user.profilePhotoUrl}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                initials(user.fullName)
-              )}
-            </span>
+            <UserAvatar
+              src={user.profilePhotoUrl}
+              rounded="rounded-xl"
+              className="relative h-12 w-12"
+              fallbackClassName="bg-clay/10 text-clay ring-1 ring-inset ring-clay/15"
+              iconClassName="h-5 w-5"
+            />
             <div className="relative min-w-0 flex-1">
               <p className="truncate text-[0.9375rem] font-semibold text-ink">
                 {user.fullName}

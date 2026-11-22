@@ -9,6 +9,7 @@ import { SearchEmpty } from "@/components/ui/search-empty";
 import { SearchInput } from "@/components/ui/search-input";
 import { SecondaryTabFilters } from "@/components/ui/secondary-tab-filters";
 import { TabFilters } from "@/components/ui/tab-filters";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import type { ReportMarkerRow, RescueConsoleData } from "@furescue/core";
 
 import { RescuesMap } from "./rescues-map";
@@ -272,15 +273,17 @@ function ReportRow({
           </div>
 
           <div className="mt-2.5 flex items-center gap-1.5 rounded-md bg-white/55 px-2 py-1.5 text-[0.6875rem] text-ink/50 ring-1 ring-inset ring-white/60">
-            <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold uppercase text-ink/55">
-              {report.rescuer
-                ? report.rescuer.fullName
-                    .split(/\s+/)
-                    .slice(0, 2)
-                    .map((part) => part[0])
-                    .join("")
-                : "—"}
-            </span>
+            {report.rescuer ? (
+              <UserAvatar
+                src={report.rescuer.profilePhotoUrl}
+                className="h-4 w-4"
+                iconClassName="h-2.5 w-2.5"
+              />
+            ) : (
+              <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold uppercase text-ink/55">
+                —
+              </span>
+            )}
             <span className="truncate">
               {report.rescuer?.fullName ?? "Unassigned"}
             </span>

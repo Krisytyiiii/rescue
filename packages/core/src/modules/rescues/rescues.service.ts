@@ -145,9 +145,11 @@ function toRescuerAssignment(
     longitude: Number(report.longitude),
     photoUrl: report.media[0]?.fileUrl ?? null,
     reporter: reporterName(report.reporter),
+    reporterProfilePhotoUrl: report.reporter?.profilePhotoUrl ?? null,
     assignedBy: operation.assigner
       ? `${operation.assigner.firstName} ${operation.assigner.lastName}`
       : null,
+    assignedByProfilePhotoUrl: operation.assigner?.profilePhotoUrl ?? null,
     reporterUserId: report.reporterUserId ?? null,
     assignedByUserId: operation.assignedBy ?? null,
     distanceKm: null,
@@ -195,7 +197,11 @@ function toReportMarker(report: ReportMarkerWithRelations): ReportMarkerRow {
     submittedAt: report.submittedAt.toISOString(),
     verifiedAt: report.verifiedAt?.toISOString() ?? null,
     rescuer: rescuer
-      ? { id: rescuer.id, fullName: `${rescuer.firstName} ${rescuer.lastName}` }
+      ? {
+          id: rescuer.id,
+          fullName: `${rescuer.firstName} ${rescuer.lastName}`,
+          profilePhotoUrl: rescuer.profilePhotoUrl,
+        }
       : null,
     assignmentStatus: report.rescueOperations[0]?.assignmentStatus ?? null,
     statusHistory: report.statusHistory.map((entry) => ({

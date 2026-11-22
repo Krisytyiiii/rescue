@@ -25,6 +25,7 @@ import {
   PlusCircleIcon,
 } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import {
   MAX_COMMUNITY_PHOTOS,
@@ -406,6 +407,9 @@ function FeedCard({ post, isOwn }: { post: CommunityPost; isOwn: boolean }) {
               <Text style={styles.ownBadgeText}>Your post</Text>
             </View>
           ) : null}
+          {author ? (
+            <UserAvatar uri={author.profilePhotoUrl} size={24} />
+          ) : null}
           <Text style={styles.cardAuthor} numberOfLines={1}>
             Posted by {isOwn ? "you" : postAuthor(post.postedBy)}
           </Text>
@@ -423,7 +427,11 @@ function FeedCard({ post, isOwn }: { post: CommunityPost; isOwn: boolean }) {
             onPress={() =>
               router.push({
                 pathname: "/chat/[userId]",
-                params: { userId: author.id, name: postAuthor(author) },
+                params: {
+                  userId: author.id,
+                  name: postAuthor(author),
+                  photo: author.profilePhotoUrl ?? undefined,
+                },
               })
             }
             style={({ pressed }) => [

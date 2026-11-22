@@ -5,6 +5,7 @@ export interface CommunityAuthor {
   id: string;
   firstName: string;
   lastName: string;
+  profilePhotoUrl: string | null;
 }
 
 /**

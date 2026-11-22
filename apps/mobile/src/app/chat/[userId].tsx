@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChevronLeftIcon, PawIcon, PersonIcon, SendIcon } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { ChatMessage } from "@/domain/messaging";
 import { useChatViewModel } from "@/features/messages/useChatViewModel";
@@ -26,13 +27,14 @@ function timeLabel(iso: string): string {
 
 export default function ChatScreen() {
   const router = useRouter();
-  const { userId, name, role } = useLocalSearchParams<{
+  const { userId, name, photo, role } = useLocalSearchParams<{
     userId: string;
     name?: string;
+    photo?: string;
     role?: string;
   }>();
-  const { contactName, messages, loading, ready, error, loadError, send, deleteMessage } =
-    useChatViewModel(userId, name);
+  const { contactName, contactPhotoUrl, messages, loading, ready, error, loadError, send, deleteMessage } =
+    useChatViewModel(userId, name, photo);
   const [body, setBody] = useState("");
   const [selected, setSelected] = useState<ChatMessage | null>(null);
   const scrollRef = useRef<ElementRef<typeof ScrollView>>(null);
@@ -71,11 +73,7 @@ export default function ChatScreen() {
               <ChevronLeftIcon size={20} color={Brand.ink} />
             </Pressable>
 
-            <View style={styles.headerAvatar}>
-              <Text style={styles.headerInitial}>
-                {contactName.charAt(0).toUpperCase()}
-              </Text>
-            </View>
+            <UserAvatar uri={contactPhotoUrl} size={38} />
 
             <View style={styles.headerBody}>
               <Text style={styles.headerName} numberOfLines={1}>
@@ -102,10 +100,8 @@ export default function ChatScreen() {
               )
             ) : messages.length === 0 ? (
               <View style={styles.intro}>
-                <View style={styles.introAvatar}>
-                  <Text style={styles.introInitial}>
-                    {contactName.charAt(0).toUpperCase()}
-                  </Text>
+                <View style={styles.introAvatarWrap}>
+                  <UserAvatar uri={contactPhotoUrl} size={64} />
                 </View>
                 <Text style={styles.introTitle}>{contactName}</Text>
                 <Text style={styles.introBody}>
@@ -132,11 +128,12 @@ export default function ChatScreen() {
           <View style={styles.composer}>
             {contactName ? (
               <View style={styles.recipientBar}>
-                <View style={styles.recipientAvatar}>
-                  <Text style={styles.recipientInitial}>
-                    {contactName.charAt(0).toUpperCase()}
-                  </Text>
-                </View>
+                <UserAvatar
+                  uri={contactPhotoUrl}
+                  size={36}
+                  backgroundColor="rgba(198,232,123,0.14)"
+                  iconColor="#C6E87B"
+                />
                 <View style={styles.recipientBody}>
                   <Text style={styles.recipientName} numberOfLines={1}>
                     {contactName}
@@ -392,6 +389,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(31,122,77,0.12)",
+    marginBottom: 6,
+  },
+  introAvatarWrap: {
     marginBottom: 6,
   },
   introInitial: {

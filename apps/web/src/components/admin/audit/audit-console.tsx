@@ -24,6 +24,7 @@ import { SecondaryTabFilters } from "@/components/ui/secondary-tab-filters";
 import { Select } from "@/components/ui/select";
 import { StatCard } from "@/components/ui/stat-card";
 import { useToast } from "@/components/ui/toast";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -440,21 +441,11 @@ export function AuditConsole({
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex items-center gap-2">
-                          {row.actor?.profilePhotoUrl ? (
-                            <img
-                              src={row.actor.profilePhotoUrl}
-                              alt=""
-                              className="h-6 w-6 shrink-0 rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-ink/[0.06] text-[0.5rem] font-semibold text-ink/50">
-                              {(row.actor?.fullName ?? "S")
-                                .split(/\s+/)
-                                .slice(0, 2)
-                                .map((part) => part[0]?.toUpperCase())
-                                .join("")}
-                            </span>
-                          )}
+                          <UserAvatar
+                            src={row.actor?.profilePhotoUrl}
+                            className="h-6 w-6"
+                            iconClassName="h-3 w-3"
+                          />
                           <div className="min-w-0">
                             <p className="truncate font-medium text-ink/75">
                               {row.actor?.fullName ?? "System"}

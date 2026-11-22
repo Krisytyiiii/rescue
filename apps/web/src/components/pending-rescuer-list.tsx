@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { FormAlert } from "@/components/ui/form-alert";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface PendingRescuer {
   id: string;
@@ -13,13 +14,6 @@ interface PendingRescuer {
   email: string;
   appliedAt: string;
   profilePhotoUrl: string | null;
-}
-
-function initials(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "R";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
 function formatApplied(value: string): string {
@@ -90,20 +84,11 @@ export function PendingRescuerList({ rescuers }: { rescuers: PendingRescuer[] })
               className="rounded-xl border border-ink/[0.07] bg-ink/[0.012] p-3 transition-colors hover:border-ink/[0.12] hover:bg-ink/[0.02]"
             >
               <div className="flex items-start gap-3">
-                <span
-                  aria-hidden="true"
-                  className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-full bg-ink/[0.06] text-[0.75rem] font-semibold uppercase tracking-wide text-ink/55"
-                >
-                  {rescuer.profilePhotoUrl ? (
-                    <img
-                      src={rescuer.profilePhotoUrl}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    initials(rescuer.fullName)
-                  )}
-                </span>
+                <UserAvatar
+                  src={rescuer.profilePhotoUrl}
+                  className="h-10 w-10"
+                  iconClassName="h-4 w-4"
+                />
 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[0.875rem] font-semibold leading-tight text-ink">

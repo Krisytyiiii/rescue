@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/form-alert";
 import { OverlayCard } from "@/components/ui/overlay-card";
 import { useToast } from "@/components/ui/toast";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import type { AdminProfileSummary } from "@furescue/core";
 
@@ -20,12 +21,6 @@ interface ProfilePatch {
   lastName: string;
   phoneNumber: string | null;
   profilePhotoUrl: string | null;
-}
-
-function initials(profile: AdminProfileSummary): string {
-  return (
-    `${profile.firstName.charAt(0)}${profile.lastName.charAt(0)}`.toUpperCase() || "A"
-  );
 }
 
 export function ProfileEditDialog({
@@ -150,17 +145,12 @@ export function ProfileEditDialog({
     >
       <form onSubmit={submit} className="space-y-3 p-5">
         <div className="flex items-center gap-3">
-          <span className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/10 text-[1rem] font-semibold text-clay ring-1 ring-inset ring-clay/15">
-            {photoUrl ? (
-              <img
-                src={photoUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              initials(profile)
-            )}
-          </span>
+          <UserAvatar
+            src={photoUrl}
+            className="h-16 w-16"
+            fallbackClassName="bg-clay/10 text-clay ring-1 ring-inset ring-clay/15"
+            iconClassName="h-6 w-6"
+          />
           <div className="min-w-0">
             <button
               type="button"

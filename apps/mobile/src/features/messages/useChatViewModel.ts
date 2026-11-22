@@ -22,6 +22,7 @@ interface Options {
 export function useChatViewModel(
   contactUserId: string,
   contactName?: string,
+  contactPhotoUrl?: string | null,
   { messages = messagingDataSource }: Options = {},
 ) {
   const [thread, setThread] = useState<ChatThread | null>(null);
@@ -189,6 +190,7 @@ export function useChatViewModel(
 
   return {
     contactName: thread?.contactName ?? contactName ?? "Chat",
+    contactPhotoUrl: thread?.contactPhotoUrl ?? contactPhotoUrl ?? null,
     messages: pending.length > 0 ? [...items, ...pending] : items,
     loading,
     ready,

@@ -24,7 +24,11 @@ interface ConversationMessagePayload {
 
 interface ConversationPayload {
   id: string;
-  participants: { userId: string; fullName: string }[];
+  participants: {
+    userId: string;
+    fullName: string;
+    profilePhotoUrl: string | null;
+  }[];
   messages: ConversationMessagePayload[];
 }
 
@@ -95,6 +99,7 @@ export class HttpMessagingGateway implements MessagingDataSource {
       id: conversation.id,
       contactUserId,
       contactName: contact?.fullName ?? "Contact",
+      contactPhotoUrl: contact?.profilePhotoUrl ?? null,
       messages: conversation.messages.map((message) =>
         this.toMessage(message, currentUserId),
       ),

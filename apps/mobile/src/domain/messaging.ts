@@ -19,5 +19,7 @@ export interface ChatThread {
   id: string;
   contactUserId: string;
   contactName: string;
+  /** Avatar of the other person, or null when they have not attached one. */
+  contactPhotoUrl: string | null;
   messages: ChatMessage[];
 }

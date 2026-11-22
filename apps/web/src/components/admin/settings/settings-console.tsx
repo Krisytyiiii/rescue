@@ -29,6 +29,7 @@ import { Badge, type BadgeTone } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SecondaryTabFilters } from "@/components/ui/secondary-tab-filters";
 import { StatCard } from "@/components/ui/stat-card";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 import { ChangePasswordDialog } from "./change-password-dialog";
 import { ProfileEditDialog } from "./profile-edit-dialog";
@@ -544,17 +545,12 @@ function AccountSection({
         }
       >
         <div className="mb-3 flex items-center gap-3">
-          <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/10 text-[0.8125rem] font-semibold text-clay ring-1 ring-inset ring-clay/15">
-            {admin.profilePhotoUrl ? (
-              <img
-                src={admin.profilePhotoUrl}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              `${admin.firstName.charAt(0)}${admin.lastName.charAt(0)}`.toUpperCase()
-            )}
-          </span>
+          <UserAvatar
+            src={admin.profilePhotoUrl}
+            className="h-12 w-12"
+            fallbackClassName="bg-clay/10 text-clay ring-1 ring-inset ring-clay/15"
+            iconClassName="h-5 w-5"
+          />
           <div className="min-w-0">
             <p className="truncate text-[0.875rem] font-semibold text-ink">
               {admin.fullName}

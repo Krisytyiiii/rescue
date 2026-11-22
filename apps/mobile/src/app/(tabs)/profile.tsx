@@ -1,8 +1,9 @@
 import { useRouter } from "expo-router";
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ArrowUpRightIcon } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useHomeViewModel } from "@/features/auth/useHomeViewModel";
 import { RescuerProfileView } from "@/features/rescuer/RescuerProfileView";
@@ -26,10 +27,6 @@ export default function ProfileScreen() {
     return <RescuerProfileView />;
   }
 
-  const initials = user
-    ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
-    : "F";
-
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
@@ -37,16 +34,12 @@ export default function ProfileScreen() {
           <Text style={styles.eyebrow}>Profile</Text>
 
           <View style={styles.card}>
-            <View style={styles.avatar}>
-              {user?.profilePhotoUrl ? (
-                <Image
-                  source={{ uri: user.profilePhotoUrl }}
-                  style={styles.avatarImage}
-                />
-              ) : (
-                <Text style={styles.avatarText}>{initials}</Text>
-              )}
-            </View>
+            <UserAvatar
+              uri={user?.profilePhotoUrl}
+              size={64}
+              backgroundColor={Brand.forest}
+              iconColor={Brand.paper}
+            />
             <Text style={styles.name}>
               {user ? user.fullName : "FuRescue account"}
             </Text>

@@ -37,6 +37,12 @@ function normalize(post: CommunityPost): CommunityPost {
       ...item,
       fileUrl: absoluteUrl(item.fileUrl) ?? item.fileUrl,
     })),
+    postedBy: post.postedBy
+      ? {
+          ...post.postedBy,
+          profilePhotoUrl: absoluteUrl(post.postedBy.profilePhotoUrl),
+        }
+      : null,
   };
 }
 

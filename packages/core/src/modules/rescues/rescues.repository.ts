@@ -11,7 +11,9 @@ const operationInclude = {
         orderBy: { createdAt: "asc" },
         take: 1,
       },
-      reporter: { select: { firstName: true, lastName: true } },
+      reporter: {
+        select: { firstName: true, lastName: true, profilePhotoUrl: true },
+      },
       resultingAnimal: { select: { id: true, animalCode: true } },
       statusHistory: {
         orderBy: { changedAt: "desc" },
@@ -20,8 +22,12 @@ const operationInclude = {
       },
     },
   },
-  rescuer: { select: { id: true, firstName: true, lastName: true } },
-  assigner: { select: { firstName: true, lastName: true } },
+  rescuer: {
+    select: { id: true, firstName: true, lastName: true, profilePhotoUrl: true },
+  },
+  assigner: {
+    select: { firstName: true, lastName: true, profilePhotoUrl: true },
+  },
 } satisfies Prisma.RescueOperationInclude;
 
 export type OperationWithRelations = Prisma.RescueOperationGetPayload<{
@@ -55,7 +61,14 @@ const reportMarkerInclude = {
     take: 1,
     select: {
       assignmentStatus: true,
-      rescuer: { select: { id: true, firstName: true, lastName: true } },
+      rescuer: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilePhotoUrl: true,
+        },
+      },
     },
   },
   statusHistory: {

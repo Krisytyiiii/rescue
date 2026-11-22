@@ -4,7 +4,6 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -18,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CheckIcon, ChevronDownIcon, LockIcon } from "@/components/icons";
+import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { RescuerScreenHeader } from "@/features/rescuer/RescuerScreenHeader";
 import { useEditProfileViewModel } from "@/features/rescuer/useEditProfileViewModel";
@@ -63,10 +63,6 @@ export default function EditProfileScreen() {
     });
   };
 
-  const initials = form
-    ? `${form.firstName.charAt(0)}${form.lastName.charAt(0)}`.toUpperCase() || "F"
-    : "F";
-
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
@@ -108,14 +104,7 @@ export default function EditProfileScreen() {
                       pressed && styles.pressed,
                     ]}
                   >
-                    {form.profilePhotoUrl ? (
-                      <Image
-                        source={{ uri: form.profilePhotoUrl }}
-                        style={styles.photoImage}
-                      />
-                    ) : (
-                      <Text style={styles.photoInitials}>{initials}</Text>
-                    )}
+                    <UserAvatar uri={form.profilePhotoUrl} size={76} />
                     {uploadingPhoto ? (
                       <View style={styles.photoOverlay}>
                         <ActivityIndicator color={Brand.paper} />
