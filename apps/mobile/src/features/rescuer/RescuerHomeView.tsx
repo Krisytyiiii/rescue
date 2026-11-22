@@ -720,17 +720,19 @@ function QuickActionCard({
           style={[styles.actionHighlight, { backgroundColor: `${tint}22` }]}
         />
 
-        <View style={styles.actionGlyph}>{icon}</View>
-        <View style={styles.actionArrow}>
-          <ArrowUpRightIcon size={13} color={Brand.ink55} />
-        </View>
+        <View style={styles.actionBody}>
+          <View style={styles.actionGlyph}>{icon}</View>
+          <View style={styles.actionArrow}>
+            <ArrowUpRightIcon size={13} color={Brand.ink55} />
+          </View>
 
-        <Text style={styles.actionLabel} numberOfLines={2}>
-          {label}
-        </Text>
-        <Text style={styles.actionHint} numberOfLines={2}>
-          {hint}
-        </Text>
+          <Text style={styles.actionLabel} numberOfLines={2}>
+            {label}
+          </Text>
+          <Text style={styles.actionHint} numberOfLines={2}>
+            {hint}
+          </Text>
+        </View>
       </GlassView>
     </Pressable>
   );
@@ -1368,7 +1370,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.95)",
     backgroundColor: "rgba(255,255,255,0.55)",
-    padding: 14,
     minHeight: 126,
     overflow: "hidden",
     shadowColor: "#10231A",
@@ -1376,6 +1377,10 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
+  },
+  actionBody: {
+    flex: 1,
+    padding: 14,
   },
   actionCardPressed: {
     opacity: 0.82,
