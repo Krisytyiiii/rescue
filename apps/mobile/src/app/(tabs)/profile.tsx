@@ -3,6 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ArrowUpRightIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useHomeViewModel } from "@/features/auth/useHomeViewModel";
@@ -16,7 +17,7 @@ function roleLabel(role: string | undefined) {
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, signOut } = useHomeViewModel();
+  const { user, loading, signOut } = useHomeViewModel();
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,6 +26,10 @@ export default function ProfileScreen() {
 
   if (user?.role === "rescuer") {
     return <RescuerProfileView />;
+  }
+
+  if (loading) {
+    return <ProfileSkeleton />;
   }
 
   return (
@@ -65,6 +70,48 @@ export default function ProfileScreen() {
               <ArrowUpRightIcon size={15} color={Brand.ink} />
             </View>
           </Pressable>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
+  );
+}
+
+function ProfileSkeleton() {
+  return (
+    <View style={styles.root}>
+      <SafeAreaView style={styles.flex} edges={["top"]}>
+        <ScrollView contentContainerStyle={styles.content}>
+          <Skeleton width={62} height={10} borderRadius={5} />
+
+          <View style={styles.card}>
+            <Skeleton width={64} height={64} borderRadius={32} />
+            <Skeleton
+              width={176}
+              height={24}
+              borderRadius={10}
+              style={styles.skeletonName}
+            />
+            <Skeleton
+              width={92}
+              height={9}
+              borderRadius={4}
+              style={styles.skeletonRole}
+            />
+
+            <View style={styles.rule} />
+
+            {[0, 1, 2].map((index) => (
+              <View key={index} style={styles.infoRow}>
+                <Skeleton width={54} height={9} borderRadius={4} />
+                <Skeleton width={116} height={11} borderRadius={5} />
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.signOut}>
+            <Skeleton width={78} height={13} borderRadius={6} />
+            <Skeleton width={36} height={36} borderRadius={18} />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -184,6 +231,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  skeletonName: { marginTop: 14 },
+  skeletonRole: { marginTop: 8 },
   pressed: { opacity: 0.65 },
   signOutText: {
     fontFamily: FontFamily.medium,

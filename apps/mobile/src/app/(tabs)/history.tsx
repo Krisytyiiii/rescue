@@ -17,6 +17,7 @@ import {
   PawIcon,
   PersonIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { AssignmentStatus, RescuerAssignment } from "@/domain/rescuer";
 import {
@@ -70,9 +71,13 @@ export default function HistoryScreen() {
 
           {loading ? (
             <View style={styles.skeletonList}>
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
+              <View style={styles.skeletonGroup}>
+                <Skeleton width={94} height={13} borderRadius={6} />
+                <Skeleton width={56} height={9} borderRadius={4} />
+              </View>
+              {[0, 1, 2].map((index) => (
+                <HistoryCardSkeleton key={index} />
+              ))}
             </View>
           ) : history && history.total > 0 ? (
             <>
@@ -113,6 +118,30 @@ export default function HistoryScreen() {
           )}
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function HistoryCardSkeleton() {
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardHead}>
+        <View style={styles.cardBody}>
+          <View style={styles.cardTop}>
+            <Skeleton width={92} height={10} borderRadius={4} />
+            <Skeleton width={68} height={22} borderRadius={999} />
+          </View>
+          <Skeleton
+            width="94%"
+            height={13}
+            borderRadius={6}
+            style={styles.skeletonDescription}
+          />
+          <Skeleton width="62%" height={11} borderRadius={5} style={styles.skeletonMeta} />
+          <Skeleton width="48%" height={10} borderRadius={4} style={styles.skeletonReporter} />
+        </View>
+        <Skeleton width={16} height={16} borderRadius={8} />
+      </View>
     </View>
   );
 }
@@ -629,12 +658,23 @@ const styles = StyleSheet.create({
     color: Brand.ink55,
   },
   skeletonList: {
-    marginTop: 18,
+    marginTop: 0,
     gap: 10,
   },
-  skeletonRow: {
-    height: 128,
-    borderRadius: 22,
-    backgroundColor: "rgba(16,36,26,0.05)",
+  skeletonGroup: {
+    marginTop: 26,
+    marginBottom: 2,
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+  },
+  skeletonDescription: {
+    marginTop: 10,
+  },
+  skeletonMeta: {
+    marginTop: 8,
+  },
+  skeletonReporter: {
+    marginTop: 8,
   },
 });

@@ -27,6 +27,7 @@ export function useReportViewModel(
   const [locating, setLocating] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [barangays, setBarangays] = useState<Barangay[]>([]);
+  const [barangaysLoading, setBarangaysLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<CreatedReport | null>(null);
@@ -75,6 +76,9 @@ export function useReportViewModel(
       })
       .catch(() => {
         // Barangay is optional; the server falls back to the account's barangay.
+      })
+      .finally(() => {
+        if (active) setBarangaysLoading(false);
       });
 
     return () => {
@@ -168,6 +172,7 @@ export function useReportViewModel(
     locationError,
     retryLocation: locate,
     barangays,
+    barangaysLoading,
     submitting,
     error,
     created,

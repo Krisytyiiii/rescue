@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChatIcon, PawIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useMessagesViewModel } from "@/features/messages/useMessagesViewModel";
@@ -36,10 +37,10 @@ export default function MessagesScreen() {
           </View>
 
           {loading ? (
-            <View style={styles.skeletonList}>
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
+            <View style={styles.peopleList}>
+              {[0, 1, 2, 3].map((index) => (
+                <ContactSkeleton key={index} />
+              ))}
             </View>
           ) : contacts.length === 0 ? (
             <View style={styles.emptyCard}>
@@ -105,6 +106,24 @@ export default function MessagesScreen() {
           {error ? <Text style={styles.error}>{error}</Text> : null}
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function ContactSkeleton() {
+  return (
+    <View style={styles.contact}>
+      <Skeleton width={44} height={44} borderRadius={22} />
+      <View style={styles.contactBody}>
+        <Skeleton width="48%" height={13} borderRadius={6} />
+        <Skeleton
+          width="68%"
+          height={10}
+          borderRadius={5}
+          style={styles.skeletonMeta}
+        />
+      </View>
+      <Skeleton width={34} height={34} borderRadius={17} />
     </View>
   );
 }
@@ -213,14 +232,8 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     color: Brand.ink55,
   },
-  skeletonList: {
-    marginTop: 22,
-    gap: 8,
-  },
-  skeletonRow: {
-    height: 70,
-    borderRadius: 18,
-    backgroundColor: "rgba(16,36,26,0.05)",
+  skeletonMeta: {
+    marginTop: 6,
   },
   pressed: {
     opacity: 0.7,

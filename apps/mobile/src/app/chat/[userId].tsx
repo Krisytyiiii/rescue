@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChevronLeftIcon, PawIcon, PersonIcon, SendIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { ChatMessage } from "@/domain/messaging";
@@ -250,11 +251,21 @@ export default function ChatScreen() {
 function ChatSkeleton() {
   return (
     <View style={styles.chatSkeleton}>
-      <View style={[styles.skelBubble, { width: "64%" }]} />
-      <View style={[styles.skelBubble, styles.skelBubbleMine, { width: "48%" }]} />
-      <View style={[styles.skelBubble, { width: "72%" }]} />
-      <View style={[styles.skelBubble, styles.skelBubbleMine, { width: "38%" }]} />
-      <View style={[styles.skelBubble, { width: "56%" }]} />
+      <Skeleton width="64%" height={46} borderRadius={18} />
+      <Skeleton
+        width="48%"
+        height={46}
+        borderRadius={18}
+        style={styles.skeletonMine}
+      />
+      <Skeleton width="72%" height={46} borderRadius={18} />
+      <Skeleton
+        width="38%"
+        height={46}
+        borderRadius={18}
+        style={styles.skeletonMine}
+      />
+      <Skeleton width="56%" height={46} borderRadius={18} />
     </View>
   );
 }
@@ -361,15 +372,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   chatSkeleton: { gap: 8, paddingTop: 4 },
-  skelBubble: {
-    height: 46,
-    borderRadius: 18,
-    backgroundColor: "rgba(16, 36, 26, 0.07)",
-  },
-  skelBubbleMine: {
-    alignSelf: "flex-end",
-    backgroundColor: "rgba(31, 122, 77, 0.14)",
-  },
+  skeletonMine: { alignSelf: "flex-end" },
   loadError: {
     fontFamily: FontFamily.medium,
     fontSize: 12,

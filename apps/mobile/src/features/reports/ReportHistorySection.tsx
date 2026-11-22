@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  ActivityIndicator,
   Image,
   Pressable,
   StyleSheet,
@@ -8,6 +7,7 @@ import {
   View,
 } from "react-native";
 
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import { REPORT_STATUS_META } from "@/domain/report-map";
 import type { MyReport } from "@/domain/report-submission";
@@ -58,12 +58,9 @@ export function ReportHistorySection({
         </View>
       ) : null}
 
-      {loading && reports.length === 0 ? (
-        <View style={styles.statusCard}>
-          <ActivityIndicator color={Brand.clay} size="small" />
-          <Text style={styles.statusText}>Loading your reports…</Text>
-        </View>
-      ) : null}
+      {loading && reports.length === 0
+        ? [0, 1, 2].map((index) => <ReportCardSkeleton key={index} />)
+        : null}
 
       {error ? (
         <View style={styles.statusCard}>
@@ -108,6 +105,38 @@ export function ReportHistorySection({
           </Text>
         </Pressable>
       ) : null}
+    </View>
+  );
+}
+
+function ReportCardSkeleton() {
+  return (
+    <View style={styles.card}>
+      <View style={styles.cardTop}>
+        <Skeleton width={42} height={42} borderRadius={11} />
+        <View style={styles.cardIdentity}>
+          <Skeleton width="52%" height={12} borderRadius={6} />
+          <Skeleton
+            width="74%"
+            height={9}
+            borderRadius={4}
+            style={styles.skeletonGap}
+          />
+        </View>
+        <Skeleton width={72} height={22} borderRadius={999} />
+      </View>
+      <Skeleton
+        width="56%"
+        height={9}
+        borderRadius={4}
+        style={styles.skeletonDate}
+      />
+      <Skeleton
+        width="40%"
+        height={9}
+        borderRadius={4}
+        style={styles.skeletonGap}
+      />
     </View>
   );
 }
@@ -242,6 +271,8 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.paper,
     padding: 13,
   },
+  skeletonGap: { marginTop: 6 },
+  skeletonDate: { marginTop: 10 },
   cardTop: { flexDirection: "row", alignItems: "center", gap: 10 },
   thumbnail: {
     width: 42,

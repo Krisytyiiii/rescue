@@ -38,6 +38,7 @@ import {
   MapPinIcon,
   PawIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   ReportSpecies,
@@ -140,6 +141,7 @@ export function ReportFormView() {
     locationError,
     retryLocation,
     barangays,
+    barangaysLoading,
     submitting,
     error,
     created,
@@ -339,11 +341,10 @@ export function ReportFormView() {
                     {coordinates.longitude.toFixed(5)}
                   </Text>
                 ) : locating ? (
-                  <ActivityIndicator
-                    color={Brand.clay}
-                    size="small"
-                    style={styles.locationSpinner}
-                  />
+                  <View style={styles.locationSkeleton}>
+                    <Skeleton width={128} height={9} borderRadius={4} />
+                    <Skeleton width={82} height={9} borderRadius={4} />
+                  </View>
                 ) : (
                   <Text style={styles.locationError}>{locationError}</Text>
                 )}
@@ -686,7 +687,16 @@ export function ReportFormView() {
                     Use my account
                   </Text>
                 </Pressable>
-                {barangays.map((barangay) => {
+                {barangaysLoading
+                  ? [0, 1, 2, 3].map((index) => (
+                      <Skeleton
+                        key={index}
+                        width={index % 2 === 0 ? 92 : 76}
+                        height={34}
+                        borderRadius={999}
+                      />
+                    ))
+                  : barangays.map((barangay) => {
                   const selected = barangayId === barangay.id;
                   return (
                     <Pressable
@@ -917,7 +927,7 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     color: Brand.ink55,
   },
-  locationSpinner: { marginTop: 4, alignSelf: "flex-start" },
+  locationSkeleton: { marginTop: 7, gap: 6 },
   locationError: {
     marginTop: 2,
     fontFamily: FontFamily.sans,
@@ -1157,7 +1167,7 @@ const styles = StyleSheet.create({
     color: Brand.forest,
   },
   myReports: {
-    alignSelf: "flex-start",
+    alignSelf: "flex-end",
     marginTop: 14,
     flexDirection: "row",
     alignItems: "center",

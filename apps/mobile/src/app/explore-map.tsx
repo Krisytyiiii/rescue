@@ -21,6 +21,7 @@ import {
   ExpandIcon,
   LocateIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import {
   REPORT_STATUS_META,
@@ -243,26 +244,42 @@ export default function ExploreMapScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.filterRow}
             >
-              <StatusChip
-                label="All"
-                pin={Brand.ink70}
-                count={counts.total}
-                active={filter === "all"}
-                onPress={() => setFilter("all")}
-              />
-              {REPORT_STATUS_ORDER.map((status) => {
-                const meta = REPORT_STATUS_META[status];
-                return (
+              {loading ? (
+                <>
+                  <Skeleton width={62} height={32} borderRadius={999} />
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <Skeleton
+                      key={index}
+                      width={index % 2 === 0 ? 84 : 70}
+                      height={32}
+                      borderRadius={999}
+                    />
+                  ))}
+                </>
+              ) : (
+                <>
                   <StatusChip
-                    key={status}
-                    label={meta.label}
-                    pin={meta.pin}
-                    count={counts[status]}
-                    active={filter === status}
-                    onPress={() => setFilter(status as ReportStatusFilter)}
+                    label="All"
+                    pin={Brand.ink70}
+                    count={counts.total}
+                    active={filter === "all"}
+                    onPress={() => setFilter("all")}
                   />
-                );
-              })}
+                  {REPORT_STATUS_ORDER.map((status) => {
+                    const meta = REPORT_STATUS_META[status];
+                    return (
+                      <StatusChip
+                        key={status}
+                        label={meta.label}
+                        pin={meta.pin}
+                        count={counts[status]}
+                        active={filter === status}
+                        onPress={() => setFilter(status as ReportStatusFilter)}
+                      />
+                    );
+                  })}
+                </>
+              )}
             </ScrollView>
           </View>
 
@@ -316,15 +333,6 @@ export default function ExploreMapScreen() {
             </View>
           ) : null}
 
-          {loading ? (
-            <View style={styles.centerOverlay} pointerEvents="none">
-              <View style={styles.loadingCard}>
-                <ActivityIndicator size="small" color={Brand.moss} />
-                <Text style={styles.loadingText}>Loading report map</Text>
-              </View>
-            </View>
-          ) : null}
-
           {!loading && visible.length === 0 ? (
             <View style={styles.centerOverlay} pointerEvents="none">
               <View style={styles.emptyPill}>
@@ -345,6 +353,8 @@ export default function ExploreMapScreen() {
               bottom={Math.max(insets.bottom, 12)}
               onClose={() => select(selected.id)}
             />
+          ) : loading ? (
+            <LegendSkeleton bottom={Math.max(insets.bottom, 12)} />
           ) : (
             <StatusLegend
               counts={counts}
@@ -454,6 +464,26 @@ function StatusLegend({
             </View>
           );
         })}
+      </View>
+    </View>
+  );
+}
+
+function LegendSkeleton({ bottom }: { bottom: number }) {
+  return (
+    <View style={[styles.legend, { bottom }]}>
+      <View style={styles.legendHead}>
+        <Skeleton width={78} height={8} borderRadius={4} />
+        <Skeleton width={52} height={8} borderRadius={4} />
+      </View>
+      <View style={styles.legendGrid}>
+        {REPORT_STATUS_ORDER.map((status) => (
+          <View key={status} style={styles.legendItem}>
+            <Skeleton width={8} height={8} borderRadius={4} />
+            <Skeleton width="58%" height={8} borderRadius={4} />
+            <Skeleton width={12} height={8} borderRadius={4} />
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -754,22 +784,6 @@ const styles = StyleSheet.create({
     left: 0,
     alignItems: "center",
     justifyContent: "center",
-  },
-  loadingCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.9)",
-    backgroundColor: "rgba(255,255,255,0.94)",
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  loadingText: {
-    fontFamily: FontFamily.medium,
-    fontSize: 10.5,
-    color: Brand.ink55,
   },
   emptyPill: {
     borderRadius: 999,

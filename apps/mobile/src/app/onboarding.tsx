@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PawMark, Wordmark } from "@/components/brand";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useOnboardingViewModel } from "@/features/auth/useOnboardingViewModel";
 import { useOnboardingSnapshot } from "@/features/onboarding/useOnboardingSnapshot";
@@ -100,7 +101,7 @@ export default function OnboardingScreen() {
   const { checkingSession } = useOnboardingViewModel(() =>
     router.replace("/"),
   );
-  const { snapshot } = useOnboardingSnapshot();
+  const { snapshot, loading: snapshotLoading } = useOnboardingSnapshot();
 
   const stats = snapshot?.stats;
   const report = snapshot?.latestReport;
@@ -226,14 +227,22 @@ export default function OnboardingScreen() {
                     </View>
 
                     <View style={[styles.homesBadge, short && styles.homesBadgeShort]}>
-                      <Text
-                        style={[
-                          styles.homesValue,
-                          short && styles.homesValueShort,
-                        ]}
-                      >
-                        {formatCount(stats?.adopted)}
-                      </Text>
+                      {snapshotLoading && !stats ? (
+                        <Skeleton
+                          width={short ? 24 : 28}
+                          height={short ? 16 : 20}
+                          borderRadius={5}
+                        />
+                      ) : (
+                        <Text
+                          style={[
+                            styles.homesValue,
+                            short && styles.homesValueShort,
+                          ]}
+                        >
+                          {formatCount(stats?.adopted)}
+                        </Text>
+                      )}
                       <Text style={styles.homesLabel}>Homes{"\n"}found</Text>
                     </View>
                   </View>
@@ -350,7 +359,11 @@ export default function OnboardingScreen() {
                             position > 0 && styles.impactItemBorder,
                           ]}
                         >
-                          <Text style={styles.impactValue}>{stat.value}</Text>
+                          {snapshotLoading && !stats ? (
+                            <Skeleton width={44} height={24} borderRadius={6} />
+                          ) : (
+                            <Text style={styles.impactValue}>{stat.value}</Text>
+                          )}
                           <Text style={styles.impactLabel}>{stat.label}</Text>
                         </View>
                       ))}

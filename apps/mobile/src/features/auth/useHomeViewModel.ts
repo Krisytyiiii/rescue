@@ -7,6 +7,7 @@ import type { AuthRepository } from "@/domain/ports";
 /** Session state for the signed-in home screen. */
 export function useHomeViewModel(repository: AuthRepository = authRepository) {
   const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let active = true;
@@ -18,6 +19,9 @@ export function useHomeViewModel(repository: AuthRepository = authRepository) {
       })
       .catch(() => {
         if (active) setUser(null);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
 
     return () => {
@@ -27,5 +31,5 @@ export function useHomeViewModel(repository: AuthRepository = authRepository) {
 
   const signOut = () => repository.signOut();
 
-  return { user, signOut };
+  return { user, loading, signOut };
 }
