@@ -36,6 +36,7 @@ import type {
   RegisterInput,
   RegistrationResult,
   ResendVerificationInput,
+  UpdateAccountProfileInput,
   VerifyEmailInput,
 } from "./auth.types.ts";
 
@@ -385,6 +386,73 @@ export class AuthService {
     const user = await this.repo.findById(userId);
     if (!user) throw new UnauthorizedError("Account no longer exists");
     return toAuthUser(user);
+  }
+
+  /**
+   * Updates the fields a signed-in user owns. Email, role, and account status
+   * stay under admin control.
+   */
+  async updateProfile(
+    userId: string,
+    input: UpdateAccountProfileInput,
+  ): Promise<AuthUser> {
+    const user = await this.repo.findById(userId);
+    if (!user) throw new UnauthorizedError("Account no longer exists");
+
+    const data: {
+      firstName?: string;
+      middleName?: string | null;
+      lastName?: string;
+      phoneNumber?: string | null;
+      barangayId?: number | null;
+      profilePhotoUrl?: string | null;
+    } = {};
+
+    if (input.firstName !== undefined) data.firstName = input.firstName;
+    if (input.middleName !== undefined) {
+      data.middleName = input.middleName?.trim() || null;
+    }
+    if (input.lastName !== undefined) data.lastName = input.lastName;
+    if (input.phoneNumber !== undefined) {
+      data.phoneNumber = input.phoneNumber?.trim() || null;
+    }
+    if (input.barangayId !== undefined) data.barangayId = input.barangayId;
+    if (input.profilePhotoUrl !== undefined) {
+      data.profilePhotoUrl = input.profilePhotoUrl?.trim() || null;
+    }
+
+    const updated = await prisma.$transaction(async (tx) => {
+      const row = await tx.user.update({
+        where: { id: userId },
+        data,
+        include: { role: true },
+      });
+      await writeAuditLog(tx, {
+        userId,
+        action: "update_profile",
+        entityType: "user",
+        entityId: userId,
+        oldValue: {
+          firstName: user.firstName,
+          middleName: user.middleName,
+          lastName: user.lastName,
+          phoneNumber: user.phoneNumber,
+          barangayId: user.barangayId,
+          profilePhotoUrl: user.profilePhotoUrl,
+        },
+        newValue: {
+          firstName: row.firstName,
+          middleName: row.middleName,
+          lastName: row.lastName,
+          phoneNumber: row.phoneNumber,
+          barangayId: row.barangayId,
+          profilePhotoUrl: row.profilePhotoUrl,
+        },
+      });
+      return row;
+    });
+
+    return toAuthUser(updated);
   }
 
   async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {

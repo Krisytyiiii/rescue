@@ -9,6 +9,7 @@ import type {
   Session,
   SignupInput,
   SignupResult,
+  UpdateProfileInput,
   VerifyEmailInput,
 } from "@/domain/auth";
 import type {
@@ -78,6 +79,15 @@ export class DefaultAuthRepository implements AuthRepository {
   async getCachedUser(): Promise<AuthUser | null> {
     const cached = await this.storage.read();
     return cached?.user ?? null;
+  }
+
+  async updateProfile(input: UpdateProfileInput): Promise<AuthUser> {
+    const cached = await this.storage.read();
+    if (!cached) throw new Error("Sign in to update your profile");
+
+    const user = await this.gateway.updateProfile(cached.token, input);
+    await this.storage.save({ token: cached.token, user });
+    return user;
   }
 
   signOut(): Promise<void> {

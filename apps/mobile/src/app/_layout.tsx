@@ -59,6 +59,14 @@ export default function RootLayout() {
           name="chat/[userId]"
           options={{ animation: "slide_from_right" }}
         />
+        <Stack.Screen
+          name="reports"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="edit-profile"
+          options={{ animation: "slide_from_right" }}
+        />
       </Stack>
     </>
   );

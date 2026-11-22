@@ -18,7 +18,7 @@ interface Envelope<T> {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "DELETE";
+  method?: "GET" | "POST" | "PATCH" | "DELETE";
   body?: unknown;
   token?: string;
   /** Identifies the mobile client so the API returns tokens instead of cookies. */

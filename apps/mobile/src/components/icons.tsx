@@ -412,3 +412,111 @@ export function PaperclipIcon({
     </StrokeIcon>
   );
 }
+
+export function PencilIcon({
+  size = 16,
+  color = Brand.ink,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M12 20h9" />
+      <Path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </StrokeIcon>
+  );
+}
+
+export function ChartIcon({
+  size = 18,
+  color = Brand.ink55,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M4 20V10" />
+      <Path d="M10 20V4" />
+      <Path d="M16 20v-6" />
+      <Path d="M22 20H2" />
+    </StrokeIcon>
+  );
+}
+
+export function PhoneIcon({
+  size = 16,
+  color = Brand.ink55,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 10a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" />
+    </StrokeIcon>
+  );
+}
+
+export function MailIcon({
+  size = 16,
+  color = Brand.ink55,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+      <Path d="m3 7 9 6 9-6" />
+    </StrokeIcon>
+  );
+}
+
+export function LockIcon({
+  size = 14,
+  color = Brand.ink55,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M6 10V7a6 6 0 0 1 12 0v3" />
+      <Path d="M5 10h14v10H5Z" />
+    </StrokeIcon>
+  );
+}
+
+export function ShieldIcon({
+  size = 15,
+  color = Brand.moss,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M12 3 4.5 6v5.5c0 4.6 3.2 8 7.5 9.5 4.3-1.5 7.5-4.9 7.5-9.5V6Z" />
+      <Path d="m8.5 12 2.5 2.5 4.5-4.5" />
+    </StrokeIcon>
+  );
+}
+
+export function CalendarIcon({
+  size = 16,
+  color = Brand.ink55,
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <StrokeIcon size={size} color={color}>
+      <Path d="M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z" />
+      <Path d="M8 3v4" />
+      <Path d="M16 3v4" />
+      <Path d="M4 10h16" />
+    </StrokeIcon>
+  );
+}

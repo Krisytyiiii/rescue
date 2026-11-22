@@ -5,6 +5,7 @@ import type {
   GoogleSignupInput,
   Session,
   SignupResult,
+  UpdateProfileInput,
 } from "@/domain/auth";
 import type { AuthGateway } from "@/domain/ports";
 
@@ -124,6 +125,21 @@ export class HttpAuthGateway implements AuthGateway {
       networkMessage:
         "Can't reach FuRescue. Check your connection and try again.",
       fallbackMessage: "Your session has expired. Please sign in again.",
+    }).then((data) => data.user);
+  }
+
+  updateProfile(
+    token: string,
+    input: UpdateProfileInput,
+  ): Promise<AuthUser> {
+    return requestJson<{ user: AuthUser }>("/api/auth/me", {
+      method: "PATCH",
+      body: input,
+      token,
+      mobile: true,
+      networkMessage:
+        "Can't reach FuRescue. Check your connection and try again.",
+      fallbackMessage: "We couldn't save your profile. Please try again.",
     }).then((data) => data.user);
   }
 

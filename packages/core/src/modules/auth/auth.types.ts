@@ -69,6 +69,16 @@ export interface LoginInput {
   password: string;
 }
 
+/** Self-service profile edit. Email is deliberately not editable. */
+export interface UpdateAccountProfileInput {
+  firstName?: string;
+  middleName?: string | null;
+  lastName?: string;
+  phoneNumber?: string | null;
+  barangayId?: number | null;
+  profilePhotoUrl?: string | null;
+}
+
 export interface JwtPayload {
   sub: string;
   role: RoleName;

@@ -10,7 +10,7 @@ export interface AuthUser {
   phoneNumber: string | null;
   role: string;
   accountStatus: string;
-  barangayId: string | null;
+  barangayId: number | null;
   profilePhotoUrl: string | null;
   emailVerifiedAt: string | null;
   createdAt: string;
@@ -24,6 +24,16 @@ export interface Session {
 export interface LoginInput {
   email: string;
   password: string;
+}
+
+/** Fields a signed-in user can change. Email is read-only. */
+export interface UpdateProfileInput {
+  firstName?: string;
+  middleName?: string | null;
+  lastName?: string;
+  phoneNumber?: string | null;
+  barangayId?: number | null;
+  profilePhotoUrl?: string | null;
 }
 
 export interface SignupInput {

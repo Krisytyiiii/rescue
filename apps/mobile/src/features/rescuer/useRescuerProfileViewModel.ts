@@ -1,40 +1,38 @@
 import { useCallback, useEffect, useState } from "react";
 
-import {
-  authRepository,
-  rescuerHistoryDataSource,
-  rescuerHomeDataSource,
-} from "@/data";
-import type { AuthUser } from "@/domain/auth";
+import { authRepository, rescuerHomeDataSource } from "@/data";
+import type { Barangay, AuthUser } from "@/domain/auth";
 import type { AuthRepository } from "@/domain/ports";
 import {
-  selectRescuerHistory,
   selectRescuerHome,
   type RescuerHomeStats,
 } from "@/domain/rescuer";
+import {
+  selectRescuerReportSummary,
+  type RescuerReportSummary,
+} from "@/domain/rescuer-reports";
 
-import type { RescuerHistoryDataSource } from "@/data/rescuer-history";
 import type { RescuerHomeDataSource } from "@/data/rescuer-home";
 
 interface Options {
   auth?: AuthRepository;
   home?: RescuerHomeDataSource;
-  history?: RescuerHistoryDataSource;
 }
 
 export interface RescuerProfileState {
   stats: RescuerHomeStats;
+  reports: RescuerReportSummary;
   lifetimeRescues: number;
+  barangayName: string | null;
 }
 
 /**
- * Profile state for the rescuer shell: account details plus the workload
- * numbers the design calls for. Aggregation stays in the domain selectors.
+ * Profile state for the rescuer shell: account details, workload, and the
+ * all-time report summary behind the reports banner.
  */
 export function useRescuerProfileViewModel({
   auth = authRepository,
   home = rescuerHomeDataSource,
-  history = rescuerHistoryDataSource,
 }: Options = {}) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profile, setProfile] = useState<RescuerProfileState | null>(null);
@@ -42,19 +40,27 @@ export function useRescuerProfileViewModel({
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    const [cachedUser, homeData, historyEntries] = await Promise.all([
+    const [cachedUser, homeData, barangays] = await Promise.all([
       auth.getCachedUser(),
       home.loadHome(),
-      history.loadHistory(),
+      auth.loadBarangays().catch<Barangay[]>(() => []),
     ]);
+
+    const reports = selectRescuerReportSummary(homeData.assignments);
+    const barangay =
+      cachedUser?.barangayId != null
+        ? barangays.find((item) => item.id === cachedUser.barangayId)
+        : undefined;
 
     setUser(cachedUser);
     setProfile({
       stats: selectRescuerHome(homeData).stats,
-      lifetimeRescues: selectRescuerHistory(historyEntries).total,
+      reports,
+      lifetimeRescues: reports.totalCompleted,
+      barangayName: barangay?.name ?? null,
     });
     setError(null);
-  }, [auth, home, history]);
+  }, [auth, home]);
 
   useEffect(() => {
     let active = true;

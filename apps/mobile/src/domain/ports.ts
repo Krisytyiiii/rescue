@@ -9,6 +9,7 @@ import type {
   Session,
   SignupInput,
   SignupResult,
+  UpdateProfileInput,
   VerifyEmailInput,
 } from "./auth";
 
@@ -22,6 +23,7 @@ export interface AuthGateway {
   verifyEmail(input: VerifyEmailInput): Promise<SignupResult>;
   resendVerification(email: string): Promise<void>;
   fetchMe(token: string): Promise<AuthUser>;
+  updateProfile(token: string, input: UpdateProfileInput): Promise<AuthUser>;
   fetchBarangays(): Promise<Barangay[]>;
   googleAuthUrl(intent: GoogleAuthIntent, redirectUrl: string): string;
   completeGoogleSignup(input: GoogleSignupInput): Promise<SignupResult>;
@@ -55,6 +57,7 @@ export interface AuthRepository {
   resendVerification(email: string): Promise<void>;
   restoreSession(): Promise<RestoreResult>;
   getCachedUser(): Promise<AuthUser | null>;
+  updateProfile(input: UpdateProfileInput): Promise<AuthUser>;
   signOut(): Promise<void>;
   loadBarangays(): Promise<Barangay[]>;
   /** Runs the Google OAuth browser hand-off and resolves what to show next. */

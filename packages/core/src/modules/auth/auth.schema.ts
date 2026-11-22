@@ -45,5 +45,25 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(8).max(72),
 });
 
+/** Self-service profile fields. Email and role are intentionally immutable. */
+export const updateAccountProfileSchema = z
+  .object({
+    firstName: z.string().trim().min(1).max(60).optional(),
+    middleName: z.string().trim().max(60).nullable().optional(),
+    lastName: z.string().trim().min(1).max(60).optional(),
+    phoneNumber: z
+      .union([phone, z.literal(""), z.null()])
+      .optional(),
+    barangayId: z
+      .union([z.coerce.number().int().positive(), z.null()])
+      .optional(),
+    profilePhotoUrl: z
+      .union([z.string().trim().url("Enter a valid image URL").max(500), z.literal(""), z.null()])
+      .optional(),
+  })
+  .refine((value) => Object.values(value).some((item) => item !== undefined), {
+    message: "No profile changes to save",
+  });
+
 export type RegisterSchema = z.infer<typeof registerSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;

@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback, type ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -5,14 +6,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   ArrowUpRightIcon,
+  CalendarIcon,
+  ChartIcon,
   CheckIcon,
+  LockIcon,
+  MailIcon,
   MapPinIcon,
+  PencilIcon,
+  PhoneIcon,
+  ShieldIcon,
 } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { useRescuerProfileViewModel } from "./useRescuerProfileViewModel";
 
-/** Profile tab for the rescuer shell: account, workload, field shortcuts. */
+/** Profile tab for the rescuer shell: identity, field record, account, links. */
 export function RescuerProfileView() {
   const router = useRouter();
   const { user, profile, loading, error, reload, signOut } =
@@ -32,6 +40,7 @@ export function RescuerProfileView() {
   const initials = user
     ? `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase()
     : "F";
+  const reports = profile?.reports;
 
   return (
     <View style={styles.root}>
@@ -40,32 +49,117 @@ export function RescuerProfileView() {
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.eyebrow}>Profile</Text>
-
-          <View style={styles.card}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
+          <View style={styles.pageHead}>
+            <View>
+              <Text style={styles.eyebrow}>Profile</Text>
+              <Text style={styles.pageTitle}>Your field account</Text>
             </View>
-            <Text style={styles.name}>
-              {user ? user.fullName : "FuRescue account"}
-            </Text>
-            <Text style={styles.role}>Rescuer volunteer</Text>
-
-            <View style={styles.rule} />
-
-            <InfoRow label="Email" value={user?.email ?? "—"} />
-            <InfoRow label="Phone" value={user?.phoneNumber ?? "Not set"} />
-            <InfoRow
-              label="Status"
-              value={user?.accountStatus ? titleCase(user.accountStatus) : "—"}
-            />
+            <View style={styles.rolePill}>
+              <ShieldIcon size={13} color={Brand.moss} />
+              <Text style={styles.rolePillText}>Rescuer</Text>
+            </View>
           </View>
 
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Workload</Text>
-            <Text style={styles.sectionMeta}>
-              {loading ? "Loading" : "Live"}
+          <LinearGradient
+            colors={["#0B2E1C", "#165B37"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.hero}
+          >
+            <View style={styles.heroOrb} />
+            <View style={styles.heroTop}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => router.push("/edit-profile" as Href)}
+                style={({ pressed }) => [
+                  styles.editButton,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <PencilIcon size={13} color={Brand.sage} />
+                <Text style={styles.editText}>Edit profile</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.name}>
+              {user ? user.fullName : "FuRescue rescuer"}
             </Text>
+            <View style={styles.heroMetaRow}>
+              <Text style={styles.heroRole}>Rescuer volunteer</Text>
+              {user?.emailVerifiedAt ? (
+                <>
+                  <View style={styles.metaDot} />
+                  <CheckIcon size={11} color={Brand.sage} />
+                  <Text style={styles.verified}>Verified</Text>
+                </>
+              ) : null}
+            </View>
+
+            <View style={styles.heroEmailRow}>
+              <MailIcon size={13} color="rgba(255,255,255,0.55)" />
+              <Text style={styles.heroEmail} numberOfLines={1}>
+                {user?.email ?? "—"}
+              </Text>
+            </View>
+          </LinearGradient>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open all-time reports"
+            onPress={() => router.push("/reports" as Href)}
+            style={({ pressed }) => [pressed && styles.pressed]}
+          >
+            <LinearGradient
+              colors={["#E7F4EB", "#D6EBDD"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.reportBanner}
+            >
+              <View style={styles.reportHead}>
+                <View style={styles.reportBadge}>
+                  <ChartIcon size={14} color={Brand.moss} />
+                </View>
+                <View style={styles.reportTitleBlock}>
+                  <Text style={styles.reportEyebrow}>Reports</Text>
+                  <Text style={styles.reportTitle}>Your field record</Text>
+                </View>
+                <ArrowUpRightIcon size={16} color={Brand.moss} />
+              </View>
+
+              <View style={styles.reportStats}>
+                <ReportStat
+                  value={reports ? `${reports.totalCompleted}` : "—"}
+                  label="Completed"
+                />
+                <View style={styles.reportDivider} />
+                <ReportStat
+                  value={reports ? `${reports.thisMonthCompleted}` : "—"}
+                  label="This month"
+                />
+                <View style={styles.reportDivider} />
+                <ReportStat
+                  value={reports ? `${reports.successRate}%` : "—"}
+                  label="Success"
+                />
+              </View>
+
+              <View style={styles.reportCta}>
+                <Text style={styles.reportCtaText}>
+                  Open all-time reports
+                </Text>
+                <Text style={styles.reportCtaHint}>
+                  Outcomes, trends, species, urgency
+                </Text>
+              </View>
+            </LinearGradient>
+          </Pressable>
+
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Current workload</Text>
+            <Text style={styles.sectionMeta}>{loading ? "Loading" : "Live"}</Text>
           </View>
 
           <View style={styles.statsRow}>
@@ -76,31 +170,56 @@ export function RescuerProfileView() {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Text style={styles.lifetime}>
-            {profile
-              ? `${profile.lifetimeRescues} lifetime rescue${
-                  profile.lifetimeRescues === 1 ? "" : "s"
-                } completed`
-              : "Lifetime totals unavailable right now."}
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Account details</Text>
+            <Text style={styles.sectionMeta}>Private</Text>
+          </View>
+
+          <View style={styles.accountCard}>
+            <AccountRow
+              icon={<MailIcon size={15} color={Brand.moss} />}
+              label="Email"
+              value={user?.email ?? "—"}
+              hint="Managed by FuRescue"
+              locked
+            />
+            <View style={styles.accountRule} />
+            <AccountRow
+              icon={<PhoneIcon size={15} color={Brand.moss} />}
+              label="Phone"
+              value={user?.phoneNumber ?? "Not set"}
+            />
+            <View style={styles.accountRule} />
+            <AccountRow
+              icon={<MapPinIcon size={15} color={Brand.moss} />}
+              label="Barangay"
+              value={profile?.barangayName ?? "Not set"}
+            />
+            <View style={styles.accountRule} />
+            <AccountRow
+              icon={<CalendarIcon size={15} color={Brand.moss} />}
+              label="Member since"
+              value={user ? formatMemberSince(user.createdAt) : "—"}
+            />
+          </View>
 
           <View style={styles.links}>
             <ProfileLink
-              label="Assign"
+              label="Assignments"
               hint="Reports assigned to you"
               icon={<MapPinIcon size={17} color={Brand.clay} />}
               onPress={() => router.navigate("/queue" as Href)}
             />
             <ProfileLink
               label="Rescue history"
-              hint="Completed and failed operations"
+              hint="Completed, failed, and declined operations"
               icon={<CheckIcon size={17} color={Brand.clay} />}
               onPress={() => router.navigate("/history" as Href)}
             />
           </View>
 
           <Pressable
-            onPress={handleSignOut}
+            onPress={() => void handleSignOut()}
             accessibilityRole="button"
             style={({ pressed }) => [styles.signOut, pressed && styles.pressed]}
           >
@@ -115,13 +234,11 @@ export function RescuerProfileView() {
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function ReportStat({ value, label }: { value: string; label: string }) {
   return (
-    <View style={styles.infoRow}>
-      <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue} numberOfLines={1}>
-        {value}
-      </Text>
+    <View style={styles.reportStat}>
+      <Text style={styles.reportStatValue}>{value}</Text>
+      <Text style={styles.reportStatLabel}>{label}</Text>
     </View>
   );
 }
@@ -131,6 +248,34 @@ function StatCard({ label, value }: { label: string; value?: number }) {
     <View style={styles.statCard}>
       <Text style={styles.statValue}>{value ?? "—"}</Text>
       <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function AccountRow({
+  icon,
+  label,
+  value,
+  hint,
+  locked,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  hint?: string;
+  locked?: boolean;
+}) {
+  return (
+    <View style={styles.accountRow}>
+      <View style={styles.accountIcon}>{icon}</View>
+      <View style={styles.accountBody}>
+        <Text style={styles.accountLabel}>{label}</Text>
+        <Text style={styles.accountValue} numberOfLines={1}>
+          {value}
+        </Text>
+        {hint ? <Text style={styles.accountHint}>{hint}</Text> : null}
+      </View>
+      {locked ? <LockIcon size={13} color={Brand.ink55} /> : null}
     </View>
   );
 }
@@ -163,8 +308,23 @@ function ProfileLink({
   );
 }
 
-function titleCase(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+function formatMemberSince(iso: string): string {
+  const date = new Date(iso);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  return `${months[date.getMonth()] ?? ""} ${date.getFullYear()}`;
 }
 
 const styles = StyleSheet.create({
@@ -175,8 +335,14 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     alignSelf: "center",
     paddingHorizontal: 22,
-    paddingTop: 26,
+    paddingTop: 20,
     paddingBottom: 140,
+  },
+  pageHead: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
   },
   eyebrow: {
     fontFamily: FontFamily.medium,
@@ -185,74 +351,214 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Brand.clay,
   },
-  card: {
-    marginTop: 16,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: Brand.paper,
-    padding: 22,
-    alignItems: "center",
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Brand.forest,
-  },
-  avatarText: {
-    fontFamily: FontFamily.display,
-    fontSize: 26,
-    color: Brand.paper,
-  },
-  name: {
-    marginTop: 14,
-    fontFamily: FontFamily.display,
-    fontSize: 28,
-    letterSpacing: -0.6,
-    color: Brand.ink,
-    textAlign: "center",
-  },
-  role: {
+  pageTitle: {
     marginTop: 4,
+    fontFamily: FontFamily.display,
+    fontSize: 30,
+    lineHeight: 32,
+    letterSpacing: -0.8,
+    color: Brand.ink,
+  },
+  rolePill: {
+    marginTop: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    height: 28,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(31,122,77,0.22)",
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  rolePillText: {
     fontFamily: FontFamily.medium,
-    fontSize: 10,
-    letterSpacing: 1.2,
+    fontSize: 9.5,
+    letterSpacing: 0.9,
     textTransform: "uppercase",
-    color: Brand.clay,
+    color: Brand.moss,
   },
-  rule: {
-    height: 1,
-    alignSelf: "stretch",
-    backgroundColor: Brand.line,
-    marginVertical: 18,
+  hero: {
+    marginTop: 16,
+    borderRadius: 26,
+    padding: 20,
+    overflow: "hidden",
   },
-  infoRow: {
-    alignSelf: "stretch",
+  heroOrb: {
+    position: "absolute",
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    right: -54,
+    top: -72,
+    backgroundColor: "rgba(124,199,154,0.14)",
+  },
+  heroTop: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 16,
-    paddingVertical: 9,
   },
-  infoLabel: {
+  avatar: {
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Brand.sage,
+  },
+  avatarText: {
+    fontFamily: FontFamily.display,
+    fontSize: 24,
+    color: Brand.forest,
+  },
+  editButton: {
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(185,220,196,0.28)",
+    backgroundColor: "rgba(185,220,196,0.10)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  editText: {
     fontFamily: FontFamily.medium,
-    fontSize: 11,
+    fontSize: 10.5,
+    color: Brand.sage,
+  },
+  name: {
+    marginTop: 16,
+    fontFamily: FontFamily.display,
+    fontSize: 30,
+    lineHeight: 32,
+    letterSpacing: -0.7,
+    color: Brand.paper,
+  },
+  heroMetaRow: {
+    marginTop: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  heroRole: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: Brand.sage,
+  },
+  metaDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.35)",
+  },
+  verified: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.62)",
+  },
+  heroEmailRow: {
+    marginTop: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+  heroEmail: {
+    flex: 1,
+    fontFamily: FontFamily.sans,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.62)",
+  },
+  reportBanner: {
+    marginTop: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(31,122,77,0.18)",
+    padding: 17,
+  },
+  reportHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  reportBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  reportTitleBlock: { flex: 1 },
+  reportEyebrow: {
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
+    letterSpacing: 1.1,
+    textTransform: "uppercase",
+    color: Brand.moss,
+  },
+  reportTitle: {
+    marginTop: 1,
+    fontFamily: FontFamily.display,
+    fontSize: 20,
+    lineHeight: 22,
+    color: Brand.ink,
+  },
+  reportStats: {
+    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  reportStat: { flex: 1 },
+  reportStatValue: {
+    fontFamily: FontFamily.display,
+    fontSize: 27,
+    lineHeight: 29,
+    color: Brand.forest,
+  },
+  reportStatLabel: {
+    marginTop: 2,
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
     letterSpacing: 0.8,
     textTransform: "uppercase",
     color: Brand.ink55,
   },
-  infoValue: {
+  reportDivider: {
+    width: 1,
+    height: 30,
+    marginHorizontal: 12,
+    backgroundColor: "rgba(16,36,26,0.12)",
+  },
+  reportCta: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(16,36,26,0.10)",
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  reportCtaText: {
+    fontFamily: FontFamily.semibold,
+    fontSize: 11.5,
+    color: Brand.moss,
+  },
+  reportCtaHint: {
     flexShrink: 1,
     fontFamily: FontFamily.sans,
-    fontSize: 13,
-    color: Brand.ink,
+    fontSize: 9.5,
+    color: Brand.ink55,
+    textAlign: "right",
   },
   sectionHeader: {
-    marginTop: 26,
-    marginBottom: 12,
+    marginTop: 24,
+    marginBottom: 11,
     flexDirection: "row",
     alignItems: "baseline",
     justifyContent: "space-between",
@@ -264,34 +570,31 @@ const styles = StyleSheet.create({
   },
   sectionMeta: {
     fontFamily: FontFamily.medium,
-    fontSize: 10,
-    letterSpacing: 1.1,
+    fontSize: 9.5,
+    letterSpacing: 1,
     textTransform: "uppercase",
     color: Brand.ink55,
   },
-  statsRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
+  statsRow: { flexDirection: "row", gap: 10 },
   statCard: {
     flex: 1,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: Brand.line,
     backgroundColor: Brand.paper,
-    paddingVertical: 14,
+    paddingVertical: 13,
     paddingHorizontal: 12,
   },
   statValue: {
     fontFamily: FontFamily.display,
-    fontSize: 28,
-    lineHeight: 30,
+    fontSize: 27,
+    lineHeight: 29,
     color: Brand.ink,
   },
   statLabel: {
-    marginTop: 3,
+    marginTop: 2,
     fontFamily: FontFamily.medium,
-    fontSize: 9.5,
+    fontSize: 9,
     letterSpacing: 0.7,
     textTransform: "uppercase",
     color: Brand.ink55,
@@ -302,11 +605,51 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#B4462F",
   },
-  lifetime: {
-    marginTop: 12,
-    fontFamily: FontFamily.sans,
-    fontSize: 12.5,
+  accountCard: {
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    paddingHorizontal: 15,
+  },
+  accountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 13,
+  },
+  accountIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(31,122,77,0.08)",
+  },
+  accountBody: { flex: 1 },
+  accountLabel: {
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
+    letterSpacing: 1,
+    textTransform: "uppercase",
     color: Brand.ink55,
+  },
+  accountValue: {
+    marginTop: 2,
+    fontFamily: FontFamily.medium,
+    fontSize: 13,
+    color: Brand.ink,
+  },
+  accountHint: {
+    marginTop: 1,
+    fontFamily: FontFamily.sans,
+    fontSize: 10,
+    color: Brand.ink55,
+  },
+  accountRule: {
+    height: 1,
+    marginLeft: 44,
+    backgroundColor: Brand.line,
   },
   links: {
     marginTop: 22,
