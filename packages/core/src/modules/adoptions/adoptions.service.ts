@@ -119,6 +119,7 @@ export class AdoptionsService {
         description: true,
         primaryPhotoUrl: true,
         intakeDate: true,
+        createdAt: true,
         lifecycleStatus: true,
         listingStatus: true,
         media: {

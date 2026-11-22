@@ -35,6 +35,7 @@ export interface AdoptableAnimal {
   description: string | null;
   primaryPhotoUrl: string | null;
   intakeDate: string | null;
+  createdAt: string;
   lifecycleStatus: string;
   listingStatus: string;
   media: Array<{ fileUrl: string }>;
