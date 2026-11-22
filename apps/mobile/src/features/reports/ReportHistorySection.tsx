@@ -8,6 +8,7 @@ import {
 } from "react-native";
 
 import { Skeleton } from "@/components/skeleton";
+import { ArrowUpRightIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import { REPORT_STATUS_META } from "@/domain/report-map";
 import type { MyReport } from "@/domain/report-submission";
@@ -26,6 +27,8 @@ interface ReportHistorySectionProps {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  /** Opens the full case file for one report. */
+  onOpen?: (id: string) => void;
   /** Hide the inline heading when the parent screen already has a title. */
   showHeading?: boolean;
   /** Start with every report visible instead of the three most recent. */
@@ -41,6 +44,7 @@ export function ReportHistorySection({
   loading,
   error,
   onRetry,
+  onOpen,
   showHeading = true,
   defaultExpanded = false,
 }: ReportHistorySectionProps) {
@@ -89,7 +93,7 @@ export function ReportHistorySection({
       ) : null}
 
       {visible.map((report) => (
-        <ReportCard key={report.id} report={report} />
+        <ReportCard key={report.id} report={report} onOpen={onOpen} />
       ))}
 
       {reports.length > COLLAPSED_COUNT ? (
@@ -141,13 +145,25 @@ function ReportCardSkeleton() {
   );
 }
 
-function ReportCard({ report }: { report: MyReport }) {
+function ReportCard({
+  report,
+  onOpen,
+}: {
+  report: MyReport;
+  onOpen?: (id: string) => void;
+}) {
   const status = REPORT_STATUS_META[report.status];
   const thumbnail = report.media[0]?.fileUrl ?? null;
   const place = report.barangay ?? report.locationLandmark;
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open case ${report.reportCode}`}
+      disabled={!onOpen}
+      onPress={() => onOpen?.(report.id)}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+    >
       <View style={styles.cardTop}>
         {thumbnail ? (
           <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
@@ -190,7 +206,14 @@ function ReportCard({ report }: { report: MyReport }) {
           ) : null}
         </View>
       ) : null}
-    </View>
+
+      {onOpen ? (
+        <View style={styles.openRow}>
+          <Text style={styles.openText}>View full case</Text>
+          <ArrowUpRightIcon size={12} color={Brand.forest} />
+        </View>
+      ) : null}
+    </Pressable>
   );
 }
 
@@ -316,6 +339,17 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.sans,
     fontSize: 11.5,
     color: Brand.ink70,
+  },
+  openRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  openText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10.5,
+    color: Brand.forest,
   },
   update: {
     marginTop: 9,

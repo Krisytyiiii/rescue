@@ -3,7 +3,7 @@
  * `createReportSchema` in core.
  */
 
-import type { ReportStatus } from "./rescuer";
+import type { AssignmentStatus, ReportStatus } from "./rescuer";
 
 export const REPORT_TYPES = ["stray", "injured", "abandoned"] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
@@ -60,6 +60,34 @@ export interface ReportStatusUpdate {
   changedAt: string;
 }
 
+/** A resident-facing person reference (verifier, dispatcher, rescuer). */
+export interface ReportPerson {
+  id: string;
+  name: string;
+}
+
+/** One entry in the report's lifecycle trail. */
+export interface ReportTimelineEvent {
+  status: ReportStatus;
+  previousStatus: string | null;
+  remarks: string | null;
+  changedAt: string;
+  changedBy: ReportPerson | null;
+}
+
+/** The rescue operation attached once a dispatcher assigns the report. */
+export interface ReportAssignmentInfo {
+  id: string;
+  status: AssignmentStatus;
+  assignedAt: string;
+  acceptedAt: string | null;
+  arrivedAt: string | null;
+  completedAt: string | null;
+  outcomeNotes: string | null;
+  animalsRescued: number | null;
+  rescuer: ReportPerson | null;
+}
+
 /** One of the resident's own reports, shown in the report history. */
 export interface MyReport {
   id: string;
@@ -69,9 +97,16 @@ export interface MyReport {
   urgencyLevel: UrgencyLevel;
   status: ReportStatus;
   description: string;
+  animalCount: number;
   submittedAt: string;
   barangay: string | null;
   locationLandmark: string | null;
+  latitude: number;
+  longitude: number;
   media: Array<{ fileUrl: string }>;
+  verifiedAt: string | null;
+  verifier: ReportPerson | null;
   latestUpdate: ReportStatusUpdate | null;
+  statusHistory: ReportTimelineEvent[];
+  assignment: ReportAssignmentInfo | null;
 }

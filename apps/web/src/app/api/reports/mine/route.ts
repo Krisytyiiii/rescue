@@ -27,6 +27,14 @@ export async function GET() {
 
     const reports = items.map((report) => {
       const latest = report.statusHistory[0] ?? null;
+      const operation = report.rescueOperations[0] ?? null;
+
+      const person = (
+        user: { id: string; firstName: string; lastName: string } | null,
+      ) =>
+        user
+          ? { id: user.id, name: `${user.firstName} ${user.lastName}`.trim() }
+          : null;
 
       return {
         id: report.id,
@@ -36,15 +44,40 @@ export async function GET() {
         urgencyLevel: report.urgencyLevel,
         status: report.status,
         description: report.description,
+        animalCount: report.animalCount,
         submittedAt: report.submittedAt.toISOString(),
         barangay: report.barangay?.name ?? null,
         locationLandmark: report.locationLandmark,
+        latitude: Number(report.latitude),
+        longitude: Number(report.longitude),
         media: report.media.map((item) => ({ fileUrl: item.fileUrl })),
+        verifiedAt: report.verifiedAt?.toISOString() ?? null,
+        verifier: person(report.verifier),
         latestUpdate: latest
           ? {
               status: latest.newStatus,
               remarks: latest.remarks,
               changedAt: latest.changedAt.toISOString(),
+            }
+          : null,
+        statusHistory: report.statusHistory.map((entry) => ({
+          status: entry.newStatus,
+          previousStatus: entry.oldStatus,
+          remarks: entry.remarks,
+          changedAt: entry.changedAt.toISOString(),
+          changedBy: person(entry.changer),
+        })),
+        assignment: operation
+          ? {
+              id: operation.id,
+              status: operation.assignmentStatus,
+              assignedAt: operation.assignedAt.toISOString(),
+              acceptedAt: operation.acceptedAt?.toISOString() ?? null,
+              arrivedAt: operation.arrivedAt?.toISOString() ?? null,
+              completedAt: operation.completedAt?.toISOString() ?? null,
+              outcomeNotes: operation.outcomeNotes,
+              animalsRescued: operation.animalsRescued,
+              rescuer: person(operation.rescuer),
             }
           : null,
       };

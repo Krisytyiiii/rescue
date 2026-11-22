@@ -68,6 +68,10 @@ export default function RootLayout() {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
+          name="report-detail"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
           name="explore-map"
           options={{ animation: "slide_from_right" }}
         />

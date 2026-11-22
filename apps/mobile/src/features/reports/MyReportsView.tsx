@@ -33,6 +33,8 @@ export function MyReportsView({ showBack = true }: { showBack?: boolean }) {
     reports.length === 1 ? "1 report" : `${reports.length} reports`;
 
   const openReportForm = () => router.push("/send-report" as Href);
+  const openReport = (id: string) =>
+    router.push(`/report-detail?id=${encodeURIComponent(id)}` as Href);
 
   return (
     <View style={styles.root}>
@@ -49,7 +51,6 @@ export function MyReportsView({ showBack = true }: { showBack?: boolean }) {
             </Pressable>
           ) : null}
           <View style={styles.headerTitles}>
-            <Text style={styles.eyebrow}>Report</Text>
             <Text style={styles.title}>My reports</Text>
           </View>
           <Pressable
@@ -83,6 +84,7 @@ export function MyReportsView({ showBack = true }: { showBack?: boolean }) {
             loading={loading}
             error={error}
             onRetry={() => void reload()}
+            onOpen={openReport}
             showHeading={false}
             defaultExpanded
           />
@@ -126,13 +128,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
     fontSize: 11.5,
     color: Brand.paper,
-  },
-  eyebrow: {
-    fontFamily: FontFamily.medium,
-    fontSize: 10,
-    letterSpacing: 1.5,
-    textTransform: "uppercase",
-    color: Brand.clay,
   },
   title: {
     marginTop: 2,
