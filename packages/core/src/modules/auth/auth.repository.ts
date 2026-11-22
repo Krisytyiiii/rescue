@@ -81,8 +81,53 @@ export class AuthRepository {
     });
   }
 
-  listPendingByRole(roleName: RoleName): Promise<UserWithRole[]> {
-    return this.db.user.findMany({
+  /** Invalidate older codes and issue a fresh one for this user. */
+  async createEmailVerification(
+    userId: string,
+    codeHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await this.db.$transaction([
+      this.db.emailVerification.updateMany({
+        where: { userId, usedAt: null },
+        data: { usedAt: new Date() },
+      }),
+      this.db.emailVerification.create({
+        data: { userId, codeHash, expiresAt },
+      }),
+    ]);
+  }
+
+  findLatestEmailVerification(userId: string) {
+    return this.db.emailVerification.findFirst({
+      where: { userId, usedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  incrementVerificationAttempts(id: string) {
+    return this.db.emailVerification.update({
+      where: { id },
+      data: { attempts: { increment: 1 } },
+    });
+  }
+
+  consumeEmailVerification(id: string) {
+    return this.db.emailVerification.update({
+      where: { id },
+      data: { usedAt: new Date() },
+    });
+  }
+
+  markEmailVerified(userId: string): Promise<UserWithRole> {
+    return this.db.user.update({
+      where: { id: userId },
+      data: { emailVerifiedAt: new Date() },
+      include: authUserInclude,
+    });
+  }
+
+  listPendingByRole(roleName: RoleName): Promise<UserWithRole[]> {    return this.db.user.findMany({
       where: {
         deletedAt: null,
         accountStatus: "pending",

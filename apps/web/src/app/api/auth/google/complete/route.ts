@@ -6,6 +6,7 @@ import { authService, isAppError } from "@furescue/core";
 import {
   clearOnboardingCookie,
   readOnboarding,
+  readOnboardingToken,
   setSessionCookie,
 } from "@/lib/auth/session";
 
@@ -24,7 +25,15 @@ const completeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const pending = await readOnboarding();
+  const payload = (await request.json().catch(() => ({}))) as {
+    onboardingToken?: unknown;
+  };
+  const isMobile = request.headers.get("x-client") === "mobile";
+  const pending = isMobile
+    ? readOnboardingToken(
+        typeof payload.onboardingToken === "string" ? payload.onboardingToken : "",
+      )
+    : await readOnboarding();
   if (!pending) {
     return NextResponse.json(
       { ok: false, error: { code: "UNAUTHORIZED", message: "Your Google session expired. Start again." } },
@@ -32,7 +41,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const parsed = completeSchema.safeParse(await request.json());
+  const parsed = completeSchema.safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
       {
@@ -59,16 +68,26 @@ export async function POST(request: NextRequest) {
         ok: true,
         data: { status: "pending", user: result.user },
       });
-      clearOnboardingCookie(response);
+      if (!isMobile) clearOnboardingCookie(response);
       return response;
     }
 
     const response = NextResponse.json({
       ok: true,
-      data: { status: "active", user: result.user },
+      data: {
+        status: "active",
+        user: result.user,
+        ...(isMobile
+          ? { token: result.session.token, expiresIn: result.session.expiresIn }
+          : {}),
+      },
     });
-    setSessionCookie(response, result.session.token);
-    clearOnboardingCookie(response);
+    if (isMobile) {
+      setSessionCookie(response, result.session.token);
+    } else {
+      setSessionCookie(response, result.session.token);
+      clearOnboardingCookie(response);
+    }
     return response;
   } catch (error) {
     if (isAppError(error)) {

@@ -62,6 +62,11 @@ export type User = Prisma.UserModel
  */
 export type PasswordReset = Prisma.PasswordResetModel
 /**
+ * Model EmailVerification
+ * One-time codes proving a manually registered email belongs to the applicant.
+ */
+export type EmailVerification = Prisma.EmailVerificationModel
+/**
  * Model Animal
  * 
  */
@@ -136,6 +141,11 @@ export type ConversationParticipant = Prisma.ConversationParticipantModel
  * 
  */
 export type Message = Prisma.MessageModel
+/**
+ * Model MessageDeletion
+ * Per-user "delete for me": the message stays for everyone else.
+ */
+export type MessageDeletion = Prisma.MessageDeletionModel
 /**
  * Model Notification
  * 

@@ -401,6 +401,7 @@ export const ModelName = {
   Barangay: 'Barangay',
   User: 'User',
   PasswordReset: 'PasswordReset',
+  EmailVerification: 'EmailVerification',
   Animal: 'Animal',
   AnimalMedia: 'AnimalMedia',
   HealthRecord: 'HealthRecord',
@@ -416,6 +417,7 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
+  MessageDeletion: 'MessageDeletion',
   Notification: 'Notification',
   LearningModule: 'LearningModule',
   Lesson: 'Lesson',
@@ -441,7 +443,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "role" | "barangay" | "user" | "passwordReset" | "animal" | "animalMedia" | "healthRecord" | "vaccination" | "heartRateLog" | "report" | "reportMedia" | "reportStatusHistory" | "rescueOperation" | "adoptionRequest" | "adoptionFollowup" | "favorite" | "conversation" | "conversationParticipant" | "message" | "notification" | "learningModule" | "lesson" | "quiz" | "quizQuestion" | "userLearningProgress" | "quizAttempt" | "analyticsSnapshot" | "generatedReport" | "auditLog"
+    modelProps: "role" | "barangay" | "user" | "passwordReset" | "emailVerification" | "animal" | "animalMedia" | "healthRecord" | "vaccination" | "heartRateLog" | "report" | "reportMedia" | "reportStatusHistory" | "rescueOperation" | "adoptionRequest" | "adoptionFollowup" | "favorite" | "conversation" | "conversationParticipant" | "message" | "messageDeletion" | "notification" | "learningModule" | "lesson" | "quiz" | "quizQuestion" | "userLearningProgress" | "quizAttempt" | "analyticsSnapshot" | "generatedReport" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -738,6 +740,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PasswordResetCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PasswordResetCountAggregateOutputType> | number
+        }
+      }
+    }
+    EmailVerification: {
+      payload: Prisma.$EmailVerificationPayload<ExtArgs>
+      fields: Prisma.EmailVerificationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmailVerificationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmailVerificationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        findFirst: {
+          args: Prisma.EmailVerificationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmailVerificationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        findMany: {
+          args: Prisma.EmailVerificationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
+        }
+        create: {
+          args: Prisma.EmailVerificationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        createMany: {
+          args: Prisma.EmailVerificationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmailVerificationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
+        }
+        delete: {
+          args: Prisma.EmailVerificationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        update: {
+          args: Prisma.EmailVerificationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        deleteMany: {
+          args: Prisma.EmailVerificationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmailVerificationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmailVerificationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>[]
+        }
+        upsert: {
+          args: Prisma.EmailVerificationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmailVerificationPayload>
+        }
+        aggregate: {
+          args: Prisma.EmailVerificationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmailVerification>
+        }
+        groupBy: {
+          args: Prisma.EmailVerificationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailVerificationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmailVerificationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmailVerificationCountAggregateOutputType> | number
         }
       }
     }
@@ -1851,6 +1927,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    MessageDeletion: {
+      payload: Prisma.$MessageDeletionPayload<ExtArgs>
+      fields: Prisma.MessageDeletionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MessageDeletionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MessageDeletionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        findFirst: {
+          args: Prisma.MessageDeletionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MessageDeletionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        findMany: {
+          args: Prisma.MessageDeletionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>[]
+        }
+        create: {
+          args: Prisma.MessageDeletionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        createMany: {
+          args: Prisma.MessageDeletionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MessageDeletionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>[]
+        }
+        delete: {
+          args: Prisma.MessageDeletionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        update: {
+          args: Prisma.MessageDeletionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        deleteMany: {
+          args: Prisma.MessageDeletionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MessageDeletionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MessageDeletionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>[]
+        }
+        upsert: {
+          args: Prisma.MessageDeletionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MessageDeletionPayload>
+        }
+        aggregate: {
+          args: Prisma.MessageDeletionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMessageDeletion>
+        }
+        groupBy: {
+          args: Prisma.MessageDeletionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageDeletionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MessageDeletionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MessageDeletionCountAggregateOutputType> | number
+        }
+      }
+    }
     Notification: {
       payload: Prisma.$NotificationPayload<ExtArgs>
       fields: Prisma.NotificationFieldRefs
@@ -2690,6 +2840,20 @@ export const PasswordResetScalarFieldEnum = {
 export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
 
 
+export const EmailVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
+
+
 export const AnimalScalarFieldEnum = {
   id: 'id',
   animalCode: 'animalCode',
@@ -2959,6 +3123,15 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const MessageDeletionScalarFieldEnum = {
+  messageId: 'messageId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type MessageDeletionScalarFieldEnum = (typeof MessageDeletionScalarFieldEnum)[keyof typeof MessageDeletionScalarFieldEnum]
 
 
 export const NotificationScalarFieldEnum = {
@@ -3846,6 +4019,7 @@ export type GlobalOmitConfig = {
   barangay?: Prisma.BarangayOmit
   user?: Prisma.UserOmit
   passwordReset?: Prisma.PasswordResetOmit
+  emailVerification?: Prisma.EmailVerificationOmit
   animal?: Prisma.AnimalOmit
   animalMedia?: Prisma.AnimalMediaOmit
   healthRecord?: Prisma.HealthRecordOmit
@@ -3861,6 +4035,7 @@ export type GlobalOmitConfig = {
   conversation?: Prisma.ConversationOmit
   conversationParticipant?: Prisma.ConversationParticipantOmit
   message?: Prisma.MessageOmit
+  messageDeletion?: Prisma.MessageDeletionOmit
   notification?: Prisma.NotificationOmit
   learningModule?: Prisma.LearningModuleOmit
   lesson?: Prisma.LessonOmit

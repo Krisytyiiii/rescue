@@ -15,7 +15,18 @@ export async function POST(request: NextRequest) {
 
   try {
     const session = await authService.login(parsed.data);
-    const response = NextResponse.json({ ok: true, data: { user: session.user } });
+    // The web client relies on the httpOnly cookie. Only hand the raw token to
+    // the mobile app, which has no cookie jar and identifies itself explicitly.
+    const isMobile = request.headers.get("x-client") === "mobile";
+    const response = NextResponse.json({
+      ok: true,
+      data: {
+        user: session.user,
+        ...(isMobile
+          ? { token: session.token, expiresIn: session.expiresIn }
+          : {}),
+      },
+    });
     setSessionCookie(response, session.token);
     return response;
   } catch (error) {

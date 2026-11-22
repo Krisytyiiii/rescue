@@ -1,9 +1,19 @@
 import { compare, hash } from "bcryptjs";
-import { randomBytes } from "node:crypto";
+import { randomBytes, randomInt } from "node:crypto";
 import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../../config/env.ts";
-import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from "../../shared/errors.ts";
+import {
+  BadRequestError,
+  ConflictError,
+  EmailNotVerifiedError,
+  ForbiddenError,
+  NotFoundError,
+  RateLimitedError,
+  UnauthorizedError,
+} from "../../shared/errors.ts";
 import { prisma } from "../../db/prisma.ts";
+import { sendMail } from "../../shared/mailer.ts";
+import { buildVerificationEmail } from "./verification-email.ts";
 import { writeAuditLog } from "../../shared/audit.ts";
 import { requireRole } from "../../shared/authz.ts";
 import { buildPageMeta, normalizePagination } from "../../shared/pagination.ts";
@@ -25,9 +35,12 @@ import type {
   OAuthRegisterInput,
   RegisterInput,
   RegistrationResult,
+  ResendVerificationInput,
+  VerifyEmailInput,
 } from "./auth.types.ts";
 
 const SALT_ROUNDS = 12;
+const CODE_SALT_ROUNDS = 10;
 
 function toAuthUser(user: UserWithRole): AuthUser {
   return {
@@ -72,6 +85,9 @@ function signAccessToken(user: AuthUser): string {
 }
 
 function buildSession(user: UserWithRole): AuthSession {
+  if (!user.emailVerifiedAt) {
+    throw new EmailNotVerifiedError();
+  }
   if (user.accountStatus === "pending") {
     throw new ForbiddenError(
       "Your rescuer account is waiting for admin approval. You can sign in once it is approved.",
@@ -137,7 +153,22 @@ export class AuthService {
 
   async register(input: RegisterInput): Promise<RegistrationResult> {
     const existing = await this.repo.findByEmail(input.email);
-    if (existing) throw new ConflictError("An account with this email already exists");
+    if (existing) {
+      // Someone retrying an interrupted signup: same credentials, still
+      // unverified. Re-issue the code instead of blocking them.
+      if (
+        !existing.emailVerifiedAt &&
+        (await compare(input.password, existing.passwordHash))
+      ) {
+        await this.issueEmailVerification(existing);
+        return {
+          status: "verification_required",
+          user: toAuthUser(existing),
+          session: null,
+        };
+      }
+      throw new ConflictError("An account with this email already exists");
+    }
 
     const roleName = input.role ?? "community_user";
     const role = await this.repo.findRoleByName(roleName);
@@ -165,9 +196,112 @@ export class AuthService {
       newValue: { email: user.email, role: roleName, status: accountStatus },
     });
 
-    if (accountStatus === "pending") await notifyAdminsOfPendingRescuer(user);
+    await this.issueEmailVerification(user);
 
-    return buildRegistrationResult(user);
+    return { status: "verification_required", user: toAuthUser(user), session: null };
+  }
+
+  /** Generate, persist, and email a six-digit verification code. */
+  private async issueEmailVerification(user: UserWithRole): Promise<void> {
+    const code = randomInt(100_000, 1_000_000).toString();
+    const codeHash = await hash(code, CODE_SALT_ROUNDS);
+    const expiresAt = new Date(
+      Date.now() + env.EMAIL_VERIFICATION_TTL_MINUTES * 60_000,
+    );
+
+    await this.repo.createEmailVerification(user.id, codeHash, expiresAt);
+
+    const template = buildVerificationEmail({
+      firstName: user.firstName,
+      email: user.email,
+      code,
+      expiresMinutes: env.EMAIL_VERIFICATION_TTL_MINUTES,
+    });
+
+    try {
+      const delivered = await sendMail({ to: user.email, ...template });
+      if (!delivered && env.NODE_ENV !== "production") {
+        console.info(
+          `[auth] SMTP not configured. Verification code for ${user.email}: ${code}`,
+        );
+      }
+    } catch (error) {
+      console.error("[auth] Failed to send verification email", error);
+      if (env.NODE_ENV !== "production") {
+        console.info(
+          `[auth] Verification code for ${user.email}: ${code}`,
+        );
+      }
+    }
+  }
+
+  /** Confirm a manual signup's email with its one-time code. */
+  async verifyEmail(input: VerifyEmailInput): Promise<RegistrationResult> {
+    const user = await this.repo.findByEmail(input.email);
+    if (!user) {
+      throw new BadRequestError("That code is invalid or has expired.");
+    }
+    if (user.emailVerifiedAt) {
+      throw new ConflictError("This email is already verified. Sign in instead.");
+    }
+
+    const verification = await this.repo.findLatestEmailVerification(user.id);
+    if (!verification) {
+      throw new BadRequestError("Request a new verification code to continue.");
+    }
+    if (verification.expiresAt.getTime() <= Date.now()) {
+      throw new BadRequestError("That code has expired. Request a new one.");
+    }
+    if (verification.attempts >= env.EMAIL_VERIFICATION_MAX_ATTEMPTS) {
+      throw new RateLimitedError(
+        "Too many incorrect codes. Request a new code and try again.",
+      );
+    }
+
+    const matches = await compare(input.code, verification.codeHash);
+    if (!matches) {
+      await this.repo.incrementVerificationAttempts(verification.id);
+      const remaining =
+        env.EMAIL_VERIFICATION_MAX_ATTEMPTS - verification.attempts - 1;
+      throw new BadRequestError(
+        remaining > 0
+          ? `That code isn't right. ${remaining} ${remaining === 1 ? "try" : "tries"} left.`
+          : "That code isn't right. Request a new code.",
+      );
+    }
+
+    await this.repo.consumeEmailVerification(verification.id);
+    const verified = await this.repo.markEmailVerified(user.id);
+
+    await writeAuditLog(prisma, {
+      userId: verified.id,
+      action: "verify_email",
+      entityType: "user",
+      entityId: verified.id,
+      newValue: { email: verified.email },
+    });
+
+    if (verified.role.roleName === "rescuer") {
+      await notifyAdminsOfPendingRescuer(verified);
+      return { status: "pending", user: toAuthUser(verified), session: null };
+    }
+
+    return buildRegistrationResult(verified);
+  }
+
+  /** Re-send a code without revealing whether the email exists. */
+  async resendVerification(input: ResendVerificationInput): Promise<void> {
+    const user = await this.repo.findByEmail(input.email);
+    if (!user || user.emailVerifiedAt) return;
+
+    const latest = await this.repo.findLatestEmailVerification(user.id);
+    if (latest && Date.now() - latest.createdAt.getTime() < 60_000) {
+      throw new RateLimitedError(
+        "A code was just sent. Wait a minute before requesting another.",
+      );
+    }
+
+    await this.issueEmailVerification(user);
   }
 
   /**
@@ -177,7 +311,13 @@ export class AuthService {
    */
   async registerOAuth(input: OAuthRegisterInput): Promise<RegistrationResult> {
     const existing = await this.repo.findByEmail(input.email);
-    if (existing) return buildRegistrationResult(existing);
+    if (existing) {
+      // A manual signup confirmed by Google: trust Google's verified email.
+      const verified = existing.emailVerifiedAt
+        ? existing
+        : await this.repo.markEmailVerified(existing.id);
+      return buildRegistrationResult(verified);
+    }
 
     const roleName = input.role ?? "community_user";
     const role = await this.repo.findRoleByName(roleName);
@@ -215,7 +355,11 @@ export class AuthService {
   async findRegistrationByEmail(email: string): Promise<RegistrationResult | null> {
     const user = await this.repo.findByEmail(email);
     if (!user) return null;
-    return buildRegistrationResult(user);
+    // The caller has just completed Google OAuth, which verifies the email.
+    const verified = user.emailVerifiedAt
+      ? user
+      : await this.repo.markEmailVerified(user.id);
+    return buildRegistrationResult(verified);
   }
 
   async login(input: LoginInput): Promise<AuthSession> {
@@ -223,6 +367,11 @@ export class AuthService {
     // Constant-ish response to avoid account enumeration.
     if (!user || !(await compare(input.password, user.passwordHash))) {
       throw new UnauthorizedError("Invalid email or password");
+    }
+    if (!user.emailVerifiedAt) {
+      throw new EmailNotVerifiedError(
+        "Verify your email first. Check your inbox for the code we sent.",
+      );
     }
     if (user.accountStatus !== "active") {
       throw new ForbiddenError("This account is not active. Contact an administrator.");

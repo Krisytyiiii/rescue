@@ -61,5 +61,34 @@ export const Spacing = {
   six: 64,
 } as const;
 
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const BottomTabInset = Platform.select({ ios: 96, android: 104 }) ?? 0;
 export const MaxContentWidth = 800;
+
+/**
+ * Brand tokens mirrored from apps/web/src/app/globals.css so the mobile app
+ * and the website share one visual system.
+ */
+export const Brand = {
+  paper: "#ffffff",
+  paper2: "#f2faf4",
+  ink: "#10241a",
+  ink70: "rgba(16, 36, 26, 0.70)",
+  ink55: "rgba(16, 36, 26, 0.55)",
+  forest: "#0f3a24",
+  moss: "#16603b",
+  clay: "#1f7a4d",
+  claySoft: "#7cc79a",
+  sage: "#b9dcc4",
+  sand: "#e3f1e6",
+  line: "rgba(16, 36, 26, 0.14)",
+  lineStrong: "rgba(16, 36, 26, 0.22)",
+  paper10: "rgba(255, 255, 255, 0.12)",
+} as const;
+
+export const FontFamily = {
+  sans: "Geist_400Regular",
+  medium: "Geist_500Medium",
+  semibold: "Geist_600SemiBold",
+  display: "InstrumentSerif_400Regular",
+  displayItalic: "InstrumentSerif_400Regular_Italic",
+} as const;

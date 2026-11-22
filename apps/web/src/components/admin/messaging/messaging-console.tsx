@@ -330,7 +330,9 @@ export function MessagingConsole({
         );
         return { ...fresh, messages: [...fresh.messages, ...pending] };
       });
-      void fetch(`/api/admin/conversations/${id}/read`, { method: "POST" });
+      void fetch(`/api/admin/conversations/${id}/read`, { method: "POST" }).catch(
+        () => {},
+      );
     } catch {
       // Realtime refresh is best-effort; the next event recovers.
     }
@@ -351,7 +353,9 @@ export function MessagingConsole({
       setItems((current) =>
         current.map((item) => (item.id === id ? { ...item, unreadCount: 0 } : item)),
       );
-      void fetch(`/api/admin/conversations/${id}/read`, { method: "POST" });
+      void fetch(`/api/admin/conversations/${id}/read`, { method: "POST" }).catch(
+        () => {},
+      );
     } catch {
       toast.error("Couldn't open this conversation", {
         description: "The thread could not be loaded. Please try again.",
@@ -597,42 +601,57 @@ export function MessagingConsole({
     }
   }
 
-  async function deleteMessage(message: MessagingMessageRow) {
+  async function deleteMessage(
+    message: MessagingMessageRow,
+    scope: "me" | "everyone",
+  ) {
     if (!detail) return;
+    const previous = detail.messages;
     setDetail((current) =>
       current
         ? {
             ...current,
-            messages: current.messages.map((item) =>
-              item.id === message.id ? { ...item, isDeleted: true } : item,
-            ),
+            messages:
+              scope === "me"
+                ? current.messages.filter((item) => item.id !== message.id)
+                : current.messages.map((item) =>
+                    item.id === message.id ? { ...item, isDeleted: true } : item,
+                  ),
           }
         : current,
     );
 
     try {
-      const response = await fetch(`/api/admin/messages/${message.id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/admin/messages/${message.id}?scope=${scope}`,
+        { method: "DELETE" },
+      );
       if (!response.ok) throw new Error();
 
-      toast.success("Message removed", {
-        description: "The message is hidden but kept in the audit trail.",
-      });
+      toast.success(
+        scope === "me" ? "Message hidden for you" : "Message removed",
+        {
+          description:
+            scope === "me"
+              ? "Only your console view is affected; everyone else still sees it."
+              : "The message is hidden from the thread but kept in the audit trail.",
+        },
+      );
     } catch {
       setDetail((current) =>
-        current
-          ? {
-              ...current,
-              messages: current.messages.map((item) =>
-                item.id === message.id ? { ...item, isDeleted: false } : item,
-              ),
-            }
-          : current,
+        current ? { ...current, messages: previous } : current,
       );
-      toast.error("Couldn't remove this message", {
-        description: "The message is still visible. Please try again.",
-      });
+      toast.error(
+        scope === "me"
+          ? "Couldn't hide this message"
+          : "Couldn't remove this message",
+        {
+          description:
+            scope === "me"
+              ? "It is still visible in your console. Please try again."
+              : "The message is still visible. Please try again.",
+        },
+      );
     }
   }
 
@@ -1422,20 +1441,49 @@ export function MessagingConsole({
         onConfirm={() => void toggleStatus()}
       />
 
-      <ConfirmDialog
-        open={messageToDelete !== null}
-        onOpenChange={(open) => {
-          if (!open) setMessageToDelete(null);
-        }}
-        tone="danger"
-        title="Remove this message?"
-        description="The message is hidden from the thread but kept in the audit trail. This cannot be undone from the console."
-        confirmLabel="Remove message"
-        onConfirm={() => {
-          if (messageToDelete) void deleteMessage(messageToDelete);
-          setMessageToDelete(null);
-        }}
-      />
+      {messageToDelete !== null && (
+        <OverlayCard
+          onClose={() => setMessageToDelete(null)}
+          labelledBy="delete-message-title"
+          eyebrow="Messaging"
+          title="Delete message"
+          panelClassName="max-w-md"
+          footer={
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  const message = messageToDelete;
+                  setMessageToDelete(null);
+                  if (message) void deleteMessage(message, "me");
+                }}
+                className="inline-flex h-10 items-center justify-center rounded-lg border border-ink/12 px-3.5 text-[0.75rem] font-semibold text-ink/70 transition-colors hover:border-ink/25 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-9"
+              >
+                Delete for me
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const message = messageToDelete;
+                  setMessageToDelete(null);
+                  if (message) void deleteMessage(message, "everyone");
+                }}
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-[#b42318] px-3.5 text-[0.75rem] font-semibold text-white transition-colors hover:bg-[#991b1b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay/40 sm:h-9"
+              >
+                Delete for everyone
+              </button>
+            </>
+          }
+        >
+          <p className="px-4 py-4 text-[0.8125rem] leading-[1.55] text-ink/55 sm:px-5">
+            <span className="font-medium text-ink">Delete for me</span> hides the
+            message only in your console view.{" "}
+            <span className="font-medium text-ink">Delete for everyone</span>{" "}
+            removes it from the thread for all participants; it is kept in the
+            audit trail.
+          </p>
+        </OverlayCard>
+      )}
 
       <ConfirmDialog
         open={participantToRemove !== null}

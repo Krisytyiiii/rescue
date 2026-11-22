@@ -64,6 +64,67 @@ export interface RescuerWorkloadRow {
   openCount: number;
 }
 
+/** Mobile-facing assignment row (Today, detail, history). */
+export interface RescuerAssignmentRow {
+  id: string;
+  reportId: string;
+  reportCode: string;
+  status: AssignmentStatus;
+  reportStatus: ReportStatus;
+  urgency: UrgencyLevel;
+  species: ReportSpecies;
+  reportType: ReportType;
+  description: string;
+  barangay: string | null;
+  landmark: string | null;
+  latitude: number;
+  longitude: number;
+  photoUrl: string | null;
+  reporter: string;
+  assignedBy: string | null;
+  reporterUserId: string | null;
+  assignedByUserId: string | null;
+  distanceKm: number | null;
+  assignedAt: string;
+  completedAt: string | null;
+  nextAction:
+    | "accept"
+    | "decline"
+    | "start_en_route"
+    | "mark_on_site"
+    | "complete"
+    | null;
+}
+
+export interface RescuerHomePayload {
+  asOf: string;
+  assignments: RescuerAssignmentRow[];
+  unreadNotifications: number;
+  unreadMessages: number;
+  queueCount: number;
+}
+
+export interface RescuerQueuePayload {
+  reports: Array<{
+    id: string;
+    reportCode: string;
+    reportStatus: ReportStatus;
+    reportType: ReportType;
+    species: ReportSpecies;
+    urgency: UrgencyLevel;
+    description: string;
+    barangay: string | null;
+    landmark: string | null;
+    distanceKm: number | null;
+    submittedAt: string;
+    verifiedAt: string | null;
+  }>;
+}
+
+export interface RescuerHistoryPayload {
+  assignments: RescuerAssignmentRow[];
+}
+
 export interface RescueConsoleCounts {
   unassigned: number;
   pending: number;

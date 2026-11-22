@@ -5,6 +5,7 @@ export type ErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "VALIDATION_ERROR"
+  | "EMAIL_NOT_VERIFIED"
   | "RATE_LIMITED"
   | "INTERNAL_ERROR";
 
@@ -60,6 +61,20 @@ export class ConflictError extends AppError {
 export class ValidationError extends AppError {
   constructor(message = "Validation failed", details?: unknown) {
     super("VALIDATION_ERROR", message, 422, details);
+  }
+}
+
+export class EmailNotVerifiedError extends AppError {
+  constructor(
+    message = "Verify your email with the code we sent before signing in.",
+  ) {
+    super("EMAIL_NOT_VERIFIED", message, 403);
+  }
+}
+
+export class RateLimitedError extends AppError {
+  constructor(message = "Too many attempts. Please wait and try again.") {
+    super("RATE_LIMITED", message, 429);
   }
 }
 

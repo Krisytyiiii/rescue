@@ -23,13 +23,23 @@ export interface AuthSession {
 }
 
 /**
- * Community accounts are active immediately. Rescuer accounts start as
- * `pending` and receive no session until an admin approves them.
+ * Community accounts are active after the email code is verified. Rescuer
+ * accounts still wait for admin approval. Manual registrations start as
+ * `verification_required` and receive no session until the code is confirmed.
  */
 export interface RegistrationResult {
-  status: "active" | "pending";
+  status: "verification_required" | "active" | "pending";
   user: AuthUser;
   session: AuthSession | null;
+}
+
+export interface VerifyEmailInput {
+  email: string;
+  code: string;
+}
+
+export interface ResendVerificationInput {
+  email: string;
 }
 
 export interface RegisterInput {

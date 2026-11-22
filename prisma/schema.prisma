@@ -361,6 +361,7 @@ model User {
   barangay Barangay? @relation(fields: [barangayId], references: [id], onDelete: SetNull)
 
   passwordResets           PasswordReset[]
+  emailVerifications       EmailVerification[]
   reports                  Report[]                  @relation("ReportReporter")
   verifiedReports          Report[]                  @relation("ReportVerifier")
   reportStatusChanges      ReportStatusHistory[]     @relation("ReportStatusChanger")
@@ -378,6 +379,7 @@ model User {
   conversationParticipants ConversationParticipant[]
   conversationAssignments  Conversation[]          @relation("ConversationAssignee")
   messagesSent             Message[]
+  messageDeletions         MessageDeletion[]
   notifications            Notification[]
   learningModulesCreated   LearningModule[]          @relation("LearningModuleAuthor")
   learningProgress         UserLearningProgress[]
@@ -410,6 +412,24 @@ model PasswordReset {
   @@index([userId])
   @@index([tokenHash])
   @@map("password_resets")
+}
+
+/// One-time codes proving a manually registered email belongs to the applicant.
+model EmailVerification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  codeHash  String    @map("code_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  attempts  Int       @default(0)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([userId])
+  @@map("email_verifications")
 }
 
 // ---------------------------------------------------------------------------
@@ -785,6 +805,7 @@ model Message {
 
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation(fields: [senderUserId], references: [id], onDelete: Restrict)
+  deletions    MessageDeletion[]
 
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
@@ -792,6 +813,20 @@ model Message {
   @@index([conversationId, sentAt])
   @@index([senderUserId])
   @@map("messages")
+}
+
+/// Per-user "delete for me": the message stays for everyone else.
+model MessageDeletion {
+  messageId String   @map("message_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId])
+  @@index([userId])
+  @@map("message_deletions")
 }
 
 model Notification {

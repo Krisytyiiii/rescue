@@ -28,6 +28,13 @@ export async function POST(request: NextRequest) {
   try {
     const result = await authService.register(parsed.data);
 
+    if (result.status === "verification_required") {
+      return NextResponse.json({
+        ok: true,
+        data: { status: "verification_required", user: result.user },
+      });
+    }
+
     if (result.status === "pending" || !result.session) {
       return NextResponse.json({
         ok: true,
@@ -35,9 +42,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Only the mobile app gets the raw token; the web keeps the httpOnly cookie.
+    const isMobile = request.headers.get("x-client") === "mobile";
     const response = NextResponse.json({
       ok: true,
-      data: { status: "active", user: result.user },
+      data: {
+        status: "active",
+        user: result.user,
+        ...(isMobile
+          ? { token: result.session.token, expiresIn: result.session.expiresIn }
+          : {}),
+      },
     });
     setSessionCookie(response, result.session.token);
     return response;

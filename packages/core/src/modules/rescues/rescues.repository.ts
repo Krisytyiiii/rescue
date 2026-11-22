@@ -81,6 +81,34 @@ export class RescuesRepository {
     });
   }
 
+  /** Every operation assigned to one rescuer (active and past). */
+  listMine(rescuerUserId: string, limit = 200): Promise<OperationWithRelations[]> {
+    return this.db.rescueOperation.findMany({
+      where: { rescuerUserId, report: { deletedAt: null } },
+      include: operationInclude,
+      orderBy: [{ assignedAt: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+  }
+
+  /** Operations assigned to one rescuer filtered by assignment status. */
+  listMineByStatus(
+    rescuerUserId: string,
+    statuses: Array<"pending" | "accepted" | "declined" | "en_route" | "on_site" | "completed" | "failed">,
+    limit = 200,
+  ): Promise<OperationWithRelations[]> {
+    return this.db.rescueOperation.findMany({
+      where: {
+        rescuerUserId,
+        assignmentStatus: { in: statuses },
+        report: { deletedAt: null },
+      },
+      include: operationInclude,
+      orderBy: [{ assignedAt: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+  }
+
   listReports(limit = 500): Promise<ReportMarkerWithRelations[]> {
     return this.db.report.findMany({
       where: { deletedAt: null },

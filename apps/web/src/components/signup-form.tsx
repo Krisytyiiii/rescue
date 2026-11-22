@@ -92,6 +92,12 @@ export function SignupForm({
         return;
       }
 
+      if (body?.data?.status === "verification_required") {
+        const email = String(data.get("email") ?? "");
+        window.location.assign(`/signup/verify?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
       if (body?.data?.status === "pending") {
         window.location.assign("/signup/pending");
         return;

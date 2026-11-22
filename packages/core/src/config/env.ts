@@ -16,6 +16,28 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN: z.string().default("7d"),
 
+  EMAIL_VERIFICATION_TTL_MINUTES: z.coerce.number().int().positive().default(10),
+  EMAIL_VERIFICATION_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
+
+  SMTP_HOST: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().min(1).optional(),
+  ),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_SECURE: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((value) => value === "true"),
+  SMTP_USER: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().optional(),
+  ),
+  SMTP_PASS: z.preprocess(
+    (value) => (typeof value === "string" && value.trim() === "" ? undefined : value),
+    z.string().optional(),
+  ),
+  SMTP_FROM: z.string().default("FuRescue <no-reply@furescue.app>"),
+
   DATABASE_URL: z.string().min(1),
   DIRECT_URL: z.string().min(1).optional(),
 

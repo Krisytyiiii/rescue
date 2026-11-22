@@ -1,9 +1,15 @@
 import { prisma } from "../../db/prisma.ts";
+import type { Prisma } from "../../generated/prisma/client.ts";
+import type {
+  AssignmentStatus,
+  ReportStatus,
+} from "../../generated/prisma/enums.ts";
 import { animalsService } from "../animals/animals.service.ts";
 import { notificationsService } from "../notifications/notifications.service.ts";
+import { messagingService } from "../messaging/messaging.service.ts";
 import { writeAuditLog } from "../../shared/audit.ts";
 import { requireRole } from "../../shared/authz.ts";
-import { BadRequestError, ConflictError } from "../../shared/errors.ts";
+import { BadRequestError, ConflictError, ForbiddenError } from "../../shared/errors.ts";
 import type { Actor } from "../../shared/types.ts";
 import { RescuesRepository, rescuesRepository } from "./rescues.repository.ts";
 import type {
@@ -17,9 +23,37 @@ import type {
   RescueConsoleData,
   RescueFeedEntry,
   RescueOperationRow,
+  RescuerAssignmentRow,
+  RescuerHistoryPayload,
+  RescuerHomePayload,
+  RescuerQueuePayload,
   RescuerWorkloadRow,
   UnassignedReportRow,
 } from "./rescues.types.ts";
+
+/** Field actions a rescuer can take, mapped 1:1 to mobile transitions. */
+export type RescuerFieldAction =
+  | "accept"
+  | "decline"
+  | "start_en_route"
+  | "mark_on_site"
+  | "complete"
+  | "fail";
+
+export interface RescuerTransitionInput {
+  reason?: string;
+  outcomeNotes?: string;
+  animalsRescued?: number;
+}
+
+const RESCUER_TRANSITION_FROM: Record<RescuerFieldAction, AssignmentStatus[]> = {
+  accept: ["pending"],
+  decline: ["pending"],
+  start_en_route: ["accepted"],
+  mark_on_site: ["en_route"],
+  complete: ["on_site"],
+  fail: ["pending", "accepted", "en_route", "on_site"],
+};
 
 function reporterName(
   reporter: { firstName: string; lastName: string } | null | undefined,
@@ -73,6 +107,53 @@ function toOperationRow(operation: OperationWithRelations): RescueOperationRow {
         ? `${entry.changer.firstName} ${entry.changer.lastName}`
         : null,
     })),
+  };
+}
+
+function toRescuerAssignment(
+  operation: OperationWithRelations,
+): import("./rescues.types.ts").RescuerAssignmentRow {
+  const report = operation.report;
+  const nextAction = (() => {
+    switch (operation.assignmentStatus) {
+      case "pending":
+        return "accept" as const;
+      case "accepted":
+        return "start_en_route" as const;
+      case "en_route":
+        return "mark_on_site" as const;
+      case "on_site":
+        return "complete" as const;
+      default:
+        return null;
+    }
+  })();
+
+  return {
+    id: operation.id,
+    reportId: report.id,
+    reportCode: report.reportCode,
+    status: operation.assignmentStatus,
+    reportStatus: report.status,
+    urgency: report.urgencyLevel,
+    species: report.species,
+    reportType: report.reportType,
+    description: report.description,
+    barangay: report.barangay?.name ?? null,
+    landmark: report.locationLandmark,
+    latitude: Number(report.latitude),
+    longitude: Number(report.longitude),
+    photoUrl: report.media[0]?.fileUrl ?? null,
+    reporter: reporterName(report.reporter),
+    assignedBy: operation.assigner
+      ? `${operation.assigner.firstName} ${operation.assigner.lastName}`
+      : null,
+    reporterUserId: report.reporterUserId ?? null,
+    assignedByUserId: operation.assignedBy ?? null,
+    distanceKm: null,
+    assignedAt: operation.assignedAt.toISOString(),
+    completedAt: operation.completedAt?.toISOString() ?? null,
+    nextAction,
   };
 }
 
@@ -255,6 +336,211 @@ export class RescuesService {
       },
       feed: buildFeed(operations),
     };
+  }
+
+  /**
+   * Every assignment the signed-in rescuer owns, newest first. The mobile
+   * selectors derive Today's stats/sections and the history groups from this
+   * single snapshot so the counts always reconcile with the operations table.
+   */
+  async rescuerHome(actor: Actor | undefined): Promise<RescuerHomePayload> {
+    const rescuer = requireRole(actor, "rescuer");
+    const [operations, unreadNotifications, unreadMessages, queueCount] =
+      await Promise.all([
+        this.repo.listMine(rescuer.userId),
+        notificationsService.unreadCount(rescuer.userId),
+        messagingService.unreadForUser(rescuer.userId),
+        this.repo.countUnassigned(),
+      ]);
+
+    return {
+      asOf: new Date().toISOString(),
+      assignments: operations.map(toRescuerAssignment),
+      unreadNotifications,
+      unreadMessages,
+      queueCount,
+    };
+  }
+
+  /** Completed, failed and declined operations owned by the rescuer. */
+  async rescuerHistory(actor: Actor | undefined): Promise<RescuerHistoryPayload> {
+    const rescuer = requireRole(actor, "rescuer");
+    const operations = await this.repo.listMineByStatus(rescuer.userId, [
+      "completed",
+      "failed",
+      "declined",
+    ]);
+    return { assignments: operations.map(toRescuerAssignment) };
+  }
+
+  /** Verified reports still waiting for an admin to dispatch them. */
+  async rescuerQueue(actor: Actor | undefined): Promise<RescuerQueuePayload> {
+    requireRole(actor, "rescuer");
+    const reports = await this.repo.listUnassigned();
+    return {
+      reports: reports.map((report) => ({
+        id: report.id,
+        reportCode: report.reportCode,
+        reportStatus: report.status,
+        reportType: report.reportType,
+        species: report.species,
+        urgency: report.urgencyLevel,
+        description: report.description,
+        barangay: report.barangay?.name ?? null,
+        landmark: report.locationLandmark,
+        distanceKm: null,
+        submittedAt: report.submittedAt.toISOString(),
+        verifiedAt: report.verifiedAt?.toISOString() ?? null,
+      })),
+    };
+  }
+
+  /** One assignment, only if it belongs to the signed-in rescuer. */
+  async rescuerAssignment(
+    id: string,
+    actor: Actor | undefined,
+  ): Promise<RescuerAssignmentRow> {
+    const rescuer = requireRole(actor, "rescuer");
+    const operation = await this.repo.getOperation(id);
+    if (operation.rescuerUserId !== rescuer.userId) {
+      throw new ForbiddenError("This assignment belongs to another rescuer");
+    }
+    return toRescuerAssignment(operation);
+  }
+
+  /**
+   * Field actions taken by the rescuer. Each action is guarded by the current
+   * assignment status, mirrors the report status, and notifies the reporter or
+   * dispatch team so the admin console updates from the same rows.
+   */
+  async rescuerTransition(
+    id: string,
+    action: RescuerFieldAction,
+    actor: Actor | undefined,
+    input: RescuerTransitionInput = {},
+  ): Promise<RescuerAssignmentRow> {
+    const rescuer = requireRole(actor, "rescuer");
+    const operation = await this.repo.getOperation(id);
+
+    if (operation.rescuerUserId !== rescuer.userId) {
+      throw new ForbiddenError("This assignment belongs to another rescuer");
+    }
+    if (!RESCUER_TRANSITION_FROM[action].includes(operation.assignmentStatus)) {
+      throw new ConflictError(
+        `Cannot ${action} an assignment that is "${operation.assignmentStatus}"`,
+      );
+    }
+
+    const now = new Date();
+    const note = input.reason?.trim() || input.outcomeNotes?.trim() || null;
+    const report = operation.report;
+
+    await prisma.$transaction(async (tx) => {
+      const operationUpdate: Prisma.RescueOperationUpdateInput = {};
+      let reportStatus: ReportStatus | null = null;
+      let title = "";
+      let body = "";
+
+      switch (action) {
+        case "accept":
+          operationUpdate.assignmentStatus = "accepted";
+          operationUpdate.acceptedAt = now;
+          reportStatus = "in_progress";
+          title = "Rescuer accepted your report";
+          body = `${report.reportCode}: help is on the way.`;
+          break;
+        case "decline":
+          operationUpdate.assignmentStatus = "declined";
+          operationUpdate.outcomeNotes = note ?? "Declined by rescuer";
+          reportStatus = "verified";
+          break;
+        case "start_en_route":
+          operationUpdate.assignmentStatus = "en_route";
+          reportStatus = "in_progress";
+          title = "Rescuer is en route";
+          body = `${report.reportCode}: your rescuer is on the way.`;
+          break;
+        case "mark_on_site":
+          operationUpdate.assignmentStatus = "on_site";
+          operationUpdate.arrivedAt = now;
+          title = "Rescuer arrived";
+          body = `${report.reportCode}: your rescuer has arrived.`;
+          break;
+        case "complete":
+          operationUpdate.assignmentStatus = "completed";
+          operationUpdate.completedAt = now;
+          operationUpdate.outcomeNotes = note;
+          operationUpdate.animalsRescued = input.animalsRescued ?? null;
+          reportStatus = "rescued";
+          title = "Rescue completed";
+          body = `${report.reportCode}: the animal has been rescued.`;
+          break;
+        case "fail":
+          operationUpdate.assignmentStatus = "failed";
+          operationUpdate.completedAt = now;
+          operationUpdate.outcomeNotes = note ?? "Reported a problem in the field";
+          reportStatus = "unable_to_locate";
+          break;
+      }
+
+      await this.repo.updateOperation(id, operationUpdate, tx);
+
+      if (reportStatus && reportStatus !== report.status) {
+        await this.repo.updateReport(operation.reportId, { status: reportStatus }, tx);
+        await this.repo.addReportHistory(
+          {
+            reportId: operation.reportId,
+            oldStatus: report.status,
+            newStatus: reportStatus,
+            changedBy: rescuer.userId,
+            remarks: note,
+            changedAt: now,
+          },
+          tx,
+        );
+      }
+
+      if (report.reporterUserId && title) {
+        await notificationsService.notify(
+          {
+            recipientUserId: report.reporterUserId,
+            notificationType: "rescue_assignment",
+            title,
+            body: body.slice(0, 255),
+            referenceType: "report",
+            referenceId: operation.reportId,
+          },
+          tx,
+        );
+      }
+
+      if (action === "decline" || action === "fail") {
+        await notificationsService.notifyAdmins(
+          {
+            notificationType: "rescue_assignment",
+            title:
+              action === "decline"
+                ? "Rescuer declined an assignment"
+                : "Field problem reported",
+            body: `${report.reportCode}: ${note ?? "No reason provided"}`.slice(0, 255),
+            referenceType: "report",
+            referenceId: operation.reportId,
+          },
+          tx,
+        );
+      }
+
+      await writeAuditLog(tx, {
+        userId: rescuer.userId,
+        action: `rescuer_${action}_assignment`,
+        entityType: "rescue_operation",
+        entityId: id,
+        oldValue: { status: operation.assignmentStatus },
+        newValue: { status: operationUpdate.assignmentStatus, reportStatus, note },
+      });
+    });
+
+    return toRescuerAssignment(await this.repo.getOperation(id));
   }
 
   /** Cancel a dispatch. The report returns to the verified queue. */

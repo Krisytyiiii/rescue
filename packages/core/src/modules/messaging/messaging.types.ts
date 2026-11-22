@@ -49,7 +49,10 @@ export const conversationDetailInclude = {
   ...conversationInclude,
   messages: {
     orderBy: { sentAt: "asc" as const },
-    include: { sender: { select: senderSelect } },
+    include: {
+      sender: { select: senderSelect },
+      deletions: { select: { userId: true } },
+    },
   },
 } satisfies Prisma.ConversationInclude;
 

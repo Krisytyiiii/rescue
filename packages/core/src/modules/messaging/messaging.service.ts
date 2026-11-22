@@ -1,7 +1,11 @@
 import { prisma } from "../../db/prisma.ts";
 import { writeAuditLog } from "../../shared/audit.ts";
-import { requireRole } from "../../shared/authz.ts";
-import { ConflictError, NotFoundError } from "../../shared/errors.ts";
+import { requireActor, requireRole } from "../../shared/authz.ts";
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from "../../shared/errors.ts";
 import { normalizePagination } from "../../shared/pagination.ts";
 import type { Actor, Paginated } from "../../shared/types.ts";
 import { notificationsService } from "../notifications/notifications.service.ts";
@@ -63,6 +67,16 @@ function toMessage(
     sentAt: message.sentAt.toISOString(),
     isDeleted: message.isDeleted,
   };
+}
+
+/** Drops messages the viewer deleted only for themselves. */
+function visibleMessages(
+  messages: ConversationDetailWithRelations["messages"],
+  userId: string,
+): ConversationDetailWithRelations["messages"] {
+  return messages.filter(
+    (message) => !message.deletions.some((deletion) => deletion.userId === userId),
+  );
 }
 
 function toNotification(
@@ -226,7 +240,9 @@ export class MessagingService {
     const [row] = await this.decorate([conversation], actor!);
     return {
       ...row!,
-      messages: conversation.messages.map(toMessage),
+      messages: visibleMessages(conversation.messages, actor!.userId).map(
+        toMessage,
+      ),
     };
   }
 
@@ -255,16 +271,139 @@ export class MessagingService {
     if (input.userId === current.userId) {
       throw new ConflictError("Choose someone else to message");
     }
+    return this.startDirect(current, input.userId, input.body);
+  }
 
+  /**
+   * A rescuer may message the dispatcher who assigned their work and the
+   * reporters of reports assigned to them. The thread is reused per person.
+   */
+  async startRescuerConversation(
+    input: { userId: string; body: string },
+    actor?: Actor,
+  ): Promise<ConversationDetailRow> {
+    const current = requireRole(actor, "rescuer");
+    if (input.userId === current.userId) {
+      throw new ConflictError("Choose someone else to message");
+    }
+    await this.assertRescuerCanMessage(current, input.userId);
+    return this.startDirect(current, input.userId, input.body);
+  }
+
+  /** Existing direct thread with one contact, or null before the first message. */
+  async getRescuerDirect(
+    userId: string,
+    actor?: Actor,
+  ): Promise<ConversationDetailRow | null> {
+    const current = requireRole(actor, "rescuer");
+    if (userId === current.userId) {
+      throw new ConflictError("Choose someone else to message");
+    }
+    await this.assertRescuerCanMessage(current, userId);
+
+    const existing = await this.repo.findDirectConversation(
+      current.userId,
+      userId,
+    );
+    if (!existing) return null;
+
+    const conversation = await this.repo.getById(existing.id);
+    const mine = conversation.participants.find(
+      (participant) => participant.userId === current.userId,
+    );
+    const latest = conversation.messages[conversation.messages.length - 1];
+    if (
+      latest &&
+      latest.senderUserId !== current.userId &&
+      (!mine?.lastReadAt || latest.sentAt > mine.lastReadAt)
+    ) {
+      await this.repo.upsertParticipantRead(conversation.id, current.userId);
+    }
+
+    const [row] = await this.decorate([conversation], current);
+    return {
+      ...row!,
+      messages: visibleMessages(conversation.messages, current.userId).map(
+        toMessage,
+      ),
+    };
+  }
+
+  /** Reply inside a thread the rescuer is already part of. */
+  async sendAsRescuer(
+    id: string,
+    input: { body: string; attachmentUrl?: string },
+    actor?: Actor,
+  ) {
+    const current = requireRole(actor, "rescuer");
+    const conversation = await this.repo.getById(id);
+    const isParticipant = conversation.participants.some(
+      (participant) => participant.userId === current.userId,
+    );
+    if (!isParticipant) throw new NotFoundError("Conversation");
+    if (conversation.status === "closed") {
+      throw new ConflictError("This conversation is closed");
+    }
+
+    const message = await this.repo.createMessage(
+      id,
+      current.userId,
+      input.body,
+      input.attachmentUrl,
+    );
+
+    const recipients = conversation.participants.filter(
+      (participant) => participant.userId !== current.userId,
+    );
+    await Promise.all(
+      recipients.map((participant) =>
+        notificationsService.notify({
+          recipientUserId: participant.userId,
+          notificationType: "new_message",
+          title: "New message from FuRescue",
+          body: input.body.slice(0, 200),
+          referenceType: "conversation",
+          referenceId: id,
+        }),
+      ),
+    );
+
+    return toMessage(message);
+  }
+
+  private async assertRescuerCanMessage(current: Actor, userId: string) {
+    const allowed = await prisma.rescueOperation.findFirst({
+      where: {
+        rescuerUserId: current.userId,
+        report: { deletedAt: null },
+        OR: [
+          { assignedBy: userId },
+          { report: { reporterUserId: userId } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (!allowed) {
+      throw new ConflictError(
+        "You can only message your dispatcher or a reporter from your assignments",
+      );
+    }
+  }
+
+  private async startDirect(
+    current: Actor,
+    userId: string,
+    body: string,
+  ): Promise<ConversationDetailRow> {
     const user = await prisma.user.findFirst({
-      where: { id: input.userId, deletedAt: null, accountStatus: "active" },
+      where: { id: userId, deletedAt: null, accountStatus: "active" },
       select: { id: true, firstName: true, lastName: true },
     });
     if (!user) throw new NotFoundError("Person");
 
     const existing = await this.repo.findDirectConversation(
       current.userId,
-      input.userId,
+      userId,
     );
 
     let conversationId: string;
@@ -273,12 +412,12 @@ export class MessagingService {
       if (existing.status === "closed") {
         await this.repo.updateStatus(existing.id, "open");
       }
-      await this.repo.createMessage(existing.id, current.userId, input.body);
+      await this.repo.createMessage(existing.id, current.userId, body);
     } else {
       const created = await this.repo.createConversation(
         current.userId,
-        input.userId,
-        input.body,
+        userId,
+        body,
       );
       conversationId = created.id;
       await prisma.$transaction((tx) =>
@@ -287,21 +426,28 @@ export class MessagingService {
           action: "start_conversation",
           entityType: "conversation",
           entityId: conversationId,
-          newValue: { userId: input.userId },
+          newValue: { userId },
         }),
       );
     }
 
     await notificationsService.notify({
-      recipientUserId: input.userId,
+      recipientUserId: userId,
       notificationType: "new_message",
       title: "New message from FuRescue",
-      body: input.body.slice(0, 200),
+      body: body.slice(0, 200),
       referenceType: "conversation",
       referenceId: conversationId,
     });
 
-    return this.getById(conversationId, current);
+    const conversation = await this.repo.getById(conversationId);
+    const [row] = await this.decorate([conversation], current);
+    return {
+      ...row!,
+      messages: visibleMessages(conversation.messages, current.userId).map(
+        toMessage,
+      ),
+    };
   }
 
   async markRead(id: string, actor?: Actor) {
@@ -483,10 +629,22 @@ export class MessagingService {
   }
 
   async deleteMessage(messageId: string, actor?: Actor) {
-    const current = requireRole(actor, "admin");
+    const current = requireActor(actor);
     const message = await this.repo.getMessage(messageId);
     if (!message) throw new NotFoundError("Message");
-    if (message.isDeleted) return { id: messageId, conversationId: message.conversationId };
+    if (message.isDeleted) {
+      return { id: messageId, conversationId: message.conversationId };
+    }
+
+    // Admins may remove any message; rescuers only their own.
+    if (current.role !== "admin") {
+      if (message.senderUserId !== current.userId) {
+        throw new ForbiddenError(
+          "You can only delete your own messages for everyone",
+        );
+      }
+      await this.assertParticipant(message.conversationId, current.userId);
+    }
 
     await prisma.$transaction(async (tx) => {
       await this.repo.softDeleteMessage(messageId, tx);
@@ -500,6 +658,28 @@ export class MessagingService {
     });
 
     return { id: messageId, conversationId: message.conversationId };
+  }
+
+  /** Hides a message only for the requesting participant. */
+  async deleteMessageForMe(messageId: string, actor?: Actor) {
+    const current = requireActor(actor);
+    const message = await this.repo.getMessage(messageId);
+    if (!message) throw new NotFoundError("Message");
+    // Admins moderate threads they are not part of; the hide still only
+    // applies to their own console view.
+    if (current.role !== "admin") {
+      await this.assertParticipant(message.conversationId, current.userId);
+    }
+    await this.repo.hideMessageForUser(messageId, current.userId);
+    return { id: messageId, conversationId: message.conversationId };
+  }
+
+  private async assertParticipant(conversationId: string, userId: string) {
+    const conversation = await this.repo.getById(conversationId);
+    const isParticipant = conversation.participants.some(
+      (participant) => participant.userId === userId,
+    );
+    if (!isParticipant) throw new NotFoundError("Message");
   }
 
   async searchParticipants(id: string, q: string, actor?: Actor) {
@@ -558,6 +738,10 @@ export class MessagingService {
     const current = requireRole(actor, "admin");
     const result = await this.repo.markAllNotificationsRead(current.userId);
     return { updated: result.count };
+  }
+
+  unreadForUser(userId: string) {
+    return this.repo.unreadForUser(userId);
   }
 
   async getCounts(actor?: Actor): Promise<MessagingCounts> {

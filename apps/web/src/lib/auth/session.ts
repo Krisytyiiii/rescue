@@ -1,5 +1,5 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { NextResponse } from "next/server";
 
 export const SESSION_COOKIE = "furescue_session";
@@ -64,7 +64,14 @@ export function clearSessionCookie(response: NextResponse): void {
 
 export async function readSession(): Promise<SessionPayload | null> {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE)?.value;
+  const headerStore = await headers();
+  const authorization = headerStore.get("authorization");
+  const bearer =
+    authorization?.toLowerCase().startsWith("bearer ")
+      ? authorization.slice(7).trim()
+      : null;
+  // Browser sessions use the httpOnly cookie; the mobile app sends a Bearer token.
+  const token = store.get(SESSION_COOKIE)?.value ?? bearer;
   if (!token) return null;
 
   try {
@@ -109,9 +116,8 @@ export function clearOnboardingCookie(response: NextResponse): void {
   });
 }
 
-export async function readOnboarding(): Promise<OnboardingPayload | null> {
-  const store = await cookies();
-  const token = store.get(ONBOARDING_COOKIE)?.value;
+/** Verifies an onboarding token handed to the mobile app via deep link. */
+export function readOnboardingToken(token: string): OnboardingPayload | null {
   if (!token) return null;
 
   try {
@@ -121,4 +127,11 @@ export async function readOnboarding(): Promise<OnboardingPayload | null> {
   } catch {
     return null;
   }
+}
+
+export async function readOnboarding(): Promise<OnboardingPayload | null> {
+  const store = await cookies();
+  const token = store.get(ONBOARDING_COOKIE)?.value;
+  if (!token) return null;
+  return readOnboardingToken(token);
 }

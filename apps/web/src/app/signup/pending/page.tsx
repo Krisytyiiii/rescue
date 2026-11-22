@@ -39,7 +39,7 @@ export default async function PendingApprovalPage({ searchParams }: PendingPageP
             <Clock3 className="h-6 w-6" strokeWidth={1.7} />
           </span>
 
-          <p className="label mt-6 text-clay">Application received</p>
+          <p className="label mt-6 text-clay">Email verified</p>
           <h1 className="mt-4 font-display text-[clamp(2.4rem,6vw,3.3rem)] leading-[0.95] tracking-[-0.03em] text-ink">
             Waiting for{" "}
             <span className="font-display-italic text-clay">approval.</span>

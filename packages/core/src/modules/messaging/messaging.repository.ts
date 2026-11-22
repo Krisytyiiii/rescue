@@ -219,12 +219,29 @@ export class MessagingRepository {
   getMessage(id: string) {
     return this.db.message.findFirst({
       where: { id },
-      select: { id: true, conversationId: true, isDeleted: true },
+      select: {
+        id: true,
+        conversationId: true,
+        senderUserId: true,
+        isDeleted: true,
+      },
     });
   }
 
   softDeleteMessage(id: string, tx: Prisma.TransactionClient = this.db) {
     return tx.message.update({ where: { id }, data: { isDeleted: true } });
+  }
+
+  hideMessageForUser(
+    messageId: string,
+    userId: string,
+    tx: Prisma.TransactionClient = this.db,
+  ) {
+    return tx.messageDeletion.upsert({
+      where: { messageId_userId: { messageId, userId } },
+      update: {},
+      create: { messageId, userId },
+    });
   }
 
   searchUsers(q: string, excludeIds: string[]) {
@@ -338,6 +355,30 @@ export class MessagingRepository {
         },
       },
     });
+  }
+
+  /** Unread messages across every conversation the user participates in. */
+  async unreadForUser(userId: string): Promise<number> {
+    const conversations = await this.db.conversation.findMany({
+      where: { deletedAt: null, participants: { some: { userId } } },
+      select: {
+        id: true,
+        participants: {
+          where: { userId },
+          select: { lastReadAt: true },
+        },
+      },
+    });
+
+    let total = 0;
+    for (const conversation of conversations) {
+      total += await this.countUnread(
+        conversation.id,
+        userId,
+        conversation.participants[0]?.lastReadAt ?? null,
+      );
+    }
+    return total;
   }
 }
 

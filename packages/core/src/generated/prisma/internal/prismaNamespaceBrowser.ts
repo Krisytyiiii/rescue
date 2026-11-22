@@ -55,6 +55,7 @@ export const ModelName = {
   Barangay: 'Barangay',
   User: 'User',
   PasswordReset: 'PasswordReset',
+  EmailVerification: 'EmailVerification',
   Animal: 'Animal',
   AnimalMedia: 'AnimalMedia',
   HealthRecord: 'HealthRecord',
@@ -70,6 +71,7 @@ export const ModelName = {
   Conversation: 'Conversation',
   ConversationParticipant: 'ConversationParticipant',
   Message: 'Message',
+  MessageDeletion: 'MessageDeletion',
   Notification: 'Notification',
   LearningModule: 'LearningModule',
   Lesson: 'Lesson',
@@ -156,6 +158,20 @@ export const PasswordResetScalarFieldEnum = {
 } as const
 
 export type PasswordResetScalarFieldEnum = (typeof PasswordResetScalarFieldEnum)[keyof typeof PasswordResetScalarFieldEnum]
+
+
+export const EmailVerificationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  attempts: 'attempts',
+  usedAt: 'usedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EmailVerificationScalarFieldEnum = (typeof EmailVerificationScalarFieldEnum)[keyof typeof EmailVerificationScalarFieldEnum]
 
 
 export const AnimalScalarFieldEnum = {
@@ -427,6 +443,15 @@ export const MessageScalarFieldEnum = {
 } as const
 
 export type MessageScalarFieldEnum = (typeof MessageScalarFieldEnum)[keyof typeof MessageScalarFieldEnum]
+
+
+export const MessageDeletionScalarFieldEnum = {
+  messageId: 'messageId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+} as const
+
+export type MessageDeletionScalarFieldEnum = (typeof MessageDeletionScalarFieldEnum)[keyof typeof MessageDeletionScalarFieldEnum]
 
 
 export const NotificationScalarFieldEnum = {
