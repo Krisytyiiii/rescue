@@ -38,7 +38,11 @@ import { useAnimalsViewModel } from "./useAnimalsViewModel";
 
 const GUTTER = 16;
 
-export function AnimalsView() {
+export function AnimalsView({
+  showBack = true,
+}: {
+  showBack?: boolean;
+} = {}) {
   const router = useRouter();
   const { animals, loading, error, reload } = useAnimalsViewModel();
   const [selected, setSelected] = useState<Animal | null>(null);
@@ -58,14 +62,16 @@ export function AnimalsView() {
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.headerWrap}>
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <Text style={styles.backGlyph}>←</Text>
-            </Pressable>
+            {showBack ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+                onPress={() => router.back()}
+                style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+              >
+                <Text style={styles.backGlyph}>←</Text>
+              </Pressable>
+            ) : null}
 
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Animals</Text>

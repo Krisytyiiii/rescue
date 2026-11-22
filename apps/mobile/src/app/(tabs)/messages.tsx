@@ -32,7 +32,7 @@ export default function MessagesScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>Messages</Text>
+            <Text style={styles.headerTitle}>Chat</Text>
           </View>
 
           {loading ? (

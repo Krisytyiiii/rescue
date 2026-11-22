@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import {
   ChatIcon,
   CheckIcon,
-  CompassIcon,
   HomeIcon,
   MapPinIcon,
+  PawIcon,
   PersonIcon,
   PlusCircleIcon,
 } from "@/components/icons";
@@ -22,10 +22,10 @@ export interface TabItem {
  * Order here is the order rendered by the tab bar.
  */
 export const RESIDENT_TABS: readonly TabItem[] = [
-  { name: "index", label: "Home", Icon: HomeIcon },
-  { name: "explore", label: "Explore", Icon: CompassIcon },
-  { name: "create", label: "Create", Icon: PlusCircleIcon },
-  { name: "messages", label: "Messages", Icon: ChatIcon },
+  { name: "index", label: "Feed", Icon: HomeIcon },
+  { name: "report", label: "Report", Icon: PlusCircleIcon },
+  { name: "animals-tab", label: "Animals", Icon: PawIcon },
+  { name: "messages", label: "Chat", Icon: ChatIcon },
   { name: "profile", label: "Profile", Icon: PersonIcon },
 ];
 

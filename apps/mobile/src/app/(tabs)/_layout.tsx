@@ -12,12 +12,14 @@ export default function TabsLayout() {
       }}
       tabBar={(props) => <GlassTabBar {...props} />}
     >
-      <Tabs.Screen name="index" options={{ title: "Home" }} />
+      <Tabs.Screen name="index" options={{ title: "Feed" }} />
+      <Tabs.Screen name="report" options={{ title: "Report" }} />
+      <Tabs.Screen name="animals-tab" options={{ title: "Animals" }} />
       <Tabs.Screen name="explore" options={{ title: "Explore" }} />
       <Tabs.Screen name="create" options={{ title: "Create" }} />
       <Tabs.Screen name="queue" options={{ title: "Assign" }} />
       <Tabs.Screen name="history" options={{ title: "History" }} />
-      <Tabs.Screen name="messages" options={{ title: "Messages" }} />
+      <Tabs.Screen name="messages" options={{ title: "Chat" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
     </Tabs>
   );

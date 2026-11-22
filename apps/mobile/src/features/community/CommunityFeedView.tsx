@@ -85,7 +85,11 @@ const SIZE_OPTIONS: CommunitySize[] = ["small", "medium", "large"];
 
 type FeedScope = "all" | "mine";
 
-export function CommunityFeedView() {
+export function CommunityFeedView({
+  showBack = true,
+}: {
+  showBack?: boolean;
+} = {}) {
   const router = useRouter();
   const {
     posts,
@@ -127,17 +131,19 @@ export function CommunityFeedView() {
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.headerWrap}>
           <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Go back"
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-            >
-              <Text style={styles.backGlyph}>←</Text>
-            </Pressable>
+            {showBack ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+                onPress={() => router.back()}
+                style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+              >
+                <Text style={styles.backGlyph}>←</Text>
+              </Pressable>
+            ) : null}
 
             <View style={styles.headerText}>
-              <Text style={styles.headerTitle}>Community</Text>
+              <Text style={styles.headerTitle}>Feed</Text>
               {loading ? (
                 <Skeleton
                   width={112}
