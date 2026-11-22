@@ -3,14 +3,10 @@ import type { RescuerAssignmentRepository } from "@/domain/rescuer";
 
 import { HttpAuthGateway } from "./auth-gateway";
 import { DefaultAuthRepository } from "./auth-repository";
-import { USE_RESCUER_API } from "./config";
 import { ExpoGoogleAuthBrowser } from "./google-browser";
 import { HttpMessagingGateway } from "./messaging-gateway";
 import { HttpReportMapDataSource } from "./report-map-gateway";
-import { reportMapDataSource as mockReportMapDataSource } from "./report-map";
 import { HttpRescuerGateway } from "./rescuer-gateway";
-import { rescuerHomeDataSource as mockHomeDataSource } from "./rescuer-home";
-import { rescuerQueueDataSource as mockQueueDataSource } from "./rescuer-queue";
 import { SecureSessionStorage } from "./session-storage";
 
 import type { ReportMapDataSource } from "./report-map";
@@ -20,11 +16,12 @@ import type { RescuerQueueDataSource } from "./rescuer-queue";
 
 /**
  * Composition root: the only place concrete implementations are wired.
- * View models depend on interfaces; the environment decides mock vs HTTP.
+ * View models depend on interfaces; every source is backed by the live API.
  */
 const sessionStorage = new SecureSessionStorage();
 const httpRescuerGateway = new HttpRescuerGateway(sessionStorage);
 const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
+const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
 
 export const authRepository: AuthRepository = new DefaultAuthRepository(
   new HttpAuthGateway(),
@@ -32,9 +29,8 @@ export const authRepository: AuthRepository = new DefaultAuthRepository(
   new ExpoGoogleAuthBrowser(),
 );
 
-export const rescuerHomeDataSource: RescuerHomeDataSource = USE_RESCUER_API
-  ? httpRescuerGateway
-  : mockHomeDataSource;
+/** Today snapshot: `GET /api/rescues/mine`. */
+export const rescuerHomeDataSource: RescuerHomeDataSource = httpRescuerGateway;
 
 /**
  * The Assignments board must always reflect real backend records, matching
@@ -44,9 +40,8 @@ export const rescuerHomeDataSource: RescuerHomeDataSource = USE_RESCUER_API
 export const rescuerAssignmentsDataSource: RescuerHomeDataSource =
   httpRescuerGateway;
 
-export const rescuerQueueDataSource: RescuerQueueDataSource = USE_RESCUER_API
-  ? httpRescuerGateway
-  : mockQueueDataSource;
+/** Verified queue: `GET /api/reports?status=verified`. */
+export const rescuerQueueDataSource: RescuerQueueDataSource = httpRescuerGateway;
 
 /**
  * History is backed by the real backend only:
@@ -63,9 +58,7 @@ export const rescuerAssignmentRepository: RescuerAssignmentRepository =
 export const messagingDataSource = httpMessagingGateway;
 
 /** Explore map markers: live report coordinates from `GET /api/reports/map`. */
-export const reportMapDataSource: ReportMapDataSource = USE_RESCUER_API
-  ? new HttpReportMapDataSource(sessionStorage)
-  : mockReportMapDataSource;
+export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";

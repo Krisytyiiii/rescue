@@ -25,13 +25,6 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 
-/**
- * Rescuer screens talk to the real API by default. Set
- * `EXPO_PUBLIC_RESCUER_API=false` to fall back to the in-memory placeholder.
- */
-export const USE_RESCUER_API =
-  process.env.EXPO_PUBLIC_RESCUER_API !== "false";
-
 export function webUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
 }

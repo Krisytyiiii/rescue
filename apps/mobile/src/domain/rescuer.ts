@@ -372,7 +372,7 @@ export type AssignmentTransition =
 
 /**
  * Inbound port: the only assignment surface view models use. The data layer
- * decides whether it talks to the API or an in-memory placeholder.
+ * backs it with the live rescue API.
  */
 export interface RescuerAssignmentRepository {
   loadAssignment(id: string): Promise<RescuerAssignment | null>;
