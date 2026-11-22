@@ -61,6 +61,13 @@ export function useCommunityViewModel({
 
   const clearNotice = useCallback(() => setNotice(null), []);
 
+  const uploadPhoto = useCallback(
+    async (uri: string): Promise<string> => {
+      return data.uploadPhoto(uri);
+    },
+    [data],
+  );
+
   const submit = useCallback(
     async (input: NewCommunityPost): Promise<boolean> => {
       setSubmitting(true);
@@ -98,6 +105,7 @@ export function useCommunityViewModel({
     submitError,
     notice,
     clearNotice,
+    uploadPhoto,
     submit,
   };
 }

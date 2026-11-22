@@ -64,10 +64,7 @@ export function AdoptionsView() {
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={styles.headerWrap}>
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -98,7 +95,12 @@ export function AdoptionsView() {
               <HomeIcon size={17} color="#C4791B" />
             </View>
           </View>
+        </View>
 
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.intro}>
             <Text style={styles.introEyebrow}>Read-only</Text>
             <Text style={styles.introBody}>
@@ -445,6 +447,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 6,
     paddingBottom: 140,
+  },
+  headerWrap: {
+    width: "100%",
+    maxWidth: 560,
+    alignSelf: "center",
+    paddingHorizontal: 22,
+    paddingTop: 6,
   },
   header: {
     height: 64,

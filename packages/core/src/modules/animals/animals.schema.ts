@@ -85,7 +85,7 @@ export const createCommunityPostSchema = createAnimalSchema
           sortOrder: z.coerce.number().int().min(0).max(255).optional(),
         }),
       )
-      .max(3)
+      .max(4, "You can add up to 4 photos")
       .optional(),
   });
 

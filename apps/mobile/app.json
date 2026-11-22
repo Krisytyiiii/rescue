@@ -38,6 +38,12 @@
       ],
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "FuRescue uses your photos so you can attach pictures to an adoption post."
+        }
+      ],
+      [
         "expo-location",
         {
           "locationWhenInUsePermission": "FuRescue uses your location to show your position relative to the rescue report."

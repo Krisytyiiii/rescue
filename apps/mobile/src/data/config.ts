@@ -25,6 +25,10 @@ function resolveApiBaseUrl(): string {
 
 export const API_BASE_URL = resolveApiBaseUrl();
 
+if (__DEV__) {
+  console.log("[api] base url:", API_BASE_URL);
+}
+
 export function webUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
 }

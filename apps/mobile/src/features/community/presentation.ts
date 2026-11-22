@@ -56,6 +56,17 @@ export function postPhoto(post: CommunityPost): string | null {
   return post.media.find((item) => item.mediaType === "photo")?.fileUrl ?? null;
 }
 
+/** Every photo attached to a post, in the order the resident uploaded them. */
+export function postPhotos(post: CommunityPost): string[] {
+  const photos = post.media
+    .filter((item) => item.mediaType === "photo" && item.fileUrl)
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((item) => item.fileUrl);
+
+  if (photos.length > 0) return photos;
+  return post.primaryPhotoUrl ? [post.primaryPhotoUrl] : [];
+}
+
 export function ageLabel(months: number | null): string {
   if (months === null || months < 0) return "Age unknown";
   if (months < 1) return "Newborn";

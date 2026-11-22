@@ -35,5 +35,9 @@ export interface NewCommunityPost {
   colorMarkings?: string;
   temperament?: string;
   description: string;
-  photoUrl?: string;
+  /** Uploaded photo URLs, in display order. At most 4 per post. */
+  photoUrls?: string[];
 }
+
+/** Maximum number of photos a resident can attach to one adoption post. */
+export const MAX_COMMUNITY_PHOTOS = 4;

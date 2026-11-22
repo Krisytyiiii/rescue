@@ -1,15 +1,19 @@
 import { LinearGradient } from "expo-linear-gradient";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,13 +26,14 @@ import {
 } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
-import type {
-  CommunityBreed,
-  CommunityPost,
-  CommunitySex,
-  CommunitySize,
-  CommunitySpecies,
-  NewCommunityPost,
+import {
+  MAX_COMMUNITY_PHOTOS,
+  type CommunityBreed,
+  type CommunityPost,
+  type CommunitySex,
+  type CommunitySize,
+  type CommunitySpecies,
+  type NewCommunityPost,
 } from "@/domain/community";
 
 import {
@@ -36,7 +41,7 @@ import {
   BREED_LABEL,
   formatDate,
   postAuthor,
-  postPhoto,
+  postPhotos,
   postStatus,
   postTitle,
   SEX_LABEL,
@@ -55,7 +60,7 @@ interface PostForm {
   colorMarkings: string;
   temperament: string;
   description: string;
-  photoUrl: string;
+  photoUrls: string[];
 }
 
 const EMPTY_FORM: PostForm = {
@@ -68,7 +73,7 @@ const EMPTY_FORM: PostForm = {
   colorMarkings: "",
   temperament: "",
   description: "",
-  photoUrl: "",
+  photoUrls: [],
 };
 
 const SPECIES_OPTIONS: CommunitySpecies[] = ["dog", "cat"];
@@ -87,6 +92,7 @@ export function CommunityFeedView() {
     submitError,
     notice,
     clearNotice,
+    uploadPhoto,
     submit,
   } = useCommunityViewModel();
 
@@ -107,10 +113,7 @@ export function CommunityFeedView() {
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-        >
+        <View style={styles.headerWrap}>
           <View style={styles.header}>
             <Pressable
               accessibilityRole="button"
@@ -141,7 +144,12 @@ export function CommunityFeedView() {
               <ChatIcon size={17} color="#3D7E9A" />
             </View>
           </View>
+        </View>
 
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.intro}>
             <Text style={styles.introEyebrow}>Adoption feed</Text>
             <Text style={styles.introBody}>
@@ -231,6 +239,7 @@ export function CommunityFeedView() {
         onClose={() => setComposerOpen(false)}
         onSubmit={handleSubmit}
         onInvalid={setFormError}
+        onUploadPhoto={uploadPhoto}
       />
     </View>
   );
@@ -251,27 +260,42 @@ function FeedSkeleton() {
 }
 
 function FeedCard({ post }: { post: CommunityPost }) {
-  const photo = postPhoto(post);
+  const photos = postPhotos(post);
   const status = postStatus(post);
+  const { width } = useWindowDimensions();
+  const mediaWidth = Math.max(1, Math.min(width, 560) - 44 - 2);
 
   return (
     <View style={styles.card}>
       <View style={styles.cardMedia}>
-        {photo ? (
-          <Image source={{ uri: photo }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        ) : (
-          <LinearGradient
-            colors={["#2C5A46", "#123A28"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+        {photos.length > 0 ? (
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
             style={StyleSheet.absoluteFill}
-          />
-        )}
-
-        {photo ? null : (
-          <View style={styles.mediaFallback}>
-            <PawIcon size={34} color="rgba(255,255,255,0.35)" />
-          </View>
+          >
+            {photos.map((photo) => (
+              <Image
+                key={photo}
+                source={{ uri: photo }}
+                style={[styles.cardMediaImage, { width: mediaWidth }]}
+                resizeMode="cover"
+              />
+            ))}
+          </ScrollView>
+        ) : (
+          <>
+            <LinearGradient
+              colors={["#2C5A46", "#123A28"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <View style={styles.mediaFallback}>
+              <PawIcon size={34} color="rgba(255,255,255,0.35)" />
+            </View>
+          </>
         )}
 
         <View style={[styles.statusChip, { backgroundColor: status.background }]}>
@@ -280,6 +304,12 @@ function FeedCard({ post }: { post: CommunityPost }) {
             {status.label}
           </Text>
         </View>
+
+        {photos.length > 1 ? (
+          <View style={styles.photoCount}>
+            <Text style={styles.photoCountText}>{photos.length} photos</Text>
+          </View>
+        ) : null}
 
         <View style={styles.mediaMeta}>
           <Text style={styles.mediaCode}>{post.animalCode}</Text>
@@ -324,6 +354,8 @@ function FeedCard({ post }: { post: CommunityPost }) {
   );
 }
 
+type FormErrors = Partial<Record<"name" | "age" | "description", string>>;
+
 function ComposerSheet({
   visible,
   submitting,
@@ -332,6 +364,7 @@ function ComposerSheet({
   onSubmit,
   onInvalid,
   onDismissError,
+  onUploadPhoto,
 }: {
   visible: boolean;
   submitting: boolean;
@@ -340,44 +373,110 @@ function ComposerSheet({
   onSubmit: (input: NewCommunityPost) => Promise<boolean>;
   onInvalid: (message: string) => void;
   onDismissError: () => void;
+  onUploadPhoto: (uri: string) => Promise<string>;
 }) {
   const [form, setForm] = useState<PostForm>(EMPTY_FORM);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const remaining = MAX_COMMUNITY_PHOTOS - form.photoUrls.length;
 
   const update = <K extends keyof PostForm,>(key: K, value: PostForm[K]) => {
     onDismissError();
+    if (key === "name" || key === "age" || key === "description") {
+      const errorKey = key as "name" | "age" | "description";
+      setErrors((current) => {
+        if (!current[errorKey]) return current;
+        const next = { ...current };
+        delete next[errorKey];
+        return next;
+      });
+    }
     setForm((current) => ({ ...current, [key]: value }));
   };
 
   const close = () => {
-    if (submitting) return;
+    if (submitting || uploading) return;
     onClose();
+  };
+
+  const removePhoto = (index: number) => {
+    onDismissError();
+    setPhotoError(null);
+    setForm((current) => ({
+      ...current,
+      photoUrls: current.photoUrls.filter((_, itemIndex) => itemIndex !== index),
+    }));
+  };
+
+  const handlePickPhotos = async () => {
+    if (remaining <= 0 || uploading) return;
+
+    onDismissError();
+    setPhotoError(null);
+
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      setPhotoError("Allow photo access in your device settings to add photos.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsMultipleSelection: true,
+      selectionLimit: remaining,
+      quality: 0.8,
+    });
+
+    if (result.canceled) return;
+
+    setUploading(true);
+    try {
+      for (const asset of result.assets.slice(0, remaining)) {
+        const url = await onUploadPhoto(asset.uri);
+        setForm((current) =>
+          current.photoUrls.length >= MAX_COMMUNITY_PHOTOS ||
+          current.photoUrls.includes(url)
+            ? current
+            : { ...current, photoUrls: [...current.photoUrls, url] },
+        );
+      }
+    } catch (cause) {
+      setPhotoError(
+        cause instanceof Error
+          ? cause.message
+          : "We couldn't upload that photo. Please try again.",
+      );
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleFormSubmit = async () => {
     const name = form.name.trim();
     const description = form.description.trim();
-    const photoUrl = form.photoUrl.trim();
+    const age = form.age.trim() === "" ? undefined : Number(form.age);
 
+    const nextErrors: FormErrors = {};
     if (!name) {
-      onInvalid("Give the animal a name or a short nickname.");
-      return;
+      nextErrors.name = "Give the animal a name or a short nickname.";
     }
     if (description.length < 20) {
-      onInvalid("Tell adopters at least a couple of sentences about the animal.");
-      return;
+      nextErrors.description =
+        "Write at least a couple of sentences so adopters know the animal.";
     }
-    if (photoUrl && !/^https?:\/\//i.test(photoUrl)) {
-      onInvalid("The photo link must start with http:// or https://.");
-      return;
+    if (age !== undefined && (!Number.isInteger(age) || age < 0 || age > 600)) {
+      nextErrors.age = "Enter whole months between 0 and 600, or leave it blank.";
     }
-    if (photoUrl.length > 255) {
-      onInvalid("That photo link is too long. Use a shorter one.");
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
 
-    const age = form.age.trim() === "" ? undefined : Number(form.age);
-    if (age !== undefined && (!Number.isInteger(age) || age < 0 || age > 600)) {
-      onInvalid("Enter the age in whole months, or leave it blank.");
+    if (uploading) {
+      onInvalid("Please wait for your photos to finish uploading.");
       return;
     }
 
@@ -391,10 +490,14 @@ function ComposerSheet({
       colorMarkings: form.colorMarkings.trim() || undefined,
       temperament: form.temperament.trim() || undefined,
       description,
-      photoUrl: photoUrl || undefined,
+      photoUrls: form.photoUrls.length > 0 ? form.photoUrls : undefined,
     });
 
-    if (created) setForm(EMPTY_FORM);
+    if (created) {
+      setForm(EMPTY_FORM);
+      setErrors({});
+      setPhotoError(null);
+    }
   };
 
   return (
@@ -405,7 +508,10 @@ function ComposerSheet({
       statusBarTranslucent
       onRequestClose={close}
     >
-      <View style={styles.sheetBackdrop}>
+      <KeyboardAvoidingView
+        style={styles.sheetBackdrop}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
         <Pressable
           style={StyleSheet.absoluteFill}
           accessibilityLabel="Close the adoption post form"
@@ -414,7 +520,7 @@ function ComposerSheet({
 
         <View style={styles.sheet}>
           <View style={styles.sheetHead}>
-            <View>
+            <View style={styles.sheetHeadText}>
               <Text style={styles.sheetEyebrow}>Community post</Text>
               <Text style={styles.sheetTitle}>Post an animal</Text>
             </View>
@@ -434,126 +540,207 @@ function ComposerSheet({
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <Field label="Name">
-              <TextInput
-                value={form.name}
-                onChangeText={(value) => update("name", value)}
-                placeholder="e.g. Bantay"
-                placeholderTextColor={Brand.ink55}
-                style={styles.input}
-                maxLength={60}
+            <FormSection
+              label="Photos"
+              hint={`Add up to ${MAX_COMMUNITY_PHOTOS}. The first photo becomes the cover.`}
+            >
+              <View style={styles.photoGrid}>
+                {form.photoUrls.map((uri, index) => (
+                  <View key={`${uri}-${index}`} style={styles.photoTile}>
+                    <Image
+                      source={{ uri }}
+                      style={StyleSheet.absoluteFill}
+                      resizeMode="cover"
+                    />
+                    {index === 0 ? (
+                      <View style={styles.photoCover}>
+                        <Text style={styles.photoCoverText}>Cover</Text>
+                      </View>
+                    ) : null}
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove photo ${index + 1}`}
+                      hitSlop={6}
+                      onPress={() => removePhoto(index)}
+                      style={({ pressed }) => [
+                        styles.photoRemove,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <CloseIcon size={12} color={Brand.ink} />
+                    </Pressable>
+                  </View>
+                ))}
+
+                {remaining > 0 ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Add photos"
+                    disabled={uploading}
+                    onPress={() => void handlePickPhotos()}
+                    style={({ pressed }) => [
+                      styles.photoAdd,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    {uploading ? (
+                      <ActivityIndicator color={Brand.moss} />
+                    ) : (
+                      <>
+                        <PlusCircleIcon size={22} color={Brand.moss} />
+                        <Text style={styles.photoAddText}>Add photo</Text>
+                      </>
+                    )}
+                  </Pressable>
+                ) : null}
+              </View>
+
+              <Text style={styles.photoCounter}>
+                {form.photoUrls.length} of {MAX_COMMUNITY_PHOTOS} photos
+              </Text>
+              {photoError ? (
+                <Text style={styles.fieldError}>{photoError}</Text>
+              ) : null}
+            </FormSection>
+
+            <FormSection label="The basics">
+              <Field label="Name" required error={errors.name}>
+                <TextInput
+                  value={form.name}
+                  onChangeText={(value) => update("name", value)}
+                  placeholder="e.g. Bantay"
+                  placeholderTextColor={Brand.ink55}
+                  style={[styles.input, errors.name ? styles.inputError : null]}
+                  maxLength={60}
+                />
+              </Field>
+
+              <SegmentedGroup
+                label="Species"
+                options={SPECIES_OPTIONS}
+                selected={form.species}
+                labelFor={(value) => SPECIES_LABEL[value]}
+                onSelect={(value) => update("species", value)}
               />
-            </Field>
 
-            <ChipGroup
-              label="Species"
-              options={SPECIES_OPTIONS}
-              selected={form.species}
-              labelFor={(value) => SPECIES_LABEL[value]}
-              onSelect={(value) => update("species", value)}
-            />
+              <ChipGroup
+                label="Breed"
+                options={BREED_OPTIONS}
+                selected={form.breedType}
+                labelFor={(value) => BREED_LABEL[value] ?? value}
+                onSelect={(value) => update("breedType", value)}
+              />
+            </FormSection>
 
-            <ChipGroup
-              label="Breed"
-              options={BREED_OPTIONS}
-              selected={form.breedType}
-              labelFor={(value) => BREED_LABEL[value] ?? value}
-              onSelect={(value) => update("breedType", value)}
-            />
+            <FormSection label="Details">
+              <ChipGroup
+                label="Sex"
+                options={SEX_OPTIONS}
+                selected={form.sex}
+                labelFor={(value) => SEX_LABEL[value] ?? value}
+                onSelect={(value) => update("sex", value)}
+              />
 
-            <ChipGroup
-              label="Sex"
-              options={SEX_OPTIONS}
-              selected={form.sex}
-              labelFor={(value) => SEX_LABEL[value] ?? value}
-              onSelect={(value) => update("sex", value)}
-            />
-
-            <View style={styles.fieldRow}>
-              <View style={styles.fieldHalf}>
-                <Field label="Age (months)">
+              <Field
+                label="Age"
+                hint="Leave blank if you're not sure."
+                error={errors.age}
+              >
+                <View style={styles.inputWithSuffix}>
                   <TextInput
                     value={form.age}
-                    onChangeText={(value) => update("age", value.replace(/[^0-9]/g, ""))}
+                    onChangeText={(value) =>
+                      update("age", value.replace(/[^0-9]/g, ""))
+                    }
                     placeholder="e.g. 14"
                     placeholderTextColor={Brand.ink55}
                     keyboardType="number-pad"
-                    style={styles.input}
+                    style={[
+                      styles.input,
+                      styles.inputFlex,
+                      errors.age ? styles.inputError : null,
+                    ]}
                     maxLength={3}
                   />
-                </Field>
-              </View>
-              <View style={styles.fieldHalf}>
-                <ChipGroup
-                  label="Size"
-                  options={SIZE_OPTIONS}
-                  selected={form.size}
-                  labelFor={(value) => SIZE_LABEL[value] ?? value}
-                  onSelect={(value) => update("size", value)}
+                  <View style={styles.inputSuffix}>
+                    <Text style={styles.inputSuffixText}>months</Text>
+                  </View>
+                </View>
+              </Field>
+
+              <SegmentedGroup
+                label="Size"
+                options={SIZE_OPTIONS}
+                selected={form.size}
+                labelFor={(value) => SIZE_LABEL[value] ?? value}
+                onSelect={(value) => update("size", value)}
+              />
+            </FormSection>
+
+            <FormSection label="Story">
+              <Field
+                label="About this animal"
+                required
+                error={errors.description}
+              >
+                <TextInput
+                  value={form.description}
+                  onChangeText={(value) => update("description", value)}
+                  placeholder="Where you found the animal, how it behaves, and what kind of home would suit it."
+                  placeholderTextColor={Brand.ink55}
+                  style={[
+                    styles.input,
+                    styles.textarea,
+                    errors.description ? styles.inputError : null,
+                  ]}
+                  multiline
+                  textAlignVertical="top"
+                  maxLength={2000}
                 />
-              </View>
-            </View>
+                <Text style={styles.charCount}>
+                  {form.description.length}/2000
+                </Text>
+              </Field>
+            </FormSection>
 
-            <Field label="Color and markings">
-              <TextInput
-                value={form.colorMarkings}
-                onChangeText={(value) => update("colorMarkings", value)}
-                placeholder="e.g. Brown with a white chest"
-                placeholderTextColor={Brand.ink55}
-                style={styles.input}
-                maxLength={150}
-              />
-            </Field>
+            <FormSection label="Extra details">
+              <Field label="Color and markings">
+                <TextInput
+                  value={form.colorMarkings}
+                  onChangeText={(value) => update("colorMarkings", value)}
+                  placeholder="e.g. Brown with a white chest"
+                  placeholderTextColor={Brand.ink55}
+                  style={styles.input}
+                  maxLength={150}
+                />
+              </Field>
 
-            <Field label="Temperament">
-              <TextInput
-                value={form.temperament}
-                onChangeText={(value) => update("temperament", value)}
-                placeholder="e.g. Friendly, good with children"
-                placeholderTextColor={Brand.ink55}
-                style={styles.input}
-                maxLength={255}
-              />
-            </Field>
-
-            <Field label="Story for adopters">
-              <TextInput
-                value={form.description}
-                onChangeText={(value) => update("description", value)}
-                placeholder="Where you found the animal, how it behaves, and what kind of home would suit it."
-                placeholderTextColor={Brand.ink55}
-                style={[styles.input, styles.textarea]}
-                multiline
-                textAlignVertical="top"
-                maxLength={2000}
-              />
-            </Field>
-
-            <Field label="Photo link (optional)">
-              <TextInput
-                value={form.photoUrl}
-                onChangeText={(value) => update("photoUrl", value)}
-                placeholder="https://…"
-                placeholderTextColor={Brand.ink55}
-                style={styles.input}
-                autoCapitalize="none"
-                autoCorrect={false}
-                maxLength={255}
-              />
-              <Text style={styles.fieldHint}>
-                Paste a public photo link so adopters can see the animal.
-              </Text>
-            </Field>
+              <Field label="Temperament">
+                <TextInput
+                  value={form.temperament}
+                  onChangeText={(value) => update("temperament", value)}
+                  placeholder="e.g. Friendly, good with children"
+                  placeholderTextColor={Brand.ink55}
+                  style={styles.input}
+                  maxLength={255}
+                />
+              </Field>
+            </FormSection>
 
             {error ? <Text style={styles.formError}>{error}</Text> : null}
+          </ScrollView>
 
+          <View style={styles.sheetFooter}>
+            <Text style={styles.formFootnote}>
+              Reviewed by the City Vet team before it appears publicly.
+            </Text>
             <Pressable
               accessibilityRole="button"
               onPress={() => void handleFormSubmit()}
-              disabled={submitting}
+              disabled={submitting || uploading}
               style={({ pressed }) => [
                 styles.submit,
-                submitting && styles.submitDisabled,
+                (submitting || uploading) && styles.submitDisabled,
                 pressed && styles.pressed,
               ]}
             >
@@ -563,15 +750,75 @@ function ComposerSheet({
                 <Text style={styles.submitText}>Submit for review</Text>
               )}
             </Pressable>
-
-            <Text style={styles.formFootnote}>
-              Posts are reviewed by the City Vet team before they appear on the
-              public feed.
-            </Text>
-          </ScrollView>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
+  );
+}
+
+function FormSection({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <View style={styles.formSection}>
+      <View style={styles.formSectionHeading}>
+        <Text style={styles.formSectionLabel}>{label}</Text>
+        {hint ? <Text style={styles.formSectionHint}>{hint}</Text> : null}
+      </View>
+      <View style={styles.formSectionBody}>{children}</View>
+    </View>
+  );
+}
+
+function SegmentedGroup<T extends string>({
+  label,
+  options,
+  selected,
+  labelFor,
+  onSelect,
+}: {
+  label: string;
+  options: readonly T[];
+  selected: T;
+  labelFor: (value: T) => string;
+  onSelect: (value: T) => void;
+}) {
+  return (
+    <View style={styles.field}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={styles.segmented}>
+        {options.map((option) => {
+          const active = option === selected;
+          return (
+            <Pressable
+              key={option}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              onPress={() => onSelect(option)}
+              style={({ pressed }) => [
+                styles.segment,
+                active && styles.segmentActive,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text
+                style={[styles.segmentText, active && styles.segmentTextActive]}
+                numberOfLines={1}
+              >
+                {labelFor(option)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
   );
 }
 
@@ -619,15 +866,26 @@ function ChipGroup<T extends string>({
 
 function Field({
   label,
+  hint,
+  error,
+  required,
   children,
 }: {
   label: string;
+  hint?: string;
+  error?: string;
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <Text style={styles.fieldLabel}>
+        {label}
+        {required ? <Text style={styles.required}> *</Text> : null}
+      </Text>
       {children}
+      {hint ? <Text style={styles.fieldHint}>{hint}</Text> : null}
+      {error ? <Text style={styles.fieldError}>{error}</Text> : null}
     </View>
   );
 }
@@ -647,6 +905,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     paddingTop: 6,
     paddingBottom: 140,
+  },
+  headerWrap: {
+    width: "100%",
+    maxWidth: 560,
+    alignSelf: "center",
+    paddingHorizontal: 22,
+    paddingTop: 6,
   },
   header: {
     height: 64,
@@ -830,6 +1095,27 @@ const styles = StyleSheet.create({
     backgroundColor: Brand.forest,
     justifyContent: "flex-start",
   },
+  cardMediaImage: {
+    height: 176,
+  },
+  photoCount: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    height: 24,
+    paddingHorizontal: 9,
+    borderRadius: 999,
+    backgroundColor: "rgba(8,20,14,0.55)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoCountText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.9)",
+  },
   mediaFallback: {
     position: "absolute",
     top: 0,
@@ -982,6 +1268,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Brand.line,
   },
+  sheetHeadText: {
+    flex: 1,
+  },
   sheetEyebrow: {
     fontFamily: FontFamily.medium,
     fontSize: 9,
@@ -1013,19 +1302,101 @@ const styles = StyleSheet.create({
   },
   form: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingTop: 18,
+    paddingBottom: 26,
+    gap: 22,
+  },
+  formSection: {
+    gap: 12,
+  },
+  formSectionHeading: {
+    gap: 3,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: Brand.line,
+  },
+  formSectionLabel: {
+    fontFamily: FontFamily.medium,
+    fontSize: 12,
+    letterSpacing: 0.2,
+    color: Brand.ink,
+  },
+  formSectionHint: {
+    fontFamily: FontFamily.sans,
+    fontSize: 11,
+    lineHeight: 15,
+    color: Brand.ink55,
+  },
+  formSectionBody: {
     gap: 14,
+  },
+  photoGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  photoTile: {
+    width: "30%",
+    aspectRatio: 1,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: Brand.sand,
+    borderWidth: 1,
+    borderColor: Brand.line,
+  },
+  photoCover: {
+    position: "absolute",
+    left: 6,
+    bottom: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(8,20,14,0.62)",
+    paddingVertical: 2,
+    paddingHorizontal: 7,
+  },
+  photoCoverText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 8,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: Brand.paper,
+  },
+  photoRemove: {
+    position: "absolute",
+    top: 5,
+    right: 5,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "rgba(255,255,255,0.94)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  photoAdd: {
+    width: "30%",
+    aspectRatio: 1,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderStyle: "dashed",
+    borderColor: "rgba(31,122,77,0.4)",
+    backgroundColor: "rgba(47,143,99,0.06)",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 5,
+  },
+  photoAddText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    color: Brand.moss,
+  },
+  photoCounter: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: Brand.ink55,
   },
   field: {
     gap: 7,
-  },
-  fieldRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  fieldHalf: {
-    flex: 1,
   },
   fieldLabel: {
     fontFamily: FontFamily.medium,
@@ -1034,14 +1405,23 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Brand.ink55,
   },
+  required: {
+    color: "#B4462F",
+  },
   fieldHint: {
     fontFamily: FontFamily.sans,
     fontSize: 10.5,
     lineHeight: 15,
     color: Brand.ink55,
   },
+  fieldError: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10.5,
+    lineHeight: 15,
+    color: "#B4462F",
+  },
   input: {
-    minHeight: 44,
+    minHeight: 46,
     borderRadius: 13,
     borderWidth: 1,
     borderColor: Brand.line,
@@ -1049,11 +1429,47 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontFamily: FontFamily.sans,
-    fontSize: 13,
+    fontSize: 13.5,
     color: Brand.ink,
   },
+  inputError: {
+    borderColor: "rgba(180,70,47,0.55)",
+    backgroundColor: "rgba(180,70,47,0.04)",
+  },
+  inputFlex: {
+    flex: 1,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  inputWithSuffix: {
+    flexDirection: "row",
+    alignItems: "stretch",
+  },
+  inputSuffix: {
+    borderWidth: 1,
+    borderLeftWidth: 0,
+    borderColor: Brand.line,
+    borderTopRightRadius: 13,
+    borderBottomRightRadius: 13,
+    backgroundColor: Brand.paper2,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  inputSuffixText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10.5,
+    letterSpacing: 0.4,
+    color: Brand.ink55,
+  },
+  charCount: {
+    alignSelf: "flex-end",
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    color: Brand.ink55,
+  },
   textarea: {
-    minHeight: 110,
+    minHeight: 128,
   },
   chips: {
     flexDirection: "row",
@@ -1061,8 +1477,8 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   chip: {
-    height: 32,
-    paddingHorizontal: 12,
+    height: 34,
+    paddingHorizontal: 13,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: Brand.line,
@@ -1076,17 +1492,57 @@ const styles = StyleSheet.create({
   },
   chipText: {
     fontFamily: FontFamily.medium,
-    fontSize: 11,
+    fontSize: 11.5,
     color: Brand.ink70,
   },
   chipTextActive: {
     color: Brand.paper,
+  },
+  segmented: {
+    flexDirection: "row",
+    gap: 6,
+    padding: 4,
+    borderRadius: 14,
+    backgroundColor: "rgba(16,36,26,0.05)",
+  },
+  segment: {
+    flex: 1,
+    minHeight: 38,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  segmentActive: {
+    backgroundColor: Brand.paper,
+    shadowColor: "#10231A",
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  segmentText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 12,
+    color: Brand.ink55,
+  },
+  segmentTextActive: {
+    color: Brand.ink,
   },
   formError: {
     fontFamily: FontFamily.medium,
     fontSize: 11.5,
     lineHeight: 16,
     color: "#B4462F",
+  },
+  sheetFooter: {
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 24,
+    borderTopWidth: 1,
+    borderTopColor: Brand.line,
+    backgroundColor: Brand.paper,
   },
   submit: {
     height: 50,

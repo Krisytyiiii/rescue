@@ -5,13 +5,26 @@ import type {
 } from "@/domain/community";
 import type { SessionStorage } from "@/domain/ports";
 
-import { webUrl } from "./config";
+import { webUrl, API_BASE_URL } from "./config";
 import type { CommunityDataSource } from "./community";
-import { requestJson } from "./http";
+import { ApiError, requestJson } from "./http";
 
 function absoluteUrl(url: string | null): string | null {
   if (!url) return null;
   return url.startsWith("/") ? webUrl(url) : url;
+}
+
+function photoFile(uri: string): { name: string; type: string } {
+  const rawName = uri.split("?")[0].split("/").pop() || `photo-${Date.now()}.jpg`;
+  const extension = rawName.split(".").pop()?.toLowerCase();
+  const type =
+    extension === "png"
+      ? "image/png"
+      : extension === "webp"
+        ? "image/webp"
+        : "image/jpeg";
+  const name = /\.[a-z0-9]+$/i.test(rawName) ? rawName : `${rawName}.jpg`;
+  return { name, type };
 }
 
 function normalize(post: CommunityPost): CommunityPost {
@@ -57,14 +70,12 @@ export class HttpCommunityGateway implements CommunityDataSource {
         colorMarkings: input.colorMarkings,
         temperament: input.temperament,
         description: input.description,
-        media: input.photoUrl
-          ? [
-              {
-                mediaType: "photo" as const,
-                fileUrl: input.photoUrl,
-                sortOrder: 0,
-              },
-            ]
+        media: input.photoUrls?.length
+          ? input.photoUrls.map((fileUrl, sortOrder) => ({
+              mediaType: "photo" as const,
+              fileUrl,
+              sortOrder,
+            }))
           : undefined,
       },
       networkMessage: "Can't reach FuRescue. Check your connection.",
@@ -72,5 +83,47 @@ export class HttpCommunityGateway implements CommunityDataSource {
     });
 
     return normalize(post);
+  }
+
+  async uploadPhoto(uri: string): Promise<string> {
+    const token = (await this.session.read())?.token;
+    const file = photoFile(uri);
+
+    const form = new FormData();
+    form.append("file", {
+      uri,
+      name: file.name,
+      type: file.type,
+    } as unknown as Blob);
+
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}/api/community/uploads`, {
+        method: "POST",
+        headers: token ? { authorization: `Bearer ${token}` } : undefined,
+        body: form,
+      });
+    } catch {
+      throw new ApiError(
+        __DEV__
+          ? `Can't reach FuRescue. Check your connection. [${API_BASE_URL}/api/community/uploads]`
+          : "Can't reach FuRescue. Check your connection.",
+        "NETWORK_ERROR",
+      );
+    }
+
+    const envelope = (await response.json().catch(() => null)) as
+      | { ok: boolean; data?: { url?: string }; error?: { message?: string } }
+      | null;
+
+    if (!response.ok || !envelope?.ok || !envelope.data?.url) {
+      throw new ApiError(
+        envelope?.error?.message ?? "We couldn't upload that photo.",
+        "UPLOAD_FAILED",
+        response.status,
+      );
+    }
+
+    return envelope.data.url;
   }
 }

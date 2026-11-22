@@ -46,8 +46,28 @@ export async function requestJson<T>(
       headers,
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
     });
-  } catch {
-    throw new ApiError(options.networkMessage, "NETWORK_ERROR");
+  } catch (cause) {
+    if (__DEV__) {
+      const token = options.token;
+      console.warn(
+        `[api] ${options.method ?? "GET"} ${API_BASE_URL}${path} failed`,
+        {
+          error: cause instanceof Error ? `${cause.name}: ${cause.message}` : cause,
+          token: token
+            ? {
+                length: token.length,
+                jwtLike: /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(token),
+              }
+            : "none",
+        },
+      );
+    }
+    throw new ApiError(
+      __DEV__
+        ? `${options.networkMessage} [${API_BASE_URL}${path}]`
+        : options.networkMessage,
+      "NETWORK_ERROR",
+    );
   }
 
   const envelope = (await response.json().catch(() => null)) as Envelope<T> | null;
