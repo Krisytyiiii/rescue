@@ -125,10 +125,9 @@ export class AnimalsService {
    */
   async listCommunityFeed(actor?: Actor) {
     const current = requireActor(actor);
-    const items = await this.repo.listCommunityFeed(
-      current.userId,
-      !isStaff(current),
-    );
+    // Everyone sees published posts plus their own submissions, whatever their
+    // role, so authors can follow their post through review.
+    const items = await this.repo.listCommunityFeed(current.userId, true);
     return { items };
   }
 

@@ -205,52 +205,50 @@ export function CommunityFeedView() {
             </Pressable>
           ) : null}
 
-          {myPosts.length > 0 ? (
-            <View style={styles.scopeRow}>
-              {(["all", "mine"] as const).map((value) => {
-                const active = scope === value;
-                return (
-                  <Pressable
-                    key={value}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected: active }}
-                    onPress={() => setScope(value)}
-                    style={({ pressed }) => [
-                      styles.scopePill,
-                      active && styles.scopePillActive,
-                      pressed && styles.pressed,
+          <View style={styles.scopeRow}>
+            {(["all", "mine"] as const).map((value) => {
+              const active = scope === value;
+              return (
+                <Pressable
+                  key={value}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                  onPress={() => setScope(value)}
+                  style={({ pressed }) => [
+                    styles.scopePill,
+                    active && styles.scopePillActive,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.scopeText,
+                      active && styles.scopeTextActive,
                     ]}
                   >
-                    <Text
+                    {value === "all" ? "All posts" : "My posts"}
+                  </Text>
+                  {value === "mine" ? (
+                    <View
                       style={[
-                        styles.scopeText,
-                        active && styles.scopeTextActive,
+                        styles.scopeCount,
+                        active && styles.scopeCountActive,
                       ]}
                     >
-                      {value === "all" ? "All posts" : "My posts"}
-                    </Text>
-                    {value === "mine" ? (
-                      <View
+                      <Text
                         style={[
-                          styles.scopeCount,
-                          active && styles.scopeCountActive,
+                          styles.scopeCountText,
+                          active && styles.scopeCountTextActive,
                         ]}
                       >
-                        <Text
-                          style={[
-                            styles.scopeCountText,
-                            active && styles.scopeCountTextActive,
-                          ]}
-                        >
-                          {myPosts.length}
-                        </Text>
-                      </View>
-                    ) : null}
-                  </Pressable>
-                );
-              })}
-            </View>
-          ) : null}
+                        {myPosts.length}
+                      </Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </View>
 
           {error && posts.length === 0 ? (
             <View style={styles.errorCard}>
