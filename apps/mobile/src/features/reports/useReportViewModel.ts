@@ -117,6 +117,7 @@ export function useReportViewModel(
 
   return {
     coordinates,
+    setCoordinates,
     locating,
     locationError,
     retryLocation: locate,

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -10,6 +10,13 @@ import {
   TextInput,
   View,
 } from "react-native";
+import MapView, {
+  Marker,
+  UrlTile,
+  type MapPressEvent,
+  type MarkerDragStartEndEvent,
+  type Region,
+} from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CheckIcon, MapPinIcon, PawIcon } from "@/components/icons";
@@ -45,9 +52,21 @@ const URGENCY_OPTIONS: Array<{
   { value: "critical", label: "Critical", tone: "#B4462F" },
 ];
 
+/** Same tile source as the explore map, so Android works without a Maps key. */
+const TILE_URL =
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+
+const DEFAULT_REGION = {
+  latitude: 7.0731,
+  longitude: 125.6128,
+  latitudeDelta: 0.02,
+  longitudeDelta: 0.02,
+};
+
 export function ReportFormView() {
   const {
     coordinates,
+    setCoordinates,
     locating,
     locationError,
     retryLocation,
@@ -66,9 +85,38 @@ export function ReportFormView() {
   const [description, setDescription] = useState("");
   const [landmark, setLandmark] = useState("");
   const [barangayId, setBarangayId] = useState<number | undefined>();
+  const mapRef = useRef<MapView | null>(null);
 
   const descriptionReady = description.trim().length >= 10;
   const canSubmit = Boolean(coordinates) && descriptionReady && !submitting;
+
+  // Recenter once the device fixes its position (or the user retries).
+  useEffect(() => {
+    if (!coordinates) return;
+    mapRef.current?.animateToRegion(
+      {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: DEFAULT_REGION.latitudeDelta,
+        longitudeDelta: DEFAULT_REGION.longitudeDelta,
+      },
+      400,
+    );
+  }, [coordinates]);
+
+  const pinAt = (latitude: number, longitude: number) => {
+    setCoordinates({ latitude, longitude });
+  };
+
+  const handleMapPress = (event: MapPressEvent) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    pinAt(latitude, longitude);
+  };
+
+  const handleMarkerDrag = (event: MarkerDragStartEndEvent) => {
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    pinAt(latitude, longitude);
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) return;
@@ -181,6 +229,41 @@ export function ReportFormView() {
                   <Text style={styles.retryText}>Retry</Text>
                 </Pressable>
               ) : null}
+            </View>
+
+            <View style={styles.mapCard}>
+              <MapView
+                ref={mapRef}
+                style={styles.map}
+                initialRegion={{
+                  latitude: coordinates?.latitude ?? DEFAULT_REGION.latitude,
+                  longitude: coordinates?.longitude ?? DEFAULT_REGION.longitude,
+                  latitudeDelta: DEFAULT_REGION.latitudeDelta,
+                  longitudeDelta: DEFAULT_REGION.longitudeDelta,
+                }}
+                onPress={handleMapPress}
+                showsUserLocation
+                showsMyLocationButton={false}
+                toolbarEnabled={false}
+              >
+                <UrlTile
+                  urlTemplate={TILE_URL}
+                  maximumZ={19}
+                  flipY={false}
+                  shouldReplaceMapContent
+                />
+                {coordinates ? (
+                  <Marker
+                    coordinate={coordinates}
+                    draggable
+                    onDragEnd={handleMarkerDrag}
+                    pinColor={Brand.clay}
+                  />
+                ) : null}
+              </MapView>
+              <Text style={styles.mapHint}>
+                Tap the map or drag the pin to adjust the exact spot.
+              </Text>
             </View>
 
             <Field label="What did you see?">
@@ -488,6 +571,28 @@ const styles = StyleSheet.create({
     borderColor: Brand.line,
     backgroundColor: Brand.paper,
     padding: 14,
+  },
+  mapCard: {
+    marginTop: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    padding: 6,
+    overflow: "hidden",
+  },
+  map: {
+    height: 190,
+    borderRadius: 14,
+  },
+  mapHint: {
+    paddingHorizontal: 8,
+    paddingTop: 8,
+    paddingBottom: 2,
+    fontFamily: FontFamily.sans,
+    fontSize: 11,
+    lineHeight: 15,
+    color: Brand.ink55,
   },
   locationIcon: {
     width: 38,
