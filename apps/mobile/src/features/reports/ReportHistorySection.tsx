@@ -26,6 +26,10 @@ interface ReportHistorySectionProps {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  /** Hide the inline heading when the parent screen already has a title. */
+  showHeading?: boolean;
+  /** Start with every report visible instead of the three most recent. */
+  defaultExpanded?: boolean;
 }
 
 /**
@@ -37,18 +41,22 @@ export function ReportHistorySection({
   loading,
   error,
   onRetry,
+  showHeading = true,
+  defaultExpanded = false,
 }: ReportHistorySectionProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
   const visible = expanded ? reports : reports.slice(0, COLLAPSED_COUNT);
 
   return (
-    <View style={styles.section}>
-      <View style={styles.header}>
-        <Text style={styles.heading}>Your reports</Text>
-        {reports.length > 0 ? (
-          <Text style={styles.count}>{reports.length}</Text>
-        ) : null}
-      </View>
+    <View style={showHeading ? styles.section : styles.sectionPlain}>
+      {showHeading ? (
+        <View style={styles.header}>
+          <Text style={styles.heading}>Your reports</Text>
+          {reports.length > 0 ? (
+            <Text style={styles.count}>{reports.length}</Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {loading && reports.length === 0 ? (
         <View style={styles.statusCard}>
@@ -159,6 +167,7 @@ function ReportCard({ report }: { report: MyReport }) {
 
 const styles = StyleSheet.create({
   section: { marginTop: 24 },
+  sectionPlain: { marginTop: 12 },
   header: {
     flexDirection: "row",
     alignItems: "center",

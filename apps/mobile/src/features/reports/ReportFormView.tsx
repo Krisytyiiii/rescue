@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -7,7 +6,7 @@ import {
   type RefObject,
 } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { useFocusEffect } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import {
   ActivityIndicator,
   Image,
@@ -31,7 +30,14 @@ import MapView, {
 } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { CheckIcon, CloseIcon, ExpandIcon, MapPinIcon, PawIcon } from "@/components/icons";
+import {
+  ArrowUpRightIcon,
+  CheckIcon,
+  CloseIcon,
+  ExpandIcon,
+  MapPinIcon,
+  PawIcon,
+} from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   ReportSpecies,
@@ -40,8 +46,6 @@ import type {
 } from "@/domain/report-submission";
 import { MAX_REPORT_PHOTOS } from "@/domain/report-submission";
 
-import { ReportHistorySection } from "./ReportHistorySection";
-import { useReportHistoryViewModel } from "./useReportHistoryViewModel";
 import { useReportViewModel } from "./useReportViewModel";
 
 const REPORT_TYPE_OPTIONS: Array<{ value: ReportType; label: string; hint: string }> = [
@@ -128,6 +132,7 @@ function MapCanvas({
 }
 
 export function ReportFormView() {
+  const router = useRouter();
   const {
     coordinates,
     setCoordinates,
@@ -147,18 +152,7 @@ export function ReportFormView() {
     reset,
   } = useReportViewModel();
 
-  const {
-    reports: historyReports,
-    loading: historyLoading,
-    error: historyError,
-    reload: reloadHistory,
-  } = useReportHistoryViewModel();
-
-  useFocusEffect(
-    useCallback(() => {
-      void reloadHistory();
-    }, [reloadHistory]),
-  );
+  const openMyReports = () => router.push("/my-reports" as Href);
 
   const [reportType, setReportType] = useState<ReportType>("stray");
   const [species, setSpecies] = useState<ReportSpecies>("dog");
@@ -209,7 +203,7 @@ export function ReportFormView() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     setMapExpanded(false);
-    const result = await submit({
+    await submit({
       reportType,
       species,
       urgencyLevel: urgency,
@@ -218,7 +212,6 @@ export function ReportFormView() {
       locationLandmark: landmark.trim() || undefined,
       barangayId,
     });
-    if (result) void reloadHistory();
   };
 
   const handleAnother = () => {
@@ -281,6 +274,17 @@ export function ReportFormView() {
             >
               <Text style={styles.primaryText}>Report another animal</Text>
             </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={openMyReports}
+              style={({ pressed }) => [
+                styles.secondary,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.secondaryText}>View my reports</Text>
+              <ArrowUpRightIcon size={15} color={Brand.forest} />
+            </Pressable>
           </View>
         </SafeAreaView>
       </View>
@@ -309,12 +313,17 @@ export function ReportFormView() {
               City Vet and the rescue team.
             </Text>
 
-            <ReportHistorySection
-              reports={historyReports}
-              loading={historyLoading}
-              error={historyError}
-              onRetry={() => void reloadHistory()}
-            />
+            <Pressable
+              accessibilityRole="button"
+              onPress={openMyReports}
+              style={({ pressed }) => [
+                styles.myReports,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.myReportsText}>View my reports</Text>
+              <ArrowUpRightIcon size={14} color={Brand.forest} />
+            </Pressable>
 
             <View style={styles.locationCard}>
               <View style={styles.locationIcon}>
@@ -1129,6 +1138,39 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.medium,
     fontSize: 15,
     color: Brand.paper,
+  },
+  secondary: {
+    marginTop: 12,
+    height: 52,
+    borderRadius: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+    borderWidth: 1,
+    borderColor: Brand.lineStrong,
+    backgroundColor: Brand.paper,
+  },
+  secondaryText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    color: Brand.forest,
+  },
+  myReports: {
+    alignSelf: "flex-start",
+    marginTop: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: "rgba(31,122,77,0.10)",
+  },
+  myReportsText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 11.5,
+    color: Brand.forest,
   },
   pressed: { opacity: 0.7 },
   footnote: {
