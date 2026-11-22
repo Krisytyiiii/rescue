@@ -22,7 +22,24 @@ export const ANIMAL_LIFECYCLE_TRANSITIONS: Record<LifecycleStatus, readonly Life
 
 export const animalDetailInclude = {
   media: { orderBy: { sortOrder: "asc" } },
-  sourceReport: { select: { id: true, reportCode: true, status: true } },
+  sourceReport: {
+    select: {
+      id: true,
+      reportCode: true,
+      status: true,
+      statusHistory: {
+        orderBy: { changedAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          oldStatus: true,
+          newStatus: true,
+          remarks: true,
+          changedAt: true,
+        },
+      },
+    },
+  },
   postedBy: { select: { id: true, firstName: true, lastName: true } },
   healthRecords: { orderBy: { recordDate: "desc" }, take: 10 },
   vaccinations: { orderBy: { dateGiven: "desc" }, take: 10 },

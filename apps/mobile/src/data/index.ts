@@ -1,6 +1,7 @@
 import type { AuthRepository } from "@/domain/ports";
 import type { RescuerAssignmentRepository } from "@/domain/rescuer";
 
+import { HttpAnimalsGateway } from "./animals-gateway";
 import { HttpAuthGateway } from "./auth-gateway";
 import { DefaultAuthRepository } from "./auth-repository";
 import { ExpoGoogleAuthBrowser } from "./google-browser";
@@ -9,6 +10,7 @@ import { HttpReportMapDataSource } from "./report-map-gateway";
 import { HttpRescuerGateway } from "./rescuer-gateway";
 import { SecureSessionStorage } from "./session-storage";
 
+import type { AnimalsDataSource } from "./animals";
 import type { ReportMapDataSource } from "./report-map";
 import type { RescuerHistoryDataSource } from "./rescuer-history";
 import type { RescuerHomeDataSource } from "./rescuer-home";
@@ -20,6 +22,7 @@ import type { RescuerQueueDataSource } from "./rescuer-queue";
  */
 const sessionStorage = new SecureSessionStorage();
 const httpRescuerGateway = new HttpRescuerGateway(sessionStorage);
+const httpAnimalsGateway = new HttpAnimalsGateway(sessionStorage);
 const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
 const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
 
@@ -54,6 +57,9 @@ export const rescuerHistoryDataSource: RescuerHistoryDataSource =
 export const rescuerAssignmentRepository: RescuerAssignmentRepository =
   httpRescuerGateway;
 
+/** Read-only animal records shown in the rescuer Animals screen. */
+export const animalsDataSource: AnimalsDataSource = httpAnimalsGateway;
+
 /** Direct messages from a rescuer to their dispatcher or a reporter. */
 export const messagingDataSource = httpMessagingGateway;
 
@@ -62,6 +68,7 @@ export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
+export type { AnimalsDataSource } from "./animals";
 export type { ReportMapDataSource } from "./report-map";
 export type { RescuerHomeDataSource } from "./rescuer-home";
 export type { RescuerQueueDataSource } from "./rescuer-queue";
