@@ -89,23 +89,36 @@ export function postStatus(post: CommunityPost): {
   background: string;
   ink: string;
 } {
-  if (post.listingStatus === "published") {
-    return {
-      label: "Open for adoption",
-      background: "rgba(255,255,255,0.94)",
-      ink: "#16603B",
-    };
+  switch (post.listingStatus) {
+    case "published":
+      return {
+        label: "Posted",
+        background: "rgba(255,255,255,0.94)",
+        ink: "#16603B",
+      };
+    case "rejected":
+      return {
+        label: "Not approved",
+        background: "rgba(255,255,255,0.94)",
+        ink: "#B4462F",
+      };
+    case "draft":
+      return {
+        label: "Draft",
+        background: "rgba(255,255,255,0.94)",
+        ink: "#5C5C5C",
+      };
+    case "archived":
+      return {
+        label: "Archived",
+        background: "rgba(255,255,255,0.94)",
+        ink: "#5C5C5C",
+      };
+    default:
+      return {
+        label: "Pending review",
+        background: "rgba(255,255,255,0.94)",
+        ink: "#9A4A0D",
+      };
   }
-  if (post.listingStatus === "rejected") {
-    return {
-      label: "Not approved",
-      background: "rgba(255,255,255,0.94)",
-      ink: "#B4462F",
-    };
-  }
-  return {
-    label: "Pending review",
-    background: "rgba(255,255,255,0.94)",
-    ink: "#9A4A0D",
-  };
 }

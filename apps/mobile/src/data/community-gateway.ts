@@ -87,6 +87,10 @@ export class HttpCommunityGateway implements CommunityDataSource {
     return normalize(post);
   }
 
+  async getCurrentUserId(): Promise<string | null> {
+    return (await this.session.read())?.user.id ?? null;
+  }
+
   async uploadPhoto(photo: CommunityPhotoUpload): Promise<string> {
     const token = (await this.session.read())?.token;
     const file = photoFile(photo);

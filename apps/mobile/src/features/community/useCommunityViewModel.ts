@@ -20,6 +20,7 @@ export function useCommunityViewModel({
   data = communityDataSource,
 }: CommunityOptions = {}) {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -30,6 +31,21 @@ export function useCommunityViewModel({
     const items = await data.loadFeed();
     setPosts(items);
     setError(null);
+  }, [data]);
+
+  useEffect(() => {
+    let active = true;
+
+    data
+      .getCurrentUserId()
+      .then((id) => {
+        if (active) setCurrentUserId(id);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      active = false;
+    };
   }, [data]);
 
   useEffect(() => {
@@ -102,6 +118,7 @@ export function useCommunityViewModel({
 
   return {
     posts,
+    currentUserId,
     loading,
     error,
     reload,

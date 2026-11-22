@@ -82,10 +82,13 @@ const BREED_OPTIONS: CommunityBreed[] = ["aspin", "puspin", "mixed", "other"];
 const SEX_OPTIONS: CommunitySex[] = ["male", "female", "unknown"];
 const SIZE_OPTIONS: CommunitySize[] = ["small", "medium", "large"];
 
+type FeedScope = "all" | "mine";
+
 export function CommunityFeedView() {
   const router = useRouter();
   const {
     posts,
+    currentUserId,
     loading,
     error,
     reload,
@@ -99,12 +102,19 @@ export function CommunityFeedView() {
 
   const [composerOpen, setComposerOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [scope, setScope] = useState<FeedScope>("all");
+
+  const isOwn = (post: CommunityPost) =>
+    Boolean(currentUserId && post.postedBy?.id === currentUserId);
+  const myPosts = currentUserId ? posts.filter(isOwn) : [];
+  const visiblePosts = scope === "mine" ? myPosts : posts;
 
   const handleSubmit = useCallback(
     async (input: NewCommunityPost) => {
       const created = await submit(input);
       if (created) {
         setComposerOpen(false);
+        setScope("mine");
       }
       return created;
     },
@@ -195,6 +205,53 @@ export function CommunityFeedView() {
             </Pressable>
           ) : null}
 
+          {myPosts.length > 0 ? (
+            <View style={styles.scopeRow}>
+              {(["all", "mine"] as const).map((value) => {
+                const active = scope === value;
+                return (
+                  <Pressable
+                    key={value}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                    onPress={() => setScope(value)}
+                    style={({ pressed }) => [
+                      styles.scopePill,
+                      active && styles.scopePillActive,
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.scopeText,
+                        active && styles.scopeTextActive,
+                      ]}
+                    >
+                      {value === "all" ? "All posts" : "My posts"}
+                    </Text>
+                    {value === "mine" ? (
+                      <View
+                        style={[
+                          styles.scopeCount,
+                          active && styles.scopeCountActive,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.scopeCountText,
+                            active && styles.scopeCountTextActive,
+                          ]}
+                        >
+                          {myPosts.length}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
+
           {error && posts.length === 0 ? (
             <View style={styles.errorCard}>
               <Text style={styles.errorText}>{error}</Text>
@@ -214,18 +271,21 @@ export function CommunityFeedView() {
                 <FeedSkeleton key={index} />
               ))}
             </View>
-          ) : posts.length === 0 ? (
+          ) : visiblePosts.length === 0 ? (
             <View style={styles.emptyCard}>
-              <Text style={styles.emptyTitle}>No adoption posts yet</Text>
+              <Text style={styles.emptyTitle}>
+                {scope === "mine" ? "You haven't posted yet" : "No adoption posts yet"}
+              </Text>
               <Text style={styles.emptyBody}>
-                Be the first to help an animal find a home. Post one above and
-                the City Vet team will review it.
+                {scope === "mine"
+                  ? "Post an animal above and your submission will show up here with its review status."
+                  : "Be the first to help an animal find a home. Post one above and the City Vet team will review it."}
               </Text>
             </View>
           ) : (
             <View style={styles.feed}>
-              {posts.map((post) => (
-                <FeedCard key={post.id} post={post} />
+              {visiblePosts.map((post) => (
+                <FeedCard key={post.id} post={post} isOwn={isOwn(post)} />
               ))}
             </View>
           )}
@@ -260,7 +320,7 @@ function FeedSkeleton() {
   );
 }
 
-function FeedCard({ post }: { post: CommunityPost }) {
+function FeedCard({ post, isOwn }: { post: CommunityPost; isOwn: boolean }) {
   const photos = postPhotos(post);
   const status = postStatus(post);
   const { width } = useWindowDimensions();
@@ -345,14 +405,33 @@ function FeedCard({ post }: { post: CommunityPost }) {
         ) : null}
 
         <View style={styles.cardFooter}>
+          {isOwn ? (
+            <View style={styles.ownBadge}>
+              <Text style={styles.ownBadgeText}>Your post</Text>
+            </View>
+          ) : null}
           <Text style={styles.cardAuthor} numberOfLines={1}>
-            Posted by {postAuthor(post.postedBy)}
+            Posted by {isOwn ? "you" : postAuthor(post.postedBy)}
           </Text>
           <Text style={styles.cardDate}>{formatDate(post.createdAt)}</Text>
         </View>
+
+        {isOwn && post.listingStatus !== "published" ? (
+          <Text style={styles.ownNote}>{ownPostNote(post)}</Text>
+        ) : null}
       </View>
     </View>
   );
+}
+
+function ownPostNote(post: CommunityPost): string {
+  if (post.listingStatus === "rejected") {
+    return "This post was not approved and is only visible to you.";
+  }
+  if (post.listingStatus === "archived") {
+    return "This post is archived and is no longer shown to others.";
+  }
+  return "Only you can see this until the City Vet team approves it.";
 }
 
 type FormErrors = Partial<Record<"name" | "age" | "description", string>>;
@@ -1043,6 +1122,55 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: Brand.moss,
   },
+  scopeRow: {
+    marginTop: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  scopePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    height: 32,
+    paddingHorizontal: 13,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+  },
+  scopePillActive: {
+    borderColor: Brand.forest,
+    backgroundColor: Brand.forest,
+  },
+  scopeText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 11,
+    color: Brand.ink70,
+  },
+  scopeTextActive: {
+    color: Brand.paper,
+  },
+  scopeCount: {
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 5,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(16,36,26,0.07)",
+  },
+  scopeCountActive: {
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  scopeCountText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 9.5,
+    color: Brand.ink70,
+  },
+  scopeCountTextActive: {
+    color: Brand.paper,
+  },
   errorCard: {
     marginTop: 12,
     borderRadius: 16,
@@ -1225,6 +1353,28 @@ const styles = StyleSheet.create({
   cardDate: {
     fontFamily: FontFamily.medium,
     fontSize: 10,
+    color: Brand.ink55,
+  },
+  ownBadge: {
+    height: 20,
+    paddingHorizontal: 8,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(47,143,99,0.12)",
+  },
+  ownBadgeText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    color: Brand.moss,
+  },
+  ownNote: {
+    marginTop: 8,
+    fontFamily: FontFamily.sans,
+    fontSize: 11,
+    lineHeight: 16,
     color: Brand.ink55,
   },
   emptyCard: {
