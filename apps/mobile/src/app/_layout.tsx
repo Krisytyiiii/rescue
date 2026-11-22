@@ -64,7 +64,7 @@ export default function RootLayout() {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
-          name="my-reports"
+          name="send-report"
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen

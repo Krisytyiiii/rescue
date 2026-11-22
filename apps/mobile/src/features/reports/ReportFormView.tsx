@@ -6,7 +6,7 @@ import {
   type RefObject,
 } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter, type Href } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
   Image,
@@ -33,6 +33,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import {
   ArrowUpRightIcon,
   CheckIcon,
+  ChevronLeftIcon,
   CloseIcon,
   ExpandIcon,
   MapPinIcon,
@@ -154,7 +155,13 @@ export function ReportFormView() {
     reset,
   } = useReportViewModel();
 
-  const openMyReports = () => router.push("/my-reports" as Href);
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace("/");
+  };
 
   const [reportType, setReportType] = useState<ReportType>("stray");
   const [species, setSpecies] = useState<ReportSpecies>("dog");
@@ -278,7 +285,7 @@ export function ReportFormView() {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={openMyReports}
+              onPress={goBack}
               style={({ pressed }) => [
                 styles.secondary,
                 pressed && styles.pressed,
@@ -305,7 +312,21 @@ export function ReportFormView() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <Text style={styles.eyebrow}>Report</Text>
+            <View style={styles.formHead}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Back to my reports"
+                onPress={goBack}
+                style={({ pressed }) => [
+                  styles.back,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <ChevronLeftIcon size={18} color={Brand.ink} />
+              </Pressable>
+              <Text style={styles.formHeadLabel}>New report</Text>
+            </View>
+
             <Text style={styles.title}>
               Seen an animal{"\n"}
               <Text style={styles.titleAccent}>in need?</Text>
@@ -314,18 +335,6 @@ export function ReportFormView() {
               Send the location and what you saw. A verified report reaches the
               City Vet and the rescue team.
             </Text>
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={openMyReports}
-              style={({ pressed }) => [
-                styles.myReports,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={styles.myReportsText}>View my reports</Text>
-              <ArrowUpRightIcon size={14} color={Brand.forest} />
-            </Pressable>
 
             <View style={styles.locationCard}>
               <View style={styles.locationIcon}>
@@ -788,6 +797,27 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Brand.clay,
   },
+  formHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 14,
+  },
+  back: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(16,36,26,0.05)",
+  },
+  formHeadLabel: {
+    fontFamily: FontFamily.medium,
+    fontSize: 10,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+    color: Brand.clay,
+  },
   title: {
     marginTop: 10,
     fontFamily: FontFamily.display,
@@ -1164,22 +1194,6 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontFamily: FontFamily.medium,
     fontSize: 14,
-    color: Brand.forest,
-  },
-  myReports: {
-    alignSelf: "flex-end",
-    marginTop: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
-    backgroundColor: "rgba(31,122,77,0.10)",
-  },
-  myReportsText: {
-    fontFamily: FontFamily.medium,
-    fontSize: 11.5,
     color: Brand.forest,
   },
   pressed: { opacity: 0.7 },

@@ -1,4 +1,4 @@
-import { useFocusEffect, useRouter } from "expo-router";
+import { useFocusEffect, useRouter, type Href } from "expo-router";
 import { useCallback } from "react";
 import {
   Pressable,
@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChevronLeftIcon } from "@/components/icons";
+import { ChevronLeftIcon, PlusCircleIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { ReportHistorySection } from "./ReportHistorySection";
@@ -19,7 +19,7 @@ import { useReportHistoryViewModel } from "./useReportHistoryViewModel";
  * Dedicated screen for the resident's report history. Kept separate from the
  * send-report form so following up on cases never competes with reporting.
  */
-export function MyReportsView() {
+export function MyReportsView({ showBack = true }: { showBack?: boolean }) {
   const router = useRouter();
   const { reports, loading, error, reload } = useReportHistoryViewModel();
 
@@ -32,22 +32,38 @@ export function MyReportsView() {
   const subtitle =
     reports.length === 1 ? "1 report" : `${reports.length} reports`;
 
+  const openReportForm = () => router.push("/send-report" as Href);
+
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
         <View style={styles.header}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-          >
-            <ChevronLeftIcon size={18} color={Brand.ink} />
-          </Pressable>
+          {showBack ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+              onPress={() => router.back()}
+              style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+            >
+              <ChevronLeftIcon size={18} color={Brand.ink} />
+            </Pressable>
+          ) : null}
           <View style={styles.headerTitles}>
             <Text style={styles.eyebrow}>Report</Text>
             <Text style={styles.title}>My reports</Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Send a new report"
+            onPress={openReportForm}
+            style={({ pressed }) => [
+              styles.newReport,
+              pressed && styles.pressed,
+            ]}
+          >
+            <PlusCircleIcon size={15} color={Brand.paper} />
+            <Text style={styles.newReportText}>New</Text>
+          </Pressable>
         </View>
 
         <ScrollView
@@ -97,6 +113,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitles: { flex: 1 },
+  newReport: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    height: 34,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    backgroundColor: Brand.forest,
+  },
+  newReportText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 11.5,
+    color: Brand.paper,
+  },
   eyebrow: {
     fontFamily: FontFamily.medium,
     fontSize: 10,
@@ -118,7 +148,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     paddingHorizontal: 22,
     paddingTop: 8,
-    paddingBottom: 40,
+    paddingBottom: 140,
   },
   intro: {
     fontFamily: FontFamily.sans,

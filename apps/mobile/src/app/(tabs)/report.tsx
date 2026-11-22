@@ -1,5 +1,5 @@
-import { ReportFormView } from "@/features/reports/ReportFormView";
+import { MyReportsView } from "@/features/reports/MyReportsView";
 
 export default function ReportScreen() {
-  return <ReportFormView />;
+  return <MyReportsView showBack={false} />;
 }
