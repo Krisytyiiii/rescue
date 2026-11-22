@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { PawMark, Wordmark } from "@/components/brand";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useOnboardingViewModel } from "@/features/auth/useOnboardingViewModel";
+import { useOnboardingSnapshot } from "@/features/onboarding/useOnboardingSnapshot";
 
 const heroPuppy = require("@/assets/images/onboarding/hero-puppy.jpg");
 const heroCat = require("@/assets/images/onboarding/hero-cat.jpg");
@@ -56,17 +57,40 @@ const SLIDES: Slide[] = [
   },
 ];
 
-const TIMELINE = [
-  { label: "Report submitted", time: "7:42 AM" },
-  { label: "Verified by the City Vet", time: "7:58 AM" },
-  { label: "Rescuer on the way", time: "8:06 AM" },
-];
+const STATUS_LABELS: Record<string, string> = {
+  submitted: "Report submitted",
+  verified: "Verified by the City Vet",
+  assigned: "Rescuer assigned",
+  in_progress: "Rescue in progress",
+  rescued: "Animal rescued",
+  unable_to_locate: "Unable to locate",
+  rejected: "Report rejected",
+  closed: "Case closed",
+};
 
-const IMPACT = [
-  { value: "1,284", label: "Animals rescued" },
-  { value: "916", label: "Found families" },
-  { value: "46", label: "Foster homes" },
-];
+function statusLabel(status: string): string {
+  return (
+    STATUS_LABELS[status] ??
+    status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())
+  );
+}
+
+function titleCase(value: string): string {
+  return value.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatCount(value: number | undefined): string {
+  return value === undefined ? "—" : value.toLocaleString("en-US");
+}
+
+function formatTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const hour12 = hours % 12 || 12;
+  return `${hour12}:${minutes} ${hours >= 12 ? "PM" : "AM"}`;
+}
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -76,6 +100,21 @@ export default function OnboardingScreen() {
   const { checkingSession } = useOnboardingViewModel(() =>
     router.replace("/"),
   );
+  const { snapshot } = useOnboardingSnapshot();
+
+  const stats = snapshot?.stats;
+  const report = snapshot?.latestReport;
+  const timeline = report
+    ? (report.steps.length
+        ? report.steps
+        : [{ status: "submitted", at: report.submittedAt }]
+      ).slice(-3)
+    : [];
+  const impact = [
+    { value: formatCount(stats?.rescued), label: "Animals rescued" },
+    { value: formatCount(stats?.adopted), label: "Found families" },
+    { value: formatCount(stats?.inCare), label: "In care now" },
+  ];
 
   const short = height < 760;
   const displaySize = height < 700 ? 33 : short ? 36 : 42;
@@ -176,8 +215,13 @@ export default function OnboardingScreen() {
                         accessibilityLabel="A rescued puppy on its first walk"
                       />
                       <View style={styles.captionRow}>
-                        <Text style={styles.caption}>Dahican · 7:42 AM</Text>
-                        <Text style={styles.caption}>First walk</Text>
+                        <Text style={styles.caption}>
+                          {report?.barangay ?? "Mati City"}
+                          {report ? ` · ${formatTime(report.submittedAt)}` : ""}
+                        </Text>
+                        <Text style={styles.caption}>
+                          {stats ? `${formatCount(stats.available)} ready` : "Rescued"}
+                        </Text>
                       </View>
                     </View>
 
@@ -188,7 +232,7 @@ export default function OnboardingScreen() {
                           short && styles.homesValueShort,
                         ]}
                       >
-                        916
+                        {formatCount(stats?.adopted)}
                       </Text>
                       <Text style={styles.homesLabel}>Homes{"\n"}found</Text>
                     </View>
@@ -198,46 +242,70 @@ export default function OnboardingScreen() {
                 {item.visual === "dispatch" && (
                   <View style={styles.dispatchWrap}>
                     <View style={styles.mockCard}>
-                      <View>
-                        <View style={styles.mockHeader}>
-                          <Text style={styles.monoLabel}>RPT-2026-00042</Text>
-                          <View style={styles.chip}>
-                            <View style={styles.chipDot} />
-                            <Text style={styles.chipText}>In progress</Text>
-                          </View>
-                        </View>
-                        <Text style={[styles.mockTitle, short && styles.mockTitleShort]}>
-                          Injured stray near Dahican beach
-                        </Text>
-                        <Text style={styles.mockMeta}>
-                          Dog · High urgency · Dahican
-                        </Text>
-                      </View>
-
-                      {!short && (
-                        <View style={styles.timeline}>
-                          {TIMELINE.map((entry, position) => (
-                            <View key={entry.label} style={styles.timelineRow}>
-                              <View style={styles.timelineRail}>
-                                <View
-                                  style={[
-                                    styles.timelineDot,
-                                    position === TIMELINE.length - 1 &&
-                                      styles.timelineDotActive,
-                                  ]}
-                                />
-                                {position < TIMELINE.length - 1 && (
-                                  <View style={styles.timelineLine} />
-                                )}
+                      {report ? (
+                        <>
+                          <View>
+                            <View style={styles.mockHeader}>
+                              <Text style={styles.monoLabel}>{report.code}</Text>
+                              <View style={styles.chip}>
+                                <View style={styles.chipDot} />
+                                <Text style={styles.chipText}>
+                                  {statusLabel(report.status)}
+                                </Text>
                               </View>
-                              <Text style={styles.timelineLabel}>
-                                {entry.label}
-                              </Text>
-                              <Text style={styles.timelineTime}>
-                                {entry.time}
-                              </Text>
                             </View>
-                          ))}
+                            <Text
+                              numberOfLines={2}
+                              style={[styles.mockTitle, short && styles.mockTitleShort]}
+                            >
+                              {report.title}
+                            </Text>
+                            <Text style={styles.mockMeta}>
+                              {titleCase(report.species)} · {titleCase(report.urgency)} urgency
+                              {report.barangay ? ` · ${report.barangay}` : ""}
+                            </Text>
+                          </View>
+
+                          {!short && timeline.length > 0 && (
+                            <View style={styles.timeline}>
+                              {timeline.map((entry, position) => (
+                                <View
+                                  key={`${entry.status}-${entry.at}`}
+                                  style={styles.timelineRow}
+                                >
+                                  <View style={styles.timelineRail}>
+                                    <View
+                                      style={[
+                                        styles.timelineDot,
+                                        position === timeline.length - 1 &&
+                                          styles.timelineDotActive,
+                                      ]}
+                                    />
+                                    {position < timeline.length - 1 && (
+                                      <View style={styles.timelineLine} />
+                                    )}
+                                  </View>
+                                  <Text style={styles.timelineLabel}>
+                                    {statusLabel(entry.status)}
+                                  </Text>
+                                  <Text style={styles.timelineTime}>
+                                    {formatTime(entry.at)}
+                                  </Text>
+                                </View>
+                              ))}
+                            </View>
+                          )}
+                        </>
+                      ) : (
+                        <View style={styles.emptyReport}>
+                          <Text style={styles.monoLabel}>Live dispatch</Text>
+                          <Text style={styles.mockTitle}>
+                            No active reports right now
+                          </Text>
+                          <Text style={styles.mockMeta}>
+                            New community reports appear here as soon as the City
+                            Vet verifies them.
+                          </Text>
                         </View>
                       )}
                     </View>
@@ -266,13 +334,15 @@ export default function OnboardingScreen() {
                       <View style={styles.adoptBadge}>
                         <View style={styles.liveDotLight} />
                         <Text style={styles.adoptBadgeText}>
-                          Ready for adoption
+                          {stats
+                            ? `${formatCount(stats.available)} ready for adoption`
+                            : "Ready for adoption"}
                         </Text>
                       </View>
                     </View>
 
                     <View style={styles.impact}>
-                      {IMPACT.map((stat, position) => (
+                      {impact.map((stat, position) => (
                         <View
                           key={stat.label}
                           style={[
@@ -546,6 +616,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 12,
+  },
+  emptyReport: {
+    flex: 1,
+    justifyContent: "center",
   },
   monoLabel: {
     fontFamily: FontFamily.medium,

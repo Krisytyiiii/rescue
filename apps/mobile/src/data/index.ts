@@ -8,6 +8,7 @@ import { DefaultAuthRepository } from "./auth-repository";
 import { HttpCommunityGateway } from "./community-gateway";
 import { ExpoGoogleAuthBrowser } from "./google-browser";
 import { HttpMessagingGateway } from "./messaging-gateway";
+import { HttpOnboardingGateway } from "./onboarding-gateway";
 import { HttpReportMapDataSource } from "./report-map-gateway";
 import { HttpRescuerGateway } from "./rescuer-gateway";
 import { SecureSessionStorage } from "./session-storage";
@@ -15,6 +16,7 @@ import { SecureSessionStorage } from "./session-storage";
 import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
+import type { OnboardingDataSource } from "./onboarding";
 import type { ReportMapDataSource } from "./report-map";
 import type { RescuerHistoryDataSource } from "./rescuer-history";
 import type { RescuerHomeDataSource } from "./rescuer-home";
@@ -31,6 +33,7 @@ const httpAdoptionsGateway = new HttpAdoptionsGateway(sessionStorage);
 const httpCommunityGateway = new HttpCommunityGateway(sessionStorage);
 const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
 const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
+const httpOnboardingGateway = new HttpOnboardingGateway();
 
 export const authRepository: AuthRepository = new DefaultAuthRepository(
   new HttpAuthGateway(),
@@ -78,11 +81,15 @@ export const messagingDataSource = httpMessagingGateway;
 /** Explore map markers: live report coordinates from `GET /api/reports/map`. */
 export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
+/** Intro slides: real impact counts and latest report from `GET /api/public/impact`. */
+export const onboardingDataSource: OnboardingDataSource = httpOnboardingGateway;
+
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
 export type { AdoptionsDataSource } from "./adoptions";
 export type { AnimalsDataSource } from "./animals";
 export type { CommunityDataSource } from "./community";
+export type { OnboardingDataSource } from "./onboarding";
 export type { ReportMapDataSource } from "./report-map";
 export type { RescuerHomeDataSource } from "./rescuer-home";
 export type { RescuerQueueDataSource } from "./rescuer-queue";
