@@ -29,6 +29,7 @@ import { Brand, FontFamily } from "@/constants/theme";
 import {
   MAX_COMMUNITY_PHOTOS,
   type CommunityBreed,
+  type CommunityPhotoUpload,
   type CommunityPost,
   type CommunitySex,
   type CommunitySize,
@@ -373,7 +374,7 @@ function ComposerSheet({
   onSubmit: (input: NewCommunityPost) => Promise<boolean>;
   onInvalid: (message: string) => void;
   onDismissError: () => void;
-  onUploadPhoto: (uri: string) => Promise<string>;
+  onUploadPhoto: (photo: CommunityPhotoUpload) => Promise<string>;
 }) {
   const [form, setForm] = useState<PostForm>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -434,7 +435,11 @@ function ComposerSheet({
     setUploading(true);
     try {
       for (const asset of result.assets.slice(0, remaining)) {
-        const url = await onUploadPhoto(asset.uri);
+        const url = await onUploadPhoto({
+          uri: asset.uri,
+          fileName: asset.fileName,
+          mimeType: asset.mimeType,
+        });
         setForm((current) =>
           current.photoUrls.length >= MAX_COMMUNITY_PHOTOS ||
           current.photoUrls.includes(url)

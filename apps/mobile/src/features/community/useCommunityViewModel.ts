@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import { communityDataSource } from "@/data";
 import type { CommunityDataSource } from "@/data";
-import type { CommunityPost, NewCommunityPost } from "@/domain/community";
+import type {
+  CommunityPhotoUpload,
+  CommunityPost,
+  NewCommunityPost,
+} from "@/domain/community";
 
 interface CommunityOptions {
   data?: CommunityDataSource;
@@ -62,8 +66,8 @@ export function useCommunityViewModel({
   const clearNotice = useCallback(() => setNotice(null), []);
 
   const uploadPhoto = useCallback(
-    async (uri: string): Promise<string> => {
-      return data.uploadPhoto(uri);
+    async (photo: CommunityPhotoUpload): Promise<string> => {
+      return data.uploadPhoto(photo);
     },
     [data],
   );

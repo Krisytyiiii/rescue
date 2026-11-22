@@ -41,3 +41,10 @@ export interface NewCommunityPost {
 
 /** Maximum number of photos a resident can attach to one adoption post. */
 export const MAX_COMMUNITY_PHOTOS = 4;
+
+/** A local photo selected on the device, before it is uploaded. */
+export interface CommunityPhotoUpload {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+}

@@ -1,9 +1,12 @@
 import type {
   CommunityFeed,
+  CommunityPhotoUpload,
   CommunityPost,
   NewCommunityPost,
 } from "@/domain/community";
 import type { SessionStorage } from "@/domain/ports";
+import { File as ExpoFile } from "expo-file-system";
+import { Platform } from "react-native";
 
 import { webUrl, API_BASE_URL } from "./config";
 import type { CommunityDataSource } from "./community";
@@ -14,16 +17,15 @@ function absoluteUrl(url: string | null): string | null {
   return url.startsWith("/") ? webUrl(url) : url;
 }
 
-function photoFile(uri: string): { name: string; type: string } {
-  const rawName = uri.split("?")[0].split("/").pop() || `photo-${Date.now()}.jpg`;
-  const extension = rawName.split(".").pop()?.toLowerCase();
-  const type =
-    extension === "png"
-      ? "image/png"
-      : extension === "webp"
-        ? "image/webp"
-        : "image/jpeg";
-  const name = /\.[a-z0-9]+$/i.test(rawName) ? rawName : `${rawName}.jpg`;
+function photoFile(photo: CommunityPhotoUpload): { name: string; type: string } {
+  const supported = ["image/jpeg", "image/png", "image/webp"] as const;
+  const type = supported.includes(photo.mimeType as (typeof supported)[number])
+    ? (photo.mimeType as string)
+    : "image/jpeg";
+  const extension = type === "image/png" ? "png" : type === "image/webp" ? "webp" : "jpg";
+
+  const base = photo.fileName?.replace(/[^a-zA-Z0-9._-]/g, "_") || `photo.${extension}`;
+  const name = /\.[a-z0-9]+$/i.test(base) ? base : `${base}.${extension}`;
   return { name, type };
 }
 
@@ -85,16 +87,33 @@ export class HttpCommunityGateway implements CommunityDataSource {
     return normalize(post);
   }
 
-  async uploadPhoto(uri: string): Promise<string> {
+  async uploadPhoto(photo: CommunityPhotoUpload): Promise<string> {
     const token = (await this.session.read())?.token;
-    const file = photoFile(uri);
+    const file = photoFile(photo);
 
     const form = new FormData();
-    form.append("file", {
-      uri,
-      name: file.name,
-      type: file.type,
-    } as unknown as Blob);
+
+    if (Platform.OS === "web") {
+      const blob = await fetch(photo.uri)
+        .then((response) => {
+          if (!response.ok) throw new Error("Could not read the selected photo.");
+          return response.blob();
+        })
+        .catch(() => {
+          throw new ApiError("We couldn't read that photo. Try choosing it again.", "UPLOAD_FAILED");
+        });
+      form.append("file", blob, file.name);
+    } else {
+      const blob = await Promise.resolve()
+        .then(() => {
+          const nativeFile = new ExpoFile(photo.uri);
+          return nativeFile.slice(0, nativeFile.size, file.type);
+        })
+        .catch(() => {
+          throw new ApiError("We couldn't read that photo. Try choosing it again.", "UPLOAD_FAILED");
+        });
+      form.append("file", blob, file.name);
+    }
 
     let response: Response;
     try {
@@ -103,11 +122,14 @@ export class HttpCommunityGateway implements CommunityDataSource {
         headers: token ? { authorization: `Bearer ${token}` } : undefined,
         body: form,
       });
-    } catch {
+    } catch (cause) {
+      if (__DEV__) {
+        console.warn("[api] POST /api/community/uploads failed", cause);
+      }
+      const detail =
+        __DEV__ && cause instanceof Error ? ` (${cause.message})` : "";
       throw new ApiError(
-        __DEV__
-          ? `Can't reach FuRescue. Check your connection. [${API_BASE_URL}/api/community/uploads]`
-          : "Can't reach FuRescue. Check your connection.",
+        `${__DEV__ ? `Can't reach FuRescue. Check your connection. [${API_BASE_URL}/api/community/uploads]` : "Can't reach FuRescue. Check your connection."}${detail}`,
         "NETWORK_ERROR",
       );
     }

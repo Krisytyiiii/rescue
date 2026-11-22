@@ -1,4 +1,5 @@
 import type {
+  CommunityPhotoUpload,
   CommunityPost,
   NewCommunityPost,
 } from "@/domain/community";
@@ -8,5 +9,5 @@ export interface CommunityDataSource {
   loadFeed(): Promise<CommunityPost[]>;
   createPost(input: NewCommunityPost): Promise<CommunityPost>;
   /** Uploads one local photo and returns its public URL. */
-  uploadPhoto(uri: string): Promise<string>;
+  uploadPhoto(photo: CommunityPhotoUpload): Promise<string>;
 }
