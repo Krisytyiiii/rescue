@@ -108,7 +108,7 @@ export function ResidentProfileView() {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel="Open my reports"
-            onPress={() => router.push("/reports" as Href)}
+            onPress={() => router.push("/report" as Href)}
             style={({ pressed }) => [pressed && styles.pressed]}
           >
             <LinearGradient
@@ -214,7 +214,7 @@ export function ResidentProfileView() {
               label="My reports"
               hint="Every rescue report you have submitted"
               icon={<MapPinIcon size={17} color={Brand.clay} />}
-              onPress={() => router.push("/reports" as Href)}
+              onPress={() => router.push("/report" as Href)}
             />
             <ProfileLink
               label="My applications"
