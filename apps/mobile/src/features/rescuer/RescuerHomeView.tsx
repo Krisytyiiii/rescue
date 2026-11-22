@@ -1,17 +1,28 @@
+import { GlassView } from "expo-glass-effect";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect, useRouter, type Href } from "expo-router";
 import type { ReactNode } from "react";
 import { useCallback } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  type ViewStyle,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   ArrowUpRightIcon,
   BellIcon,
+  ChartIcon,
   ChatIcon,
   CompassIcon,
   CheckIcon,
-  MapPinIcon,
+  HomeIcon,
+  PawIcon,
 } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
@@ -19,6 +30,7 @@ import type {
   RescuerHomeState,
   UrgencyLevel,
 } from "@/domain/rescuer";
+import type { RescuerReportSummary } from "@/domain/rescuer-reports";
 
 import {
   ACTION_LABEL,
@@ -31,9 +43,17 @@ import {
 } from "./presentation";
 import { useRescuerHomeViewModel } from "./useRescuerHomeViewModel";
 
+const WEB_BLUR =
+  Platform.OS === "web"
+    ? ({
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+      } as ViewStyle)
+    : null;
+
 export function RescuerHomeView() {
   const router = useRouter();
-  const { home, loading, error, reload } = useRescuerHomeViewModel();
+  const { home, reports, loading, error, reload } = useRescuerHomeViewModel();
 
   useFocusEffect(
     useCallback(() => {
@@ -78,6 +98,13 @@ export function RescuerHomeView() {
             <>
               <ShiftBanner home={home} onOpen={openAssignment} />
 
+              {home.pendingOffers.length > 0 ? (
+                <DecisionBanner
+                  offers={home.pendingOffers}
+                  onOpen={openAssignment}
+                />
+              ) : null}
+
               <AssignmentSection
                 title="Pending offers"
                 meta="Needs a response"
@@ -107,33 +134,52 @@ export function RescuerHomeView() {
               />
 
               {home.stats.assigned === 0 ? (
-                <View style={styles.emptyCard}>
-                  <Text style={styles.emptyTitle}>No assignments yet</Text>
-                  <Text style={styles.emptyBody}>
-                    The dispatch team will send rescues here. Verified reports
-                    waiting for dispatch: {home.queueCount}.
-                  </Text>
-                </View>
+                <>
+                  <View style={styles.emptyCard}>
+                    <Text style={styles.emptyTitle}>No assignments yet</Text>
+                    <Text style={styles.emptyBody}>
+                      The dispatch team will send rescues here. Verified reports
+                      waiting for dispatch: {home.queueCount}.
+                    </Text>
+                  </View>
+                  {reports ? (
+                    <ReportBanner
+                      reports={reports}
+                      onOpen={() => router.push("/reports" as Href)}
+                    />
+                  ) : null}
+                </>
               ) : null}
 
-              <SectionHeader label="Quick actions" meta="Field tools" />
-              <View style={styles.actionsRow}>
+              <SectionHeader label="Quick actions" meta="Discover" />
+              <View style={styles.actionsGrid}>
                 <QuickActionCard
-                  label="Map"
+                  label="Explore map"
                   hint="Nearby reports"
-                  icon={<CompassIcon size={16} color={Brand.clay} />}
+                  tint={Brand.clay}
+                  icon={<CompassIcon size={18} color={Brand.clay} />}
+                  onPress={() => router.push("/explore-map" as Href)}
                 />
                 <QuickActionCard
-                  label="Assign"
-                  hint={`${home.stats.assigned} assigned`}
-                  icon={<MapPinIcon size={16} color={Brand.clay} />}
-                  onPress={() => router.navigate("/queue" as Href)}
+                  label="Animals"
+                  hint="Rescued animals"
+                  tint="#6B4FC2"
+                  icon={<PawIcon size={18} color="#6B4FC2" />}
+                  onPress={() => router.push("/animals" as Href)}
                 />
                 <QuickActionCard
-                  label="History"
-                  hint="Past rescues"
-                  icon={<CheckIcon size={16} color={Brand.clay} />}
-                  onPress={() => router.navigate("/history" as Href)}
+                  label="Adoption"
+                  hint="Find a home"
+                  tint="#C4791B"
+                  icon={<HomeIcon size={18} color="#C4791B" />}
+                  onPress={() => router.push("/adoption" as Href)}
+                />
+                <QuickActionCard
+                  label="Community feed"
+                  hint="Stories & updates"
+                  tint="#3D7E9A"
+                  icon={<ChatIcon size={18} color="#3D7E9A" />}
+                  onPress={() => router.push("/community" as Href)}
                 />
               </View>
             </>
@@ -206,6 +252,116 @@ function ShiftBanner({
           You're all caught up. New offers will appear here.
         </Text>
       )}
+    </View>
+  );
+}
+
+function DecisionBanner({
+  offers,
+  onOpen,
+}: {
+  offers: RescuerAssignment[];
+  onOpen: (id: string) => void;
+}) {
+  const count = offers.length;
+  const first = offers[0];
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${count} offer${count === 1 ? "" : "s"} waiting for your decision`}
+      onPress={() => first && onOpen(first.id)}
+      style={({ pressed }) => [styles.decisionBanner, pressed && styles.pressed]}
+    >
+      <LinearGradient
+        colors={["rgba(242,178,100,0.26)", "rgba(255,255,255,0.62)"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
+      <View style={styles.decisionIcon}>
+        <BellIcon size={17} color="#A46412" />
+      </View>
+
+      <View style={styles.decisionBody}>
+        <Text style={styles.decisionTitle}>
+          {count === 1
+            ? "1 offer needs your decision"
+            : `${count} offers need your decision`}
+        </Text>
+        <Text style={styles.decisionText}>
+          Assigned to you — accept or decline so dispatch can plan the next
+          move.
+        </Text>
+      </View>
+
+      <ArrowUpRightIcon size={14} color="#A46412" />
+    </Pressable>
+  );
+}
+
+function ReportBanner({
+  reports,
+  onOpen,
+}: {
+  reports: RescuerReportSummary;
+  onOpen: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="Open all-time reports"
+      onPress={onOpen}
+      style={({ pressed }) => [
+        styles.reportBannerWrap,
+        pressed && styles.pressed,
+      ]}
+    >
+      <LinearGradient
+        colors={["#E7F4EB", "#D6EBDD"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.reportBanner}
+      >
+        <View style={styles.reportHead}>
+          <View style={styles.reportBadge}>
+            <ChartIcon size={14} color={Brand.moss} />
+          </View>
+          <View style={styles.reportTitleBlock}>
+            <Text style={styles.reportEyebrow}>Reports</Text>
+            <Text style={styles.reportTitle}>Your field record</Text>
+          </View>
+          <ArrowUpRightIcon size={16} color={Brand.moss} />
+        </View>
+
+        <View style={styles.reportStats}>
+          <ReportStat value={`${reports.totalCompleted}`} label="Completed" />
+          <View style={styles.reportDivider} />
+          <ReportStat
+            value={`${reports.thisMonthCompleted}`}
+            label="This month"
+          />
+          <View style={styles.reportDivider} />
+          <ReportStat value={`${reports.successRate}%`} label="Success" />
+        </View>
+
+        <View style={styles.reportCta}>
+          <Text style={styles.reportCtaText}>Open all-time reports</Text>
+          <Text style={styles.reportCtaHint}>
+            Outcomes, trends, species, urgency
+          </Text>
+        </View>
+      </LinearGradient>
+    </Pressable>
+  );
+}
+
+function ReportStat({ value, label }: { value: string; label: string }) {
+  return (
+    <View style={styles.reportStat}>
+      <Text style={styles.reportStatValue}>{value}</Text>
+      <Text style={styles.reportStatLabel}>{label}</Text>
     </View>
   );
 }
@@ -525,25 +681,64 @@ function QuickActionCard({
   label,
   hint,
   icon,
+  tint,
   onPress,
 }: {
   label: string;
   hint: string;
   icon: ReactNode;
+  tint: string;
   onPress?: () => void;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={`${label}. ${hint}`}
       onPress={onPress}
       style={({ pressed }) => [
-        styles.actionCard,
+        styles.actionCardWrap,
         pressed && styles.actionCardPressed,
       ]}
     >
-      <View style={styles.actionGlyph}>{icon}</View>
-      <Text style={styles.actionLabel}>{label}</Text>
-      <Text style={styles.actionHint}>{hint}</Text>
+      <GlassView
+        {...(Platform.OS === "ios"
+          ? {
+              glassEffectStyle: "regular" as const,
+              tintColor: "rgba(255,255,255,0.4)",
+            }
+          : {})}
+        style={[styles.actionCard, WEB_BLUR]}
+      >
+        <LinearGradient
+          colors={[`${tint}2E`, "rgba(255,255,255,0.42)", `${tint}12`]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+        <View
+          pointerEvents="none"
+          style={[styles.actionHighlight, { backgroundColor: `${tint}22` }]}
+        />
+
+        <View
+          style={[
+            styles.actionGlyph,
+            { backgroundColor: `${tint}16`, borderColor: `${tint}45` },
+          ]}
+        >
+          {icon}
+        </View>
+        <View style={styles.actionArrow}>
+          <ArrowUpRightIcon size={13} color={Brand.ink55} />
+        </View>
+
+        <Text style={styles.actionLabel} numberOfLines={2}>
+          {label}
+        </Text>
+        <Text style={styles.actionHint} numberOfLines={2}>
+          {hint}
+        </Text>
+      </GlassView>
     </Pressable>
   );
 }
@@ -740,6 +935,138 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 18,
     color: "rgba(255,255,255,0.6)",
+  },
+  decisionBanner: {
+    marginTop: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.9)",
+    backgroundColor: "rgba(255,255,255,0.5)",
+    padding: 13,
+    overflow: "hidden",
+    shadowColor: "#10231A",
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 2,
+  },
+  decisionIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(164,100,18,0.22)",
+    backgroundColor: "rgba(242,178,100,0.18)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  decisionBody: {
+    flex: 1,
+  },
+  decisionTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: 12.5,
+    color: "#7A4A0D",
+  },
+  decisionText: {
+    marginTop: 2,
+    fontFamily: FontFamily.sans,
+    fontSize: 10.5,
+    lineHeight: 15,
+    color: "rgba(16,36,26,0.58)",
+  },
+  reportBannerWrap: {
+    marginTop: 14,
+    borderRadius: 24,
+  },
+  reportBanner: {
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(31,122,77,0.18)",
+    padding: 17,
+  },
+  reportHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  reportBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.7)",
+  },
+  reportTitleBlock: {
+    flex: 1,
+  },
+  reportEyebrow: {
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
+    letterSpacing: 1.1,
+    textTransform: "uppercase",
+    color: Brand.moss,
+  },
+  reportTitle: {
+    marginTop: 1,
+    fontFamily: FontFamily.display,
+    fontSize: 20,
+    lineHeight: 22,
+    color: Brand.ink,
+  },
+  reportStats: {
+    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  reportStat: {
+    flex: 1,
+  },
+  reportStatValue: {
+    fontFamily: FontFamily.display,
+    fontSize: 27,
+    lineHeight: 29,
+    color: Brand.forest,
+  },
+  reportStatLabel: {
+    marginTop: 2,
+    fontFamily: FontFamily.medium,
+    fontSize: 8.5,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: Brand.ink55,
+  },
+  reportDivider: {
+    width: 1,
+    height: 30,
+    marginHorizontal: 12,
+    backgroundColor: "rgba(16,36,26,0.12)",
+  },
+  reportCta: {
+    marginTop: 14,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(16,36,26,0.10)",
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  reportCtaText: {
+    fontFamily: FontFamily.semibold,
+    fontSize: 11.5,
+    color: Brand.moss,
+  },
+  reportCtaHint: {
+    flexShrink: 1,
+    fontFamily: FontFamily.sans,
+    fontSize: 9.5,
+    color: Brand.ink55,
+    textAlign: "right",
   },
   urgencyChip: {
     flexDirection: "row",
@@ -1033,41 +1360,71 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: Brand.ink55,
   },
-  actionsRow: {
+  actionsGrid: {
     flexDirection: "row",
-    gap: 10,
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  actionCardWrap: {
+    flexBasis: "47%",
+    flexGrow: 1,
+    borderRadius: 22,
   },
   actionCard: {
-    flex: 1,
-    borderRadius: 18,
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: Brand.line,
-    backgroundColor: Brand.paper,
+    borderColor: "rgba(255,255,255,0.95)",
+    backgroundColor: "rgba(255,255,255,0.55)",
     padding: 14,
-    minHeight: 104,
+    minHeight: 126,
+    overflow: "hidden",
+    shadowColor: "#10231A",
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 3,
   },
   actionCardPressed: {
-    backgroundColor: Brand.paper2,
+    opacity: 0.82,
+  },
+  actionHighlight: {
+    position: "absolute",
+    top: -42,
+    right: -34,
+    width: 150,
+    height: 118,
+    borderRadius: 999,
+    opacity: 0.55,
   },
   actionGlyph: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(31,122,77,0.10)",
+  },
+  actionArrow: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionLabel: {
-    marginTop: 12,
+    marginTop: 16,
     fontFamily: FontFamily.medium,
-    fontSize: 12.5,
+    fontSize: 13.5,
+    letterSpacing: -0.1,
     color: Brand.ink,
   },
   actionHint: {
     marginTop: 3,
     fontFamily: FontFamily.sans,
     fontSize: 10.5,
-    lineHeight: 15,
+    lineHeight: 14,
     color: Brand.ink55,
   },
   skeleton: {

@@ -8,6 +8,10 @@ import {
   type RescuerHomeData,
   type RescuerHomeState,
 } from "@/domain/rescuer";
+import {
+  selectRescuerReportSummary,
+  type RescuerReportSummary,
+} from "@/domain/rescuer-reports";
 
 import type { RescuerHomeDataSource } from "@/data/rescuer-home";
 
@@ -26,6 +30,7 @@ export function useRescuerHomeViewModel({
 }: RescuerHomeOptions = {}) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [home, setHome] = useState<RescuerHomeState | null>(null);
+  const [reports, setReports] = useState<RescuerReportSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +39,7 @@ export function useRescuerHomeViewModel({
       await Promise.all([auth.getCachedUser(), data.loadHome()]);
     setUser(cachedUser);
     setHome(selectRescuerHome(loaded));
+    setReports(selectRescuerReportSummary(loaded.assignments, loaded.asOf));
     setError(null);
   }, [auth, data]);
 
@@ -44,6 +50,7 @@ export function useRescuerHomeViewModel({
       .catch((cause) => {
         if (active) {
           setHome(null);
+          setReports(null);
           setError(
             cause instanceof Error ? cause.message : "Couldn't load your shift.",
           );
@@ -75,6 +82,7 @@ export function useRescuerHomeViewModel({
   return {
     firstName,
     home,
+    reports,
     loading,
     error,
     reload,

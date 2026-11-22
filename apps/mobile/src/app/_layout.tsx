@@ -64,6 +64,22 @@ export default function RootLayout() {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
+          name="explore-map"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="animals"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="adoption"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
+          name="community"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
           name="edit-profile"
           options={{ animation: "slide_from_right" }}
         />
