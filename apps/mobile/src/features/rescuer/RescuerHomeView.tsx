@@ -24,6 +24,7 @@ import {
   HomeIcon,
   PawIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
   RescuerAssignment,
@@ -758,9 +759,29 @@ function LoadingState({
 
   return (
     <View style={styles.skeleton}>
-      <View style={styles.skeletonBanner} />
-      <View style={styles.skeletonRow} />
-      <View style={styles.skeletonRow} />
+      <Skeleton height={220} borderRadius={26} />
+
+      {[0, 1, 2].map((section) => (
+        <View key={section} style={styles.skeletonSection}>
+          <View style={styles.skeletonHeadingRow}>
+            <Skeleton width={126} height={13} borderRadius={6} />
+            <Skeleton width={58} height={9} borderRadius={4} />
+          </View>
+          <Skeleton height={110} borderRadius={18} />
+        </View>
+      ))}
+
+      <View style={styles.skeletonSection}>
+        <View style={styles.skeletonHeadingRow}>
+          <Skeleton width={108} height={13} borderRadius={6} />
+          <Skeleton width={48} height={9} borderRadius={4} />
+        </View>
+        <View style={styles.skeletonActions}>
+          {[0, 1, 2, 3].map((card) => (
+            <Skeleton key={card} width="auto" height={98} borderRadius={18} style={styles.skeletonAction} />
+          ))}
+        </View>
+      </View>
     </View>
   );
 }
@@ -1427,14 +1448,22 @@ const styles = StyleSheet.create({
     marginTop: 8,
     gap: 12,
   },
-  skeletonBanner: {
-    height: 220,
-    borderRadius: 26,
-    backgroundColor: "rgba(16,36,26,0.06)",
+  skeletonSection: {
+    marginTop: 8,
+    gap: 9,
   },
-  skeletonRow: {
-    height: 110,
-    borderRadius: 18,
-    backgroundColor: "rgba(16,36,26,0.05)",
+  skeletonHeadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  skeletonActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+  skeletonAction: {
+    flexBasis: "47%",
+    flexGrow: 1,
   },
 });

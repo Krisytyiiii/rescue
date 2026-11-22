@@ -12,13 +12,12 @@ import {
 /** Re-read applications once a minute so status changes stop reminders. */
 const POLL_MS = 60_000;
 
-/** Keep each snackbar on screen long enough to read, then hide it. */
-const SNACKBAR_MS = 8_000;
-
 /**
  * Watches the resident's interview-scheduled applications and surfaces a
  * snackbar ten minutes before the interview, then every five minutes until the
  * application leaves the `interview_scheduled` status.
+ *
+ * The snackbar stays on screen until the resident dismisses it.
  */
 export function useInterviewReminderViewModel(
   data: AdoptionApplicationDataSource = adoptionApplicationDataSource,
@@ -28,31 +27,16 @@ export function useInterviewReminderViewModel(
 
   const shownAt = useRef(new Map<string, number>());
   const currentReminder = useRef<AdoptionRequest | null>(null);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mounted = useRef(true);
 
-  const hide = useCallback(() => {
+  const dismiss = useCallback(() => {
     setVisible(false);
   }, []);
-
-  const dismiss = useCallback(() => {
-    if (hideTimer.current) {
-      clearTimeout(hideTimer.current);
-      hideTimer.current = null;
-    }
-    hide();
-  }, [hide]);
 
   const show = useCallback((application: AdoptionRequest) => {
     currentReminder.current = application;
     setReminder(application);
     setVisible(true);
-
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => {
-      hideTimer.current = null;
-      setVisible(false);
-    }, SNACKBAR_MS);
   }, []);
 
   const run = useCallback(async () => {
@@ -118,10 +102,6 @@ export function useInterviewReminderViewModel(
       mounted.current = false;
       clearInterval(interval);
       subscription.remove();
-      if (hideTimer.current) {
-        clearTimeout(hideTimer.current);
-        hideTimer.current = null;
-      }
     };
   }, [run]);
 

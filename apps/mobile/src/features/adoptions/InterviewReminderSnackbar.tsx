@@ -39,7 +39,7 @@ export function InterviewReminderSnackbar() {
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.layer, { bottom: insets.bottom + 84 }]}
+      style={[styles.layer, { top: insets.top + 20 }]}
     >
       <View style={styles.snack}>
         <View style={styles.iconWrap}>
@@ -81,7 +81,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    paddingHorizontal: 16,
+    zIndex: 20,
+    paddingHorizontal: 22,
     alignItems: "center",
   },
   snack: {

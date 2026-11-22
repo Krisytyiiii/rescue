@@ -17,6 +17,7 @@ import {
   PhoneIcon,
 } from "@/components/icons";
 import { UserAvatar } from "@/components/user-avatar";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { useResidentProfileViewModel } from "./useResidentProfileViewModel";
@@ -130,18 +131,21 @@ export function ResidentProfileView() {
 
               <View style={styles.reportStats}>
                 <ReportStat
-                  value={loading ? "—" : `${stats.reportsSubmitted}`}
+                  value={`${stats.reportsSubmitted}`}
                   label="Reports"
+                  loading={loading}
                 />
                 <View style={styles.reportDivider} />
                 <ReportStat
-                  value={loading ? "—" : `${stats.applications}`}
+                  value={`${stats.applications}`}
                   label="Applications"
+                  loading={loading}
                 />
                 <View style={styles.reportDivider} />
                 <ReportStat
-                  value={loading ? "—" : `${stats.approved}`}
+                  value={`${stats.approved}`}
                   label="Approved"
+                  loading={loading}
                 />
               </View>
 
@@ -156,21 +160,28 @@ export function ResidentProfileView() {
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Current activity</Text>
-            <Text style={styles.sectionMeta}>{loading ? "Loading" : "Live"}</Text>
+            {loading ? (
+              <Skeleton width={34} height={9} borderRadius={4} />
+            ) : (
+              <Text style={styles.sectionMeta}>Live</Text>
+            )}
           </View>
 
           <View style={styles.statsRow}>
             <StatCard
               label="Reports"
-              value={loading ? undefined : stats.reportsSubmitted}
+              value={stats.reportsSubmitted}
+              loading={loading}
             />
             <StatCard
               label="Applications"
-              value={loading ? undefined : stats.applications}
+              value={stats.applications}
+              loading={loading}
             />
             <StatCard
               label="Interviews"
-              value={loading ? undefined : stats.interviewsScheduled}
+              value={stats.interviewsScheduled}
+              loading={loading}
             />
           </View>
 
@@ -240,19 +251,43 @@ export function ResidentProfileView() {
   );
 }
 
-function ReportStat({ value, label }: { value: string; label: string }) {
+function ReportStat({
+  value,
+  label,
+  loading,
+}: {
+  value: string;
+  label: string;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.reportStat}>
-      <Text style={styles.reportStatValue}>{value}</Text>
+      {loading ? (
+        <Skeleton width={38} height={24} borderRadius={7} />
+      ) : (
+        <Text style={styles.reportStatValue}>{value}</Text>
+      )}
       <Text style={styles.reportStatLabel}>{label}</Text>
     </View>
   );
 }
 
-function StatCard({ label, value }: { label: string; value?: number }) {
+function StatCard({
+  label,
+  value,
+  loading,
+}: {
+  label: string;
+  value?: number;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.statCard}>
-      <Text style={styles.statValue}>{value ?? "—"}</Text>
+      {loading ? (
+        <Skeleton width={44} height={24} borderRadius={7} />
+      ) : (
+        <Text style={styles.statValue}>{value ?? "—"}</Text>
+      )}
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );

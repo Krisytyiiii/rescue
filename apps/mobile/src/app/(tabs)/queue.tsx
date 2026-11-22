@@ -16,6 +16,7 @@ import {
   CloseIcon,
   SearchIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import type {
@@ -172,9 +173,9 @@ export default function AssignmentsScreen() {
 
           {loading ? (
             <View style={styles.skeletonList}>
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
-              <View style={styles.skeletonRow} />
+              <AssignmentSkeleton />
+              <AssignmentSkeleton />
+              <AssignmentSkeleton />
             </View>
           ) : visible.length === 0 ? (
             <View style={styles.emptyCard}>
@@ -214,6 +215,27 @@ export default function AssignmentsScreen() {
           )}
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function AssignmentSkeleton() {
+  return (
+    <View style={styles.skeletonCard}>
+      <View style={styles.skeletonTop}>
+        <Skeleton width={92} height={10} borderRadius={4} />
+        <Skeleton width={72} height={22} borderRadius={999} />
+      </View>
+      <Skeleton width="82%" height={14} borderRadius={6} />
+      <Skeleton width="58%" height={10} borderRadius={4} />
+      <View style={styles.skeletonReporter}>
+        <Skeleton width={16} height={16} borderRadius={8} />
+        <Skeleton width="52%" height={9} borderRadius={4} />
+      </View>
+      <View style={styles.skeletonFoot}>
+        <Skeleton width={132} height={9} borderRadius={4} />
+        <Skeleton width={78} height={9} borderRadius={4} />
+      </View>
     </View>
   );
 }
@@ -559,10 +581,32 @@ const styles = StyleSheet.create({
     marginTop: 18,
     gap: 12,
   },
-  skeletonRow: {
-    height: 128,
+  skeletonCard: {
     borderRadius: 22,
-    backgroundColor: "rgba(16,36,26,0.05)",
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    padding: 17,
+    paddingLeft: 19,
+    gap: 9,
+  },
+  skeletonTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 2,
+  },
+  skeletonReporter: {
+    marginTop: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  skeletonFoot: {
+    marginTop: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   pressed: {
     opacity: 0.7,

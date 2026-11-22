@@ -17,6 +17,7 @@ import {
   ShieldIcon,
 } from "@/components/icons";
 import { UserAvatar } from "@/components/user-avatar";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 
 import { useRescuerProfileViewModel } from "./useRescuerProfileViewModel";
@@ -134,16 +135,19 @@ export function RescuerProfileView() {
                 <ReportStat
                   value={reports ? `${reports.totalCompleted}` : "—"}
                   label="Completed"
+                  loading={loading && !reports}
                 />
                 <View style={styles.reportDivider} />
                 <ReportStat
                   value={reports ? `${reports.thisMonthCompleted}` : "—"}
                   label="This month"
+                  loading={loading && !reports}
                 />
                 <View style={styles.reportDivider} />
                 <ReportStat
                   value={reports ? `${reports.successRate}%` : "—"}
                   label="Success"
+                  loading={loading && !reports}
                 />
               </View>
 
@@ -160,13 +164,29 @@ export function RescuerProfileView() {
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Current workload</Text>
-            <Text style={styles.sectionMeta}>{loading ? "Loading" : "Live"}</Text>
+            {loading ? (
+              <Skeleton width={34} height={9} borderRadius={4} />
+            ) : (
+              <Text style={styles.sectionMeta}>Live</Text>
+            )}
           </View>
 
           <View style={styles.statsRow}>
-            <StatCard label="Assigned" value={profile?.stats.assigned} />
-            <StatCard label="In progress" value={profile?.stats.inProgress} />
-            <StatCard label="Done today" value={profile?.stats.completedToday} />
+            <StatCard
+              label="Assigned"
+              value={profile?.stats.assigned}
+              loading={loading}
+            />
+            <StatCard
+              label="In progress"
+              value={profile?.stats.inProgress}
+              loading={loading}
+            />
+            <StatCard
+              label="Done today"
+              value={profile?.stats.completedToday}
+              loading={loading}
+            />
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -235,19 +255,43 @@ export function RescuerProfileView() {
   );
 }
 
-function ReportStat({ value, label }: { value: string; label: string }) {
+function ReportStat({
+  value,
+  label,
+  loading,
+}: {
+  value: string;
+  label: string;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.reportStat}>
-      <Text style={styles.reportStatValue}>{value}</Text>
+      {loading ? (
+        <Skeleton width={38} height={24} borderRadius={7} />
+      ) : (
+        <Text style={styles.reportStatValue}>{value}</Text>
+      )}
       <Text style={styles.reportStatLabel}>{label}</Text>
     </View>
   );
 }
 
-function StatCard({ label, value }: { label: string; value?: number }) {
+function StatCard({
+  label,
+  value,
+  loading,
+}: {
+  label: string;
+  value?: number;
+  loading?: boolean;
+}) {
   return (
     <View style={styles.statCard}>
-      <Text style={styles.statValue}>{value ?? "—"}</Text>
+      {loading ? (
+        <Skeleton width={44} height={24} borderRadius={7} />
+      ) : (
+        <Text style={styles.statValue}>{value ?? "—"}</Text>
+      )}
       <Text style={styles.statLabel}>{label}</Text>
     </View>
   );

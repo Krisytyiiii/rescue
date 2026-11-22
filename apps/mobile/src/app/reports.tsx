@@ -17,6 +17,7 @@ import {
   PawIcon,
   ShieldIcon,
 } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { RescuerAssignment, UrgencyLevel } from "@/domain/rescuer";
 import type { ReportSegment } from "@/domain/rescuer-reports";
@@ -247,35 +248,35 @@ export default function ReportsScreen() {
 function ReportsSkeleton() {
   return (
     <View style={styles.skeleton}>
-      <View style={[styles.skel, styles.skelHero]} />
+      <Skeleton height={196} borderRadius={26} />
 
       <View style={styles.skelGrid}>
-        <View style={[styles.skel, styles.skelMetric]} />
-        <View style={[styles.skel, styles.skelMetric]} />
-        <View style={[styles.skel, styles.skelMetric]} />
+        <Skeleton width="auto" height={70} borderRadius={18} style={styles.skelMetric} />
+        <Skeleton width="auto" height={70} borderRadius={18} style={styles.skelMetric} />
+        <Skeleton width="auto" height={70} borderRadius={18} style={styles.skelMetric} />
       </View>
 
       <View style={styles.skelSection}>
-        <View style={[styles.skel, styles.skelHeading]} />
-        <View style={[styles.skel, styles.skelChart]} />
+        <Skeleton width={128} height={14} borderRadius={7} />
+        <Skeleton height={116} borderRadius={20} />
       </View>
 
       <View style={styles.skelSection}>
-        <View style={[styles.skel, styles.skelHeading]} />
-        <View style={[styles.skel, styles.skelCard]} />
+        <Skeleton width={128} height={14} borderRadius={7} />
+        <Skeleton height={148} borderRadius={20} />
       </View>
 
       <View style={styles.skelSection}>
-        <View style={[styles.skel, styles.skelHeading]} />
-        <View style={[styles.skel, styles.skelCard]} />
+        <Skeleton width={128} height={14} borderRadius={7} />
+        <Skeleton height={148} borderRadius={20} />
       </View>
 
       <View style={styles.skelSection}>
-        <View style={[styles.skel, styles.skelHeading]} />
+        <Skeleton width={128} height={14} borderRadius={7} />
         <View style={styles.skelList}>
-          <View style={[styles.skel, styles.skelRow]} />
-          <View style={[styles.skel, styles.skelRow]} />
-          <View style={[styles.skel, styles.skelRow]} />
+          <Skeleton height={74} borderRadius={18} />
+          <Skeleton height={74} borderRadius={18} />
+          <Skeleton height={74} borderRadius={18} />
         </View>
       </View>
     </View>
@@ -416,23 +417,10 @@ const styles = StyleSheet.create({
     paddingBottom: 130,
   },
   skeleton: { gap: 10 },
-  skel: {
-    borderRadius: 18,
-    backgroundColor: "rgba(16, 36, 26, 0.07)",
-  },
-  skelHero: {
-    height: 196,
-    borderRadius: 26,
-    backgroundColor: "rgba(11, 46, 28, 0.16)",
-  },
   skelGrid: { flexDirection: "row", gap: 10 },
-  skelMetric: { flex: 1, height: 70 },
+  skelMetric: { flex: 1 },
   skelSection: { marginTop: 18, gap: 10 },
-  skelHeading: { width: 128, height: 14, borderRadius: 7 },
-  skelChart: { height: 116, borderRadius: 20 },
-  skelCard: { height: 148, borderRadius: 20 },
   skelList: { gap: 8 },
-  skelRow: { height: 74, borderRadius: 18 },
   error: {
     marginTop: 16,
     fontFamily: FontFamily.medium,

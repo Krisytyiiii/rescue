@@ -17,6 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CheckIcon, ChevronDownIcon, LockIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
 import { RescuerScreenHeader } from "@/features/rescuer/RescuerScreenHeader";
@@ -83,13 +84,21 @@ export default function EditProfileScreen() {
           >
             {loading || !form ? (
               <View style={styles.skeleton}>
-                <View style={[styles.skel, styles.skelLocked]} />
+                <View style={styles.photoSkeleton}>
+                  <Skeleton width={76} height={76} borderRadius={38} />
+                  <View style={styles.photoSkeletonBody}>
+                    <Skeleton width={112} height={13} borderRadius={6} />
+                    <Skeleton width="88%" height={10} borderRadius={5} />
+                    <Skeleton width="62%" height={10} borderRadius={5} />
+                  </View>
+                </View>
+                <Skeleton height={62} borderRadius={16} />
                 {[0, 1, 2, 3].map((index) => (
-                  <View key={index} style={[styles.skel, styles.skelField]} />
+                  <Skeleton key={index} height={64} borderRadius={16} />
                 ))}
-                <View style={[styles.skel, styles.skelLabel]} />
-                <View style={[styles.skel, styles.skelSelect]} />
-                <View style={[styles.skel, styles.skelButton]} />
+                <Skeleton width={96} height={12} borderRadius={6} />
+                <Skeleton height={50} borderRadius={16} />
+                <Skeleton height={54} borderRadius={27} />
               </View>
             ) : (
               <>
@@ -364,15 +373,17 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   skeleton: { gap: 10 },
-  skel: {
-    borderRadius: 16,
-    backgroundColor: "rgba(16, 36, 26, 0.07)",
+  photoSkeleton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    padding: 14,
   },
-  skelLocked: { height: 62 },
-  skelField: { height: 64 },
-  skelLabel: { width: 96, height: 12, marginTop: 6, borderRadius: 6 },
-  skelSelect: { height: 50 },
-  skelButton: { height: 54, marginTop: 6, borderRadius: 27 },
+  photoSkeletonBody: { flex: 1, gap: 7 },
   photoCard: {
     flexDirection: "row",
     alignItems: "center",
