@@ -129,7 +129,7 @@ function NavLink({
       <span className="truncate">{item.label}</span>
 
       {unseen > 0 && (
-        <span className="ml-auto rounded-full bg-clay/10 px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none text-clay">
+        <span className="ml-auto rounded-full bg-[#d64545] px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none text-white">
           {unseen > BADGE_CAP ? `${BADGE_CAP}+` : unseen}
         </span>
       )}

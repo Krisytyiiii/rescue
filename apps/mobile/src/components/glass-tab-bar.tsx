@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Brand.clay,
+    backgroundColor: "#d64545",
     borderWidth: 1.5,
     borderColor: "rgba(255,255,255,0.9)",
   },
