@@ -4,6 +4,7 @@ import type {
   AdoptionIdUpload,
   CreatedAdoptionApplication,
 } from "@/domain/adoption-applications";
+import type { AdoptionRequest, AdoptionsPage } from "@/domain/adoptions";
 import type { SessionStorage } from "@/domain/ports";
 
 import type { AdoptionApplicationDataSource } from "./adoption-applications";
@@ -24,6 +25,21 @@ function normalize(animal: AdoptableAnimal): AdoptableAnimal {
       ...item,
       fileUrl: absoluteUrl(item.fileUrl) ?? item.fileUrl,
     })),
+  };
+}
+
+function normalizeApplication(request: AdoptionRequest): AdoptionRequest {
+  return {
+    ...request,
+    homePhotoUrl: absoluteUrl(request.homePhotoUrl),
+    animal: {
+      ...request.animal,
+      primaryPhotoUrl: absoluteUrl(request.animal.primaryPhotoUrl),
+      media: request.animal.media.map((item) => ({
+        ...item,
+        fileUrl: absoluteUrl(item.fileUrl) ?? item.fileUrl,
+      })),
+    },
   };
 }
 
@@ -49,6 +65,21 @@ export class HttpAdoptionApplicationsGateway
     );
 
     return payload.animals.map(normalize);
+  }
+
+  async loadMyApplications(): Promise<AdoptionRequest[]> {
+    const token = (await this.session.read())?.token;
+
+    const page = await requestJson<AdoptionsPage>(
+      "/api/adoptions/mine?pageSize=100",
+      {
+        token,
+        networkMessage: "Can't reach FuRescue. Check your connection.",
+        fallbackMessage: "We couldn't load your adoption applications.",
+      },
+    );
+
+    return page.items.map(normalizeApplication);
   }
 
   async apply(

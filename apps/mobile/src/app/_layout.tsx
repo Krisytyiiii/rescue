@@ -84,6 +84,10 @@ export default function RootLayout() {
           options={{ animation: "slide_from_right" }}
         />
         <Stack.Screen
+          name="adoption-applications"
+          options={{ animation: "slide_from_right" }}
+        />
+        <Stack.Screen
           name="community"
           options={{ animation: "slide_from_right" }}
         />

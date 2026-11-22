@@ -51,6 +51,7 @@ const SOURCES: ReadonlyArray<{ id: AdoptionSource; label: string }> = [
  * Staff animal records stay on their own screen.
  */
 export function ResidentAdoptionsView() {
+  const router = useRouter();
   const {
     animals,
     loading,
@@ -85,10 +86,6 @@ export function ResidentAdoptionsView() {
     setSelected(animal);
   };
 
-  const activeLoading = source === "vet" ? loading : feedLoading;
-  const activeCount = source === "vet" ? animals.length : posts.length;
-  const activeUnit = source === "vet" ? "animal" : "post";
-
   return (
     <View style={styles.root}>
       <SafeAreaView style={styles.flex} edges={["top"]}>
@@ -96,26 +93,19 @@ export function ResidentAdoptionsView() {
           <View style={styles.header}>
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Adopt</Text>
-              {activeLoading ? (
-                <Skeleton
-                  width={128}
-                  height={9}
-                  borderRadius={4}
-                  style={styles.headerMetaSkeleton}
-                />
-              ) : (
-                <Text style={styles.headerMeta}>
-                  {`${activeCount} ${activeUnit}${activeCount === 1 ? "" : "s"} ${
-                    source === "vet"
-                      ? "looking for a home"
-                      : "posted by the community"
-                  }`}
-                </Text>
-              )}
             </View>
-            <View style={styles.headerBadge}>
-              <PawIcon size={17} color="#6B4FC2" />
-            </View>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Track my adoption applications"
+              onPress={() => router.push("/adoption-applications")}
+              style={({ pressed }) => [
+                styles.applicationsButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={styles.applicationsButtonText}>My applications</Text>
+            </Pressable>
           </View>
 
           <View style={styles.segmentRow}>
@@ -536,20 +526,18 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8,
     color: Brand.ink,
   },
-  headerMetaSkeleton: { marginTop: 5 },
-  headerMeta: {
-    marginTop: 3,
-    fontFamily: FontFamily.sans,
-    fontSize: 11.5,
-    color: Brand.ink55,
-  },
-  headerBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  applicationsButton: {
+    height: 38,
+    paddingHorizontal: 15,
+    borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(107,79,194,0.12)",
+    backgroundColor: Brand.forest,
+  },
+  applicationsButtonText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 11.5,
+    color: Brand.paper,
   },
   segmentRow: {
     width: "100%",
