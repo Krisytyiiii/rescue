@@ -19,6 +19,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
+  ChatIcon,
   CloseIcon,
   PawIcon,
   PlusCircleIcon,
@@ -314,8 +315,10 @@ function FeedSkeleton() {
 }
 
 function FeedCard({ post, isOwn }: { post: CommunityPost; isOwn: boolean }) {
+  const router = useRouter();
   const photos = postPhotos(post);
   const status = postStatus(post);
+  const author = post.postedBy;
   const { width } = useWindowDimensions();
   const mediaWidth = Math.max(1, Math.min(width, 560) - 44 - 2);
 
@@ -411,6 +414,26 @@ function FeedCard({ post, isOwn }: { post: CommunityPost; isOwn: boolean }) {
 
         {isOwn && post.listingStatus !== "published" ? (
           <Text style={styles.ownNote}>{ownPostNote(post)}</Text>
+        ) : null}
+
+        {!isOwn && author ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Message ${postAuthor(author)}`}
+            onPress={() =>
+              router.push({
+                pathname: "/chat/[userId]",
+                params: { userId: author.id, name: postAuthor(author) },
+              })
+            }
+            style={({ pressed }) => [
+              styles.messageButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <ChatIcon size={15} color={Brand.forest} />
+            <Text style={styles.messageButtonText}>Message about this pet</Text>
+          </Pressable>
         ) : null}
       </View>
     </View>
@@ -1359,6 +1382,23 @@ const styles = StyleSheet.create({
     fontSize: 11,
     lineHeight: 16,
     color: Brand.ink55,
+  },
+  messageButton: {
+    marginTop: 12,
+    height: 40,
+    borderRadius: 13,
+    borderWidth: 1,
+    borderColor: "rgba(16,36,26,0.14)",
+    backgroundColor: "rgba(47,143,99,0.08)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 7,
+  },
+  messageButtonText: {
+    fontFamily: FontFamily.medium,
+    fontSize: 12,
+    color: Brand.forest,
   },
   emptyCard: {
     marginTop: 16,
