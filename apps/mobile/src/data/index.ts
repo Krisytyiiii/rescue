@@ -6,6 +6,7 @@ import { DefaultAuthRepository } from "./auth-repository";
 import { USE_RESCUER_API } from "./config";
 import { ExpoGoogleAuthBrowser } from "./google-browser";
 import { HttpMessagingGateway } from "./messaging-gateway";
+import { HttpReportMapDataSource } from "./report-map-gateway";
 import { reportMapDataSource as mockReportMapDataSource } from "./report-map";
 import { HttpRescuerGateway } from "./rescuer-gateway";
 import { rescuerHomeDataSource as mockHomeDataSource } from "./rescuer-home";
@@ -61,8 +62,10 @@ export const rescuerAssignmentRepository: RescuerAssignmentRepository =
 /** Direct messages from a rescuer to their dispatcher or a reporter. */
 export const messagingDataSource = httpMessagingGateway;
 
-/** Explore map markers. Placeholder until `/api/reports/map` exists. */
-export const reportMapDataSource: ReportMapDataSource = mockReportMapDataSource;
+/** Explore map markers: live report coordinates from `GET /api/reports/map`. */
+export const reportMapDataSource: ReportMapDataSource = USE_RESCUER_API
+  ? new HttpReportMapDataSource(sessionStorage)
+  : mockReportMapDataSource;
 
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";

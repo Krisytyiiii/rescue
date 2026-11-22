@@ -380,6 +380,16 @@ export class RescuesService {
     return { assignments: operations.map(toRescuerAssignment) };
   }
 
+  /**
+   * Every geotagged report for the rescuer explore map. Uses the same read
+   * model as the admin report map so the pins sit on the real coordinates.
+   */
+  async rescuerMap(actor: Actor | undefined): Promise<ReportMarkerRow[]> {
+    requireRole(actor, "rescuer");
+    const reports = await this.repo.listReports();
+    return reports.map(toReportMarker);
+  }
+
   /** Verified reports still waiting for an admin to dispatch them. */
   async rescuerQueue(actor: Actor | undefined): Promise<RescuerQueuePayload> {
     requireRole(actor, "rescuer");
