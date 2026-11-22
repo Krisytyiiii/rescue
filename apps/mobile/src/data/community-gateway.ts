@@ -5,7 +5,7 @@ import type {
   NewCommunityPost,
 } from "@/domain/community";
 import type { SessionStorage } from "@/domain/ports";
-import { File as ExpoFile } from "expo-file-system";
+import { File as ExpoFile, UploadType } from "expo-file-system";
 import { Platform } from "react-native";
 
 import { webUrl, API_BASE_URL } from "./config";
@@ -90,36 +90,86 @@ export class HttpCommunityGateway implements CommunityDataSource {
   async uploadPhoto(photo: CommunityPhotoUpload): Promise<string> {
     const token = (await this.session.read())?.token;
     const file = photoFile(photo);
+    const endpoint = `${API_BASE_URL}/api/community/uploads`;
+    const headers = token ? { authorization: `Bearer ${token}` } : undefined;
+
+    if (Platform.OS !== "web") {
+      try {
+        const nativeFile = new ExpoFile(photo.uri);
+        if (__DEV__) {
+          console.log("[api] community upload source", {
+            uri: photo.uri,
+            exists: nativeFile.exists,
+            size: nativeFile.size,
+            type: nativeFile.type,
+          });
+        }
+        if (!nativeFile.exists) {
+          throw new ApiError(
+            "That photo is no longer available. Please choose it again.",
+            "UPLOAD_FAILED",
+          );
+        }
+
+        const result = await nativeFile.upload(endpoint, {
+          httpMethod: "POST",
+          uploadType: UploadType.MULTIPART,
+          fieldName: "file",
+          mimeType: file.type,
+          headers,
+        });
+
+        const envelope = (() => {
+          try {
+            return JSON.parse(result.body) as UploadEnvelope;
+          } catch {
+            return null;
+          }
+        })();
+
+        if (
+          result.status < 200 ||
+          result.status >= 300 ||
+          !envelope?.ok ||
+          !envelope.data?.url
+        ) {
+          throw uploadError(envelope, result.status);
+        }
+
+        return envelope.data.url;
+      } catch (cause) {
+        if (cause instanceof ApiError) throw cause;
+        if (__DEV__) {
+          console.warn("[api] POST /api/community/uploads failed", cause);
+        }
+        const detail =
+          __DEV__ && cause instanceof Error ? ` (${cause.message})` : "";
+        throw new ApiError(
+          `We couldn't upload that photo. Check your connection and try again.${detail}`,
+          "UPLOAD_FAILED",
+        );
+      }
+    }
 
     const form = new FormData();
-
-    if (Platform.OS === "web") {
-      const blob = await fetch(photo.uri)
-        .then((response) => {
-          if (!response.ok) throw new Error("Could not read the selected photo.");
-          return response.blob();
-        })
-        .catch(() => {
-          throw new ApiError("We couldn't read that photo. Try choosing it again.", "UPLOAD_FAILED");
-        });
-      form.append("file", blob, file.name);
-    } else {
-      const blob = await Promise.resolve()
-        .then(() => {
-          const nativeFile = new ExpoFile(photo.uri);
-          return nativeFile.slice(0, nativeFile.size, file.type);
-        })
-        .catch(() => {
-          throw new ApiError("We couldn't read that photo. Try choosing it again.", "UPLOAD_FAILED");
-        });
-      form.append("file", blob, file.name);
-    }
+    const blob = await fetch(photo.uri)
+      .then((response) => {
+        if (!response.ok) throw new Error("Could not read the selected photo.");
+        return response.blob();
+      })
+      .catch(() => {
+        throw new ApiError(
+          "We couldn't read that photo. Try choosing it again.",
+          "UPLOAD_FAILED",
+        );
+      });
+    form.append("file", blob, file.name);
 
     let response: Response;
     try {
-      response = await fetch(`${API_BASE_URL}/api/community/uploads`, {
+      response = await fetch(endpoint, {
         method: "POST",
-        headers: token ? { authorization: `Bearer ${token}` } : undefined,
+        headers,
         body: form,
       });
     } catch (cause) {
@@ -129,23 +179,31 @@ export class HttpCommunityGateway implements CommunityDataSource {
       const detail =
         __DEV__ && cause instanceof Error ? ` (${cause.message})` : "";
       throw new ApiError(
-        `${__DEV__ ? `Can't reach FuRescue. Check your connection. [${API_BASE_URL}/api/community/uploads]` : "Can't reach FuRescue. Check your connection."}${detail}`,
+        `${__DEV__ ? `Can't reach FuRescue. Check your connection. [${endpoint}]` : "Can't reach FuRescue. Check your connection."}${detail}`,
         "NETWORK_ERROR",
       );
     }
 
-    const envelope = (await response.json().catch(() => null)) as
-      | { ok: boolean; data?: { url?: string }; error?: { message?: string } }
-      | null;
+    const envelope = (await response.json().catch(() => null)) as UploadEnvelope | null;
 
     if (!response.ok || !envelope?.ok || !envelope.data?.url) {
-      throw new ApiError(
-        envelope?.error?.message ?? "We couldn't upload that photo.",
-        "UPLOAD_FAILED",
-        response.status,
-      );
+      throw uploadError(envelope, response.status);
     }
 
     return envelope.data.url;
   }
+}
+
+interface UploadEnvelope {
+  ok: boolean;
+  data?: { url?: string };
+  error?: { message?: string };
+}
+
+function uploadError(envelope: UploadEnvelope | null, status: number) {
+  return new ApiError(
+    envelope?.error?.message ?? "We couldn't upload that photo.",
+    "UPLOAD_FAILED",
+    status,
+  );
 }
