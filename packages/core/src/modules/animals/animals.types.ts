@@ -94,6 +94,8 @@ export interface ListAnimalsQuery {
   size?: AnimalSize;
   lifecycleStatus?: LifecycleStatus;
   listingStatus?: ListingStatus;
+  originType?: OriginType;
+  postedByUserId?: string;
   search?: string;
   availableOnly?: boolean;
 }

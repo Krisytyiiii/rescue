@@ -59,6 +59,36 @@ export const createAnimalSchema = z.object({
     .optional(),
 });
 
+/**
+ * Resident submission for the community adoption feed. Residents describe the
+ * animal; staff review it before it becomes a published listing.
+ */
+export const createCommunityPostSchema = createAnimalSchema
+  .omit({
+    originType: true,
+    sourceReportId: true,
+    intakeDate: true,
+    microchipNo: true,
+  })
+  .extend({
+    description: z
+      .string()
+      .trim()
+      .min(20, "Tell adopters a little more about this animal")
+      .max(2_000),
+    media: z
+      .array(
+        z.object({
+          mediaType: z.literal("photo"),
+          fileUrl: z.string().url().max(255),
+          caption: optionalText(150),
+          sortOrder: z.coerce.number().int().min(0).max(255).optional(),
+        }),
+      )
+      .max(3)
+      .optional(),
+  });
+
 export const updateAnimalSchema = z.object({
   name: optionalText(60),
   breedType: z.enum(breedTypeValues).optional(),

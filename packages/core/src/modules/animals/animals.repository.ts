@@ -49,8 +49,7 @@ export class AnimalsRepository {
     query: ListAnimalsQuery,
     pagination: NormalizedPagination,
     publicOnly: boolean,
-  ): Promise<Paginated<Awaited<ReturnType<AnimalsRepository["getById"]>>>> {
-    const where: Prisma.AnimalWhereInput = {
+  ): Promise<Paginated<Awaited<ReturnType<AnimalsRepository["getById"]>>>> {    const where: Prisma.AnimalWhereInput = {
       deletedAt: null,
       ...(publicOnly
         ? { listingStatus: "published", lifecycleStatus: { notIn: ["deceased", "returned_to_owner"] } }
@@ -61,6 +60,8 @@ export class AnimalsRepository {
       ...(query.size ? { size: query.size } : {}),
       ...(query.lifecycleStatus ? { lifecycleStatus: query.lifecycleStatus } : {}),
       ...(query.listingStatus ? { listingStatus: query.listingStatus } : {}),
+      ...(query.originType ? { originType: query.originType } : {}),
+      ...(query.postedByUserId ? { postedByUserId: query.postedByUserId } : {}),
       ...(query.search
         ? {
             OR: [
@@ -94,6 +95,32 @@ export class AnimalsRepository {
         hasPrevious: pagination.page > 1,
       },
     };
+  }
+
+  /**
+   * Community adoption feed. Everyone sees published posts; a signed-in
+   * resident also sees their own submissions while they wait for review.
+   */
+  async listCommunityFeed(actorId: string, includeOwnPosts: boolean) {
+    const where: Prisma.AnimalWhereInput = {
+      deletedAt: null,
+      originType: "community_post",
+      ...(includeOwnPosts
+        ? {
+            OR: [
+              { listingStatus: "published" },
+              { postedByUserId: actorId },
+            ],
+          }
+        : { listingStatus: "published" }),
+    };
+
+    return this.db.animal.findMany({
+      where,
+      include: animalDetailInclude,
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    });
   }
 
   update(id: string, data: Prisma.AnimalUpdateInput, tx: Prisma.TransactionClient = this.db) {

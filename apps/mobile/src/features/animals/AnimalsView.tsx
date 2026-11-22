@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { CalendarIcon, CloseIcon, PawIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { Animal } from "@/domain/animals";
 
@@ -71,11 +72,18 @@ export function AnimalsView() {
 
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Animals</Text>
-              <Text style={styles.headerMeta}>
-                {loading
-                  ? "Loading records"
-                  : `${animals.length} animal${animals.length === 1 ? "" : "s"} in care`}
-              </Text>
+              {loading ? (
+                <Skeleton
+                  width={112}
+                  height={9}
+                  borderRadius={4}
+                  style={styles.headerMetaSkeleton}
+                />
+              ) : (
+                <Text style={styles.headerMeta}>
+                  {`${animals.length} animal${animals.length === 1 ? "" : "s"} in care`}
+                </Text>
+              )}
             </View>
 
             <View style={styles.headerBadge}>
@@ -96,14 +104,22 @@ export function AnimalsView() {
           ) : null}
 
           {loading && animals.length === 0 ? (
-            <View style={styles.grid}>
-              {Array.from({ length: 4 }).map((_, index) => (
-                <View
-                  key={index}
-                  style={[styles.skeleton, { width: cardWidth }]}
-                />
-              ))}
-            </View>
+            <>
+              <View style={styles.gridHeader}>
+                <Skeleton width={128} height={14} borderRadius={7} />
+                <Skeleton width={68} height={9} borderRadius={4} />
+              </View>
+              <View style={styles.grid}>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    width={cardWidth}
+                    height={cardWidth}
+                    borderRadius={22}
+                  />
+                ))}
+              </View>
+            </>
           ) : animals.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.emptyTitle}>No animals yet</Text>
@@ -618,6 +634,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Brand.ink55,
   },
+  headerMetaSkeleton: {
+    marginTop: 5,
+  },
   headerBadge: {
     width: 38,
     height: 38,
@@ -757,11 +776,6 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.sans,
     fontSize: 10.5,
     color: "rgba(255,255,255,0.72)",
-  },
-  skeleton: {
-    aspectRatio: 1,
-    borderRadius: 22,
-    backgroundColor: "rgba(16,36,26,0.06)",
   },
   emptyCard: {
     borderRadius: 22,

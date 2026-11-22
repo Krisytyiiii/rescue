@@ -122,6 +122,19 @@ export class AnimalsService {
     return this.repo.list(query, pagination, publicOnly);
   }
 
+  /**
+   * Community adoption feed. Published posts are public; a resident also sees
+   * their own submissions while those wait for staff review.
+   */
+  async listCommunityFeed(actor?: Actor) {
+    const current = requireActor(actor);
+    const items = await this.repo.listCommunityFeed(
+      current.userId,
+      !isStaff(current),
+    );
+    return { items };
+  }
+
   async getById(id: string, actor?: Actor) {
     const animal = await this.repo.getById(id);
     if (!isStaff(actor) && animal.listingStatus !== "published") {

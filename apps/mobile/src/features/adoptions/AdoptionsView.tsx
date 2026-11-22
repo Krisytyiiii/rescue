@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ChevronDownIcon, HomeIcon, PawIcon } from "@/components/icons";
+import { Skeleton } from "@/components/skeleton";
 import { Brand, FontFamily } from "@/constants/theme";
 import type { AdoptionRequest, AdoptionStatus } from "@/domain/adoptions";
 
@@ -79,11 +80,18 @@ export function AdoptionsView() {
 
             <View style={styles.headerText}>
               <Text style={styles.headerTitle}>Adoptions</Text>
-              <Text style={styles.headerMeta}>
-                {loading
-                  ? "Loading applications"
-                  : `${adoptions.length} application${adoptions.length === 1 ? "" : "s"}`}
-              </Text>
+              {loading ? (
+                <Skeleton
+                  width={124}
+                  height={9}
+                  borderRadius={4}
+                  style={styles.headerMetaSkeleton}
+                />
+              ) : (
+                <Text style={styles.headerMeta}>
+                  {`${adoptions.length} application${adoptions.length === 1 ? "" : "s"}`}
+                </Text>
+              )}
             </View>
 
             <View style={styles.headerBadge}>
@@ -105,21 +113,34 @@ export function AdoptionsView() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.filters}
           >
-            <FilterChip
-              label="All"
-              count={counts.all}
-              active={filter === "all"}
-              onPress={() => setFilter("all")}
-            />
-            {ADOPTION_STATUS_ORDER.map((status) => (
-              <FilterChip
-                key={status}
-                label={ADOPTION_STATUS_LABEL[status]}
-                count={counts[status]}
-                active={filter === status}
-                onPress={() => setFilter(status)}
-              />
-            ))}
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton
+                  key={index}
+                  width={index === 0 ? 62 : 84}
+                  height={34}
+                  borderRadius={999}
+                />
+              ))
+            ) : (
+              <>
+                <FilterChip
+                  label="All"
+                  count={counts.all}
+                  active={filter === "all"}
+                  onPress={() => setFilter("all")}
+                />
+                {ADOPTION_STATUS_ORDER.map((status) => (
+                  <FilterChip
+                    key={status}
+                    label={ADOPTION_STATUS_LABEL[status]}
+                    count={counts[status]}
+                    active={filter === status}
+                    onPress={() => setFilter(status)}
+                  />
+                ))}
+              </>
+            )}
           </ScrollView>
 
           {error && adoptions.length === 0 ? (
@@ -129,7 +150,7 @@ export function AdoptionsView() {
           {loading && adoptions.length === 0 ? (
             <View style={styles.list}>
               {Array.from({ length: 3 }).map((_, index) => (
-                <View key={index} style={styles.skeleton} />
+                <ApplicationSkeleton key={index} />
               ))}
             </View>
           ) : visible.length === 0 ? (
@@ -163,6 +184,25 @@ export function AdoptionsView() {
           )}
         </ScrollView>
       </SafeAreaView>
+    </View>
+  );
+}
+
+function ApplicationSkeleton() {
+  return (
+    <View style={styles.skeletonCard}>
+      <View style={styles.skeletonTop}>
+        <Skeleton width={92} height={9} borderRadius={4} />
+        <Skeleton width={68} height={22} borderRadius={999} />
+      </View>
+      <View style={styles.skeletonMain}>
+        <Skeleton width={54} height={54} borderRadius={15} />
+        <View style={styles.skeletonIdentity}>
+          <Skeleton width="64%" height={13} borderRadius={6} />
+          <Skeleton width="46%" height={10} borderRadius={5} />
+          <Skeleton width="78%" height={9} borderRadius={4} />
+        </View>
+      </View>
     </View>
   );
 }
@@ -445,6 +485,9 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: Brand.ink55,
   },
+  headerMetaSkeleton: {
+    marginTop: 5,
+  },
   headerBadge: {
     width: 38,
     height: 38,
@@ -716,10 +759,27 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     color: "rgba(255,255,255,0.55)",
   },
-  skeleton: {
-    height: 108,
+  skeletonCard: {
     borderRadius: 22,
-    backgroundColor: "rgba(16,36,26,0.05)",
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+    padding: 14,
+  },
+  skeletonTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  skeletonMain: {
+    marginTop: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 11,
+  },
+  skeletonIdentity: {
+    flex: 1,
+    gap: 7,
   },
   emptyCard: {
     borderRadius: 22,

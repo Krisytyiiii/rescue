@@ -1,8 +1,9 @@
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { PawMark, Wordmark } from "@/components/brand";
+import { ChatIcon } from "@/components/icons";
 import { Brand, FontFamily } from "@/constants/theme";
 import { useHomeViewModel } from "@/features/auth/useHomeViewModel";
 import { RescuerHomeView } from "@/features/rescuer/RescuerHomeView";
@@ -55,6 +56,26 @@ export default function HomeScreen() {
             This is the start of the resident app. The onboarding flow is ready;
             these screens come next.
           </Text>
+
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push("/community" as Href)}
+            style={({ pressed }) => [
+              styles.communityCard,
+              pressed && styles.pressed,
+            ]}
+          >
+            <View style={styles.communityIcon}>
+              <ChatIcon size={19} color={Brand.paper} />
+            </View>
+            <View style={styles.communityText}>
+              <Text style={styles.communityTitle}>Community adoption feed</Text>
+              <Text style={styles.communityHint}>
+                Post an animal for adoption or meet one looking for a home.
+              </Text>
+            </View>
+            <Text style={styles.communityArrow}>→</Text>
+          </Pressable>
 
           <View style={styles.list}>
             {UPCOMING.map((item) => (
@@ -151,6 +172,44 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderTopWidth: 1,
     borderTopColor: Brand.line,
+  },
+  communityCard: {
+    marginTop: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 20,
+    backgroundColor: Brand.forest,
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+  },
+  communityIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  communityText: {
+    flex: 1,
+  },
+  communityTitle: {
+    fontFamily: FontFamily.medium,
+    fontSize: 14,
+    color: Brand.paper,
+  },
+  communityHint: {
+    marginTop: 3,
+    fontFamily: FontFamily.sans,
+    fontSize: 11,
+    lineHeight: 15,
+    color: "rgba(255,255,255,0.62)",
+  },
+  communityArrow: {
+    fontFamily: FontFamily.medium,
+    fontSize: 16,
+    color: "rgba(255,255,255,0.7)",
   },
   row: {
     flexDirection: "row",
