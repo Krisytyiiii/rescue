@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 import { PawMark, Wordmark } from "@/components/brand";
 
@@ -24,8 +25,12 @@ interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
-  badge?: boolean;
 }
+
+/** Badges cap at 9+ so the narrow sidebar stays readable. */
+const BADGE_CAP = 9;
+const SEEN_KEY = "furescue:admin-nav-seen";
+const POLL_MS = 20_000;
 
 interface NavGroup {
   label: string;
@@ -55,7 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     label: "Community",
     items: [
-      { href: "/admin/users", label: "Users & access", icon: Users, badge: true },
+      { href: "/admin/users", label: "Users & access", icon: Users },
       { href: "/admin/messaging", label: "Messaging", icon: MessageSquare },
       { href: "/admin/learning", label: "E-learning", icon: GraduationCap },
     ],
@@ -89,21 +94,20 @@ function isActive(pathname: string, href: string): boolean {
 function NavLink({
   item,
   active,
-  pendingCount,
+  unseen,
   onNavigate,
 }: {
   item: NavItem;
   active: boolean;
-  pendingCount: number;
-  onNavigate: () => void;
+  unseen: number;
+  onNavigate: (href: string) => void;
 }) {
   const Icon = item.icon;
-  const badge = item.badge && pendingCount > 0 ? pendingCount : null;
 
   return (
     <Link
       href={item.href}
-      onClick={onNavigate}
+      onClick={() => onNavigate(item.href)}
       aria-current={active ? "page" : undefined}
       className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[0.8125rem] transition-colors ${
         active
@@ -124,13 +128,31 @@ function NavLink({
 
       <span className="truncate">{item.label}</span>
 
-      {badge !== null && (
+      {unseen > 0 && (
         <span className="ml-auto rounded-full bg-clay/10 px-1.5 py-0.5 text-[0.625rem] font-semibold leading-none text-clay">
-          {badge}
+          {unseen > BADGE_CAP ? `${BADGE_CAP}+` : unseen}
         </span>
       )}
     </Link>
   );
+}
+
+const ALL_HREFS = [
+  ...NAV_GROUPS.flatMap((group) => group.items.map((item) => item.href)),
+  FOOTER_ITEM.href,
+];
+
+function readSeen(): Record<string, number> {
+  try {
+    const raw = window.localStorage.getItem(SEEN_KEY);
+    if (!raw) return {};
+    const parsed: unknown = JSON.parse(raw);
+    return parsed && typeof parsed === "object"
+      ? (parsed as Record<string, number>)
+      : {};
+  } catch {
+    return {};
+  }
 }
 
 export function AdminSidebar({
@@ -139,6 +161,80 @@ export function AdminSidebar({
   onCloseMobile,
 }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [counts, setCounts] = useState<Record<string, number>>({
+    "/admin/users": pendingCount,
+  });
+  const [seen, setSeen] = useState<Record<string, number>>({});
+  const [seenLoaded, setSeenLoaded] = useState(false);
+
+  useEffect(() => {
+    setSeen(readSeen());
+    setSeenLoaded(true);
+  }, []);
+
+  // Poll for live counts and refresh immediately when Supabase reports a change.
+  useEffect(() => {
+    let cancelled = false;
+
+    async function refresh() {
+      try {
+        const response = await fetch("/api/admin/nav-counts", {
+          cache: "no-store",
+        });
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          data?: { counts?: Record<string, number> };
+        };
+        if (!cancelled && payload.data?.counts) setCounts(payload.data.counts);
+      } catch {
+        // Realtime is an enhancement; keep the last known counts.
+      }
+    }
+
+    void refresh();
+    const timer = window.setInterval(() => void refresh(), POLL_MS);
+    const handleRealtime = () => void refresh();
+    window.addEventListener("admin:realtime", handleRealtime);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.removeEventListener("admin:realtime", handleRealtime);
+    };
+  }, []);
+
+  const markSeen = useCallback(
+    (href: string) => {
+      setSeen((current) => {
+        const next = { ...current, [href]: counts[href] ?? 0 };
+        try {
+          window.localStorage.setItem(SEEN_KEY, JSON.stringify(next));
+        } catch {
+          // Storage is optional; the in-memory state still clears the badge.
+        }
+        return next;
+      });
+    },
+    [counts],
+  );
+
+  const navigate = useCallback(
+    (href: string) => {
+      markSeen(href);
+      onCloseMobile();
+    },
+    [markSeen, onCloseMobile],
+  );
+
+  // Landing on a page clears its badge without needing a click.
+  useEffect(() => {
+    if (!seenLoaded) return;
+    const active = ALL_HREFS.find((href) => isActive(pathname, href));
+    if (active) markSeen(active);
+  }, [pathname, seenLoaded, markSeen]);
+
+  const unseenFor = (href: string) =>
+    Math.max(0, (counts[href] ?? 0) - (seen[href] ?? 0));
 
   return (
     <aside
@@ -172,8 +268,8 @@ export function AdminSidebar({
                   key={item.href}
                   item={item}
                   active={isActive(pathname, item.href)}
-                  pendingCount={pendingCount}
-                  onNavigate={onCloseMobile}
+                  unseen={unseenFor(item.href)}
+                  onNavigate={navigate}
                 />
               ))}
             </div>
@@ -185,8 +281,8 @@ export function AdminSidebar({
         <NavLink
           item={FOOTER_ITEM}
           active={isActive(pathname, FOOTER_ITEM.href)}
-          pendingCount={pendingCount}
-          onNavigate={onCloseMobile}
+          unseen={unseenFor(FOOTER_ITEM.href)}
+          onNavigate={navigate}
         />
         <p className="mt-3 px-3 text-[0.5625rem] leading-[1.6] text-ink/35">
           FurRescue · Mati City

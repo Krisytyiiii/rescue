@@ -259,6 +259,13 @@ export class RescuesService {
   constructor(private readonly repo: RescuesRepository = rescuesRepository) {}
 
   /** Single read model for the command center panes. */
+  /** Assignment offers still waiting on a rescuer response. */
+  countPendingOffers(): Promise<number> {
+    return prisma.rescueOperation.count({
+      where: { assignmentStatus: "pending" },
+    });
+  }
+
   async console(): Promise<RescueConsoleData> {
     const since = new Date();
     since.setHours(0, 0, 0, 0);

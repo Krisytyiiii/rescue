@@ -166,7 +166,7 @@ export function AdminNavbar({
           <Bell className="h-5 w-5" strokeWidth={1.8} />
           {unread > 0 && (
             <span className="absolute right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-clay px-1 text-[0.5625rem] font-semibold leading-none text-white">
-              {unread > 99 ? "99+" : unread}
+              {unread > 9 ? "9+" : unread}
             </span>
           )}
         </Link>

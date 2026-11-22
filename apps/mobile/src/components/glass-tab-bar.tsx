@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { Brand, FontFamily } from "@/constants/theme";
+import { useTabBadges } from "@/features/navigation/useTabBadges";
 import { useTabsViewModel } from "@/features/navigation/useTabsViewModel";
 
 const WEB_BLUR =
@@ -33,8 +34,16 @@ export function GlassTabBar({
   navigateToTab,
   insets,
 }: BottomTabBarProps) {
-  const { items, ready } = useTabsViewModel();
+  const { items, ready, role } = useTabsViewModel();
+  const { unseen, markSeen } = useTabBadges(role);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  const focusedName = state.routes[state.index]?.name;
+
+  // Visiting a tab is what clears its badge.
+  useEffect(() => {
+    if (focusedName) markSeen(focusedName);
+  }, [focusedName, markSeen]);
 
   useEffect(() => {
     const show = Keyboard.addListener("keyboardDidShow", () =>
@@ -96,6 +105,8 @@ export function GlassTabBar({
               }
             };
 
+            const badge = unseen(item.name);
+
             return (
               <Pressable
                 key={route.key}
@@ -112,10 +123,19 @@ export function GlassTabBar({
                   pressed && styles.itemPressed,
                 ]}
               >
-                <item.Icon
-                  size={22}
-                  color={focused ? Brand.clay : Brand.ink55}
-                />
+                <View style={styles.iconWrap}>
+                  <item.Icon
+                    size={22}
+                    color={focused ? Brand.clay : Brand.ink55}
+                  />
+                  {badge > 0 ? (
+                    <View style={styles.badge}>
+                      <Text style={styles.badgeText}>
+                        {badge > 9 ? "9+" : badge}
+                      </Text>
+                    </View>
+                  ) : null}
+                </View>
                 <Text style={[styles.label, focused && styles.labelActive]}>
                   {label}
                 </Text>
@@ -169,6 +189,31 @@ const styles = StyleSheet.create({
   },
   itemPressed: {
     opacity: 0.65,
+  },
+  iconWrap: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badge: {
+    position: "absolute",
+    top: -5,
+    right: -11,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Brand.clay,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.9)",
+  },
+  badgeText: {
+    fontFamily: FontFamily.semibold,
+    fontSize: 9,
+    lineHeight: 11,
+    color: "#ffffff",
   },
   label: {
     fontFamily: FontFamily.medium,

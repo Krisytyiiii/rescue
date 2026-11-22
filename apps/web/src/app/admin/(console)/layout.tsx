@@ -39,7 +39,13 @@ export default async function AdminConsoleLayout({
     >
       <AdminSupabaseRealtime
         channelName="admin-realtime"
-        tables={["notifications"]}
+        tables={[
+          "notifications",
+          "reports",
+          "rescue_operations",
+          "adoption_requests",
+          "messages",
+        ]}
       />
       <ToastProvider>{children}</ToastProvider>
     </AdminShell>
