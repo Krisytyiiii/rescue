@@ -543,6 +543,25 @@ function AccountSection({
           </div>
         }
       >
+        <div className="mb-3 flex items-center gap-3">
+          <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-clay/10 text-[0.8125rem] font-semibold text-clay ring-1 ring-inset ring-clay/15">
+            {admin.profilePhotoUrl ? (
+              <img
+                src={admin.profilePhotoUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              `${admin.firstName.charAt(0)}${admin.lastName.charAt(0)}`.toUpperCase()
+            )}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-[0.875rem] font-semibold text-ink">
+              {admin.fullName}
+            </p>
+            <p className="truncate text-[0.6875rem] text-ink/45">{admin.email}</p>
+          </div>
+        </div>
         <dl>
           <Row label="Full name" value={admin.fullName} />
           <Row label="Email" value={admin.email} />

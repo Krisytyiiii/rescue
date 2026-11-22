@@ -10,6 +10,12 @@ export const updateProfileSchema = z.object({
   middleName: z.string().trim().max(60).optional().or(z.literal("")),
   lastName: z.string().trim().min(1, "Last name is required").max(60),
   phoneNumber: phone.optional().or(z.literal("")),
+  profilePhotoUrl: z
+    .string()
+    .trim()
+    .max(2048, "That photo URL is too long")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;

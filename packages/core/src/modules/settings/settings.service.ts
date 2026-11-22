@@ -141,6 +141,7 @@ export class SettingsService {
         middleName: true,
         lastName: true,
         phoneNumber: true,
+        profilePhotoUrl: true,
       },
     });
     if (!before) throw new NotFoundError("Account");
@@ -150,6 +151,7 @@ export class SettingsService {
       middleName: input.middleName?.trim() ? input.middleName.trim() : null,
       lastName: input.lastName,
       phoneNumber: input.phoneNumber?.trim() ? input.phoneNumber.trim() : null,
+      profilePhotoUrl: input.profilePhotoUrl?.trim() ? input.profilePhotoUrl.trim() : null,
     };
 
     await prisma.$transaction(async (tx) => {
@@ -257,6 +259,7 @@ export class SettingsService {
     lastName: string;
     email: string;
     phoneNumber: string | null;
+    profilePhotoUrl: string | null;
     accountStatus: AdminProfileSummary["accountStatus"];
     lastLoginAt: Date | null;
     createdAt: Date;
@@ -276,6 +279,7 @@ export class SettingsService {
       role: admin.role.roleName,
       accountStatus: admin.accountStatus,
       barangay: admin.barangay?.name ?? null,
+      profilePhotoUrl: admin.profilePhotoUrl,
       lastLoginAt: admin.lastLoginAt?.toISOString() ?? null,
       createdAt: admin.createdAt.toISOString(),
     };

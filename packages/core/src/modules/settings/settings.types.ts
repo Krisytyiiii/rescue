@@ -13,6 +13,7 @@ export interface AdminProfileSummary {
   role: RoleName;
   accountStatus: AccountStatus;
   barangay: string | null;
+  profilePhotoUrl: string | null;
   lastLoginAt: string | null;
   createdAt: string;
 }
