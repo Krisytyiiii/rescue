@@ -1,6 +1,7 @@
 import type { AuthRepository } from "@/domain/ports";
 import type { RescuerAssignmentRepository } from "@/domain/rescuer";
 
+import { HttpAdoptionsGateway } from "./adoptions-gateway";
 import { HttpAnimalsGateway } from "./animals-gateway";
 import { HttpAuthGateway } from "./auth-gateway";
 import { DefaultAuthRepository } from "./auth-repository";
@@ -10,6 +11,7 @@ import { HttpReportMapDataSource } from "./report-map-gateway";
 import { HttpRescuerGateway } from "./rescuer-gateway";
 import { SecureSessionStorage } from "./session-storage";
 
+import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { ReportMapDataSource } from "./report-map";
 import type { RescuerHistoryDataSource } from "./rescuer-history";
@@ -23,6 +25,7 @@ import type { RescuerQueueDataSource } from "./rescuer-queue";
 const sessionStorage = new SecureSessionStorage();
 const httpRescuerGateway = new HttpRescuerGateway(sessionStorage);
 const httpAnimalsGateway = new HttpAnimalsGateway(sessionStorage);
+const httpAdoptionsGateway = new HttpAdoptionsGateway(sessionStorage);
 const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
 const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
 
@@ -60,6 +63,9 @@ export const rescuerAssignmentRepository: RescuerAssignmentRepository =
 /** Read-only animal records shown in the rescuer Animals screen. */
 export const animalsDataSource: AnimalsDataSource = httpAnimalsGateway;
 
+/** Read-only adoption applications shown in the rescuer Adoption screen. */
+export const adoptionsDataSource: AdoptionsDataSource = httpAdoptionsGateway;
+
 /** Direct messages from a rescuer to their dispatcher or a reporter. */
 export const messagingDataSource = httpMessagingGateway;
 
@@ -68,6 +74,7 @@ export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
+export type { AdoptionsDataSource } from "./adoptions";
 export type { AnimalsDataSource } from "./animals";
 export type { ReportMapDataSource } from "./report-map";
 export type { RescuerHomeDataSource } from "./rescuer-home";

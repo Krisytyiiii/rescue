@@ -100,6 +100,15 @@ export class AdoptionsService {
     return this.repo.list(scoped, normalizePagination(scoped));
   }
 
+  /**
+   * Read-only list for staff observers (rescuers). Unlike `list`, this is not
+   * scoped to the caller's own applications, and it never mutates anything.
+   */
+  async listForStaff(query: ListAdoptionsQuery, actor?: Actor) {
+    requireRole(actor, "admin", "rescuer");
+    return this.repo.list(query, normalizePagination(query));
+  }
+
   async getById(id: string, actor?: Actor) {
     const user = requireActor(actor);
     const request = await this.repo.getById(id);
