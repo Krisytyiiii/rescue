@@ -1275,7 +1275,7 @@ export function MessagingConsole({
         <OverlayCard
           onClose={() => setNewMessageOpen(false)}
           labelledBy="new-message-title"
-          eyebrow="Messaging"
+          eyebrow="Chat"
           title="New message"
           titleClassName="text-[0.9375rem] font-semibold text-ink"
           panelClassName="max-w-lg"
@@ -1430,7 +1430,7 @@ export function MessagingConsole({
         <OverlayCard
           onClose={() => setMessageToDelete(null)}
           labelledBy="delete-message-title"
-          eyebrow="Messaging"
+          eyebrow="Chat"
           title="Delete message"
           panelClassName="max-w-md"
           footer={

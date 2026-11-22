@@ -72,8 +72,21 @@ export class MessagingRepository {
     return { items, meta: buildPageMeta(total, pagination) };
   }
 
-  findDirectConversation(adminUserId: string, userId: string) {
-    return this.db.conversation.findFirst({
+  /** Direct threads the person participates in, newest activity first. */
+  listDirectForUser(userId: string) {
+    return this.db.conversation.findMany({
+      where: {
+        deletedAt: null,
+        contextType: "general",
+        subject: null,
+        participants: { some: { userId } },
+      },
+      orderBy: { updatedAt: "desc" },
+      include: conversationInclude,
+    });
+  }
+
+  findDirectConversation(adminUserId: string, userId: string) {    return this.db.conversation.findFirst({
       where: {
         deletedAt: null,
         contextType: "general",

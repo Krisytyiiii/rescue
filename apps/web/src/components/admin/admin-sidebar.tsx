@@ -61,7 +61,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Community",
     items: [
       { href: "/admin/users", label: "Users & access", icon: Users },
-      { href: "/admin/messaging", label: "Messaging", icon: MessageSquare },
+      { href: "/admin/messaging", label: "Chat", icon: MessageSquare },
       { href: "/admin/learning", label: "E-learning", icon: GraduationCap },
     ],
   },

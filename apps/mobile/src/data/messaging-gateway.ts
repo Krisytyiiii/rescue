@@ -1,6 +1,11 @@
 import { fetch as expoFetch } from "expo/fetch";
 
-import type { ChatMessage, ChatThread, ResidentContact } from "@/domain/messaging";
+import type {
+  ChatMessage,
+  ChatPreview,
+  ChatThread,
+  ResidentContact,
+} from "@/domain/messaging";
 import type { SessionStorage } from "@/domain/ports";
 
 import { API_BASE_URL } from "./config";
@@ -30,6 +35,22 @@ interface ConversationPayload {
     profilePhotoUrl: string | null;
   }[];
   messages: ConversationMessagePayload[];
+}
+
+interface ThreadPreviewPayload {
+  id: string;
+  participants: {
+    userId: string;
+    fullName: string;
+    profilePhotoUrl: string | null;
+  }[];
+  lastMessage: {
+    senderUserId: string;
+    body: string;
+    sentAt: string;
+  } | null;
+  updatedAt: string;
+  unreadCount: number;
 }
 
 /** Live thread updates pushed over server-sent events. */
@@ -66,9 +87,17 @@ export interface ResidentContactsDataSource {
   loadContacts(): Promise<ResidentContact[]>;
 }
 
+/** Port for the latest direct-thread activity per contact. */
+export interface ChatPreviewDataSource {
+  loadPreviews(): Promise<ChatPreview[]>;
+}
+
 /** Real backend implementation of direct messaging. */
 export class HttpMessagingGateway
-  implements MessagingDataSource, ResidentContactsDataSource
+  implements
+    MessagingDataSource,
+    ResidentContactsDataSource,
+    ChatPreviewDataSource
 {
   constructor(private readonly session: SessionStorage) {}
 
@@ -151,6 +180,36 @@ export class HttpMessagingGateway
       },
     );
     return payload.contacts;
+  }
+
+  /** Latest message per direct thread, newest activity first. */
+  async loadPreviews(): Promise<ChatPreview[]> {
+    const { token, userId } = await this.context();
+    const payload = await requestJson<{ threads: ThreadPreviewPayload[] }>(
+      "/api/messages/threads",
+      {
+        token,
+        networkMessage: "Can't reach FuRescue. Check your connection.",
+        fallbackMessage: "We couldn't load your chats.",
+      },
+    );
+
+    return payload.threads.flatMap((thread) => {
+      const contact = thread.participants.find(
+        (participant) => participant.userId !== userId,
+      );
+      if (!contact) return [];
+
+      return [
+        {
+          contactUserId: contact.userId,
+          lastMessage: thread.lastMessage?.body ?? null,
+          lastMessageAt: thread.lastMessage?.sentAt ?? thread.updatedAt,
+          lastMessageMine: thread.lastMessage?.senderUserId === userId,
+          unreadCount: thread.unreadCount,
+        },
+      ];
+    });
   }
 
   async startThread(contactUserId: string, body: string): Promise<ChatThread> {

@@ -24,6 +24,16 @@ export interface ResidentContact {
   reportCodes: string[];
 }
 
+/** Latest activity with one contact, used to preview the chat list. */
+export interface ChatPreview {
+  contactUserId: string;
+  lastMessage: string | null;
+  lastMessageAt: string | null;
+  /** True when the signed-in person sent the last message. */
+  lastMessageMine: boolean;
+  unreadCount: number;
+}
+
 /** A rescuer's direct conversation with one dispatcher or reporter. */
 export interface ChatThread {
   id: string;

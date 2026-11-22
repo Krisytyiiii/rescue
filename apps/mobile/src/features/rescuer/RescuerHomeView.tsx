@@ -87,7 +87,7 @@ export function RescuerHomeView() {
               </IconPill>
               <IconPill
                 count={home?.unreadMessages ?? 0}
-                accessibilityLabel="Messages"
+                accessibilityLabel="Chat"
               >
                 <ChatIcon size={17} color={Brand.ink} />
               </IconPill>

@@ -37,7 +37,7 @@ export const RESCUER_TABS: readonly TabItem[] = [
   { name: "index", label: "Today", Icon: HomeIcon },
   { name: "queue", label: "Assign", Icon: MapPinIcon },
   { name: "history", label: "History", Icon: CheckIcon },
-  { name: "messages", label: "Messages", Icon: ChatIcon },
+  { name: "messages", label: "Chat", Icon: ChatIcon },
   { name: "profile", label: "Profile", Icon: PersonIcon },
 ];
 

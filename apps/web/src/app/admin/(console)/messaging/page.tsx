@@ -13,7 +13,7 @@ import { fetchAllPages } from "@/lib/fetch-all-pages";
 import { readSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {
-  title: "Messaging — FuRescue admin",
+  title: "Chat — FuRescue admin",
   robots: { index: false, follow: false },
 };
 

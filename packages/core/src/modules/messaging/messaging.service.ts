@@ -235,8 +235,17 @@ export class MessagingService {
     return { items: await this.decorate(page.items, actor!), meta: page.meta };
   }
 
-  async getById(id: string, actor?: Actor): Promise<ConversationDetailRow> {
-    requireRole(actor, "admin");
+  /**
+   * The signed-in person's direct threads with their latest message, so the
+   * mobile chat list can preview and order contacts by recent activity.
+   */
+  async listMyDirectThreads(actor?: Actor): Promise<ConversationListRow[]> {
+    const current = requireActor(actor);
+    const conversations = await this.repo.listDirectForUser(current.userId);
+    return this.decorate(conversations, current);
+  }
+
+  async getById(id: string, actor?: Actor): Promise<ConversationDetailRow> {    requireRole(actor, "admin");
     const conversation = await this.repo.getById(id);
     const [row] = await this.decorate([conversation], actor!);
     return {

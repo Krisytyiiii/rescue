@@ -1,15 +1,16 @@
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ChatIcon, PawIcon } from "@/components/icons";
+import { ChatIcon, PawIcon, SearchIcon } from "@/components/icons";
 import { Skeleton } from "@/components/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
 import { Brand, FontFamily } from "@/constants/theme";
@@ -33,12 +34,30 @@ export default function MessagesScreen() {
   const { contacts, viewerRole, loading, error, reload } =
     useChatContactsViewModel();
   const isRescuer = viewerRole === "rescuer";
+  const [search, setSearch] = useState("");
 
   useFocusEffect(
     useCallback(() => {
       void reload();
     }, [reload]),
   );
+
+  const visible = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return contacts;
+
+    return contacts.filter((contact) => {
+      const haystack = [
+        contact.fullName,
+        contact.lastMessage ?? "",
+        roleLabel(contact.role, viewerRole),
+        contact.reportCodes.join(" "),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [contacts, search, viewerRole]);
 
   return (
     <View style={styles.root}>
@@ -49,6 +68,19 @@ export default function MessagesScreen() {
         >
           <View style={styles.header}>
             <Text style={styles.headerTitle}>Chat</Text>
+          </View>
+
+          <View style={styles.searchBar}>
+            <SearchIcon size={16} color={Brand.ink55} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Search chats"
+              placeholderTextColor={Brand.ink55}
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={styles.searchInput}
+            />
           </View>
 
           {loading ? (
@@ -67,9 +99,16 @@ export default function MessagesScreen() {
                   : "The City Vet team and the rescuers assigned to your reports will appear here."}
               </Text>
             </View>
+          ) : visible.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyTitle}>No chats found</Text>
+              <Text style={styles.emptyBody}>
+                Try a different name or message.
+              </Text>
+            </View>
           ) : (
             <View style={styles.peopleList}>
-              {contacts.map((contact) => (
+              {visible.map((contact) => (
                 <Pressable
                   key={contact.userId}
                   accessibilityRole="button"
@@ -105,11 +144,14 @@ export default function MessagesScreen() {
                     <Text style={styles.contactName} numberOfLines={1}>
                       {contact.fullName}
                     </Text>
-                    <Text style={styles.contactMeta} numberOfLines={1}>
-                      {roleLabel(contact.role, viewerRole)}
-                      {contact.reportCodes.length > 0
-                        ? ` · ${contact.reportCodes.join(", ")}`
-                        : ""}
+                    <Text
+                      style={styles.contactMeta}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {contact.lastMessage
+                        ? `${contact.lastMessageMine ? "You: " : ""}${contact.lastMessage}`
+                        : roleLabel(contact.role, viewerRole)}
                     </Text>
                   </View>
 
@@ -172,8 +214,27 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
     color: Brand.ink,
   },
+  searchBar: {
+    marginTop: 16,
+    height: 44,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Brand.line,
+    backgroundColor: Brand.paper,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 0,
+    fontFamily: FontFamily.medium,
+    fontSize: 13,
+    color: Brand.ink,
+  },
   peopleList: {
-    marginTop: 22,
+    marginTop: 16,
     gap: 8,
   },
   contact: {

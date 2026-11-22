@@ -19,7 +19,10 @@ import type { AdoptionApplicationDataSource } from "./adoption-applications";
 import type { AdoptionsDataSource } from "./adoptions";
 import type { AnimalsDataSource } from "./animals";
 import type { CommunityDataSource } from "./community";
-import type { ResidentContactsDataSource } from "./messaging-gateway";
+import type {
+  ChatPreviewDataSource,
+  ResidentContactsDataSource,
+} from "./messaging-gateway";
 import type { OnboardingDataSource } from "./onboarding";
 import type { ReportMapDataSource } from "./report-map";
 import type {
@@ -99,6 +102,9 @@ export const messagingDataSource = httpMessagingGateway;
 export const residentContactsDataSource: ResidentContactsDataSource =
   httpMessagingGateway;
 
+/** Latest direct-thread activity per contact, used by the chat list. */
+export const chatPreviewDataSource: ChatPreviewDataSource = httpMessagingGateway;
+
 /** Explore map markers: live report coordinates from `GET /api/reports/map`. */
 export const reportMapDataSource: ReportMapDataSource = httpReportMapDataSource;
 
@@ -129,6 +135,7 @@ export type { RescuerHomeDataSource } from "./rescuer-home";
 export type { RescuerQueueDataSource } from "./rescuer-queue";
 export type { RescuerHistoryDataSource } from "./rescuer-history";
 export type {
+  ChatPreviewDataSource,
   MessagingDataSource,
   ResidentContactsDataSource,
 } from "./messaging-gateway";
