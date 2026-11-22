@@ -13,6 +13,7 @@ import { HttpOnboardingGateway } from "./onboarding-gateway";
 import { HttpReportMapDataSource } from "./report-map-gateway";
 import { HttpReportsGateway } from "./reports-gateway";
 import { HttpRescuerGateway } from "./rescuer-gateway";
+import { HttpResidentProfileGateway } from "./resident-profile";
 import { SecureSessionStorage } from "./session-storage";
 
 import type { AdoptionApplicationDataSource } from "./adoption-applications";
@@ -32,6 +33,7 @@ import type {
 import type { RescuerHistoryDataSource } from "./rescuer-history";
 import type { RescuerHomeDataSource } from "./rescuer-home";
 import type { RescuerQueueDataSource } from "./rescuer-queue";
+import type { ResidentProfileDataSource } from "./resident-profile";
 
 /**
  * Composition root: the only place concrete implementations are wired.
@@ -50,6 +52,7 @@ const httpMessagingGateway = new HttpMessagingGateway(sessionStorage);
 const httpReportMapDataSource = new HttpReportMapDataSource(sessionStorage);
 const httpOnboardingGateway = new HttpOnboardingGateway();
 const httpReportsGateway = new HttpReportsGateway(sessionStorage);
+const httpResidentProfileGateway = new HttpResidentProfileGateway(sessionStorage);
 
 export const authRepository: AuthRepository = new DefaultAuthRepository(
   new HttpAuthGateway(),
@@ -119,6 +122,10 @@ export const reportSubmissionDataSource: ReportSubmissionDataSource =
 export const reportHistoryDataSource: ReportHistoryDataSource =
   httpReportsGateway;
 
+/** Resident profile summary: `GET /api/profile/summary`. */
+export const residentProfileDataSource: ResidentProfileDataSource =
+  httpResidentProfileGateway;
+
 export { ApiError } from "./http";
 export { API_BASE_URL, webUrl } from "./config";
 export type { AdoptionApplicationDataSource } from "./adoption-applications";
@@ -139,3 +146,4 @@ export type {
   MessagingDataSource,
   ResidentContactsDataSource,
 } from "./messaging-gateway";
+export type { ResidentProfileDataSource } from "./resident-profile";

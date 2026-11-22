@@ -29,6 +29,7 @@ import {
   formatDate,
   formatDateTime,
   HOUSING_LABEL,
+  INTERVIEW_VENUE,
 } from "./presentation";
 import { useMyAdoptionsViewModel } from "./useMyAdoptionsViewModel";
 
@@ -223,6 +224,7 @@ function ApplicationCard({
                   : "Not scheduled"
               }
             />
+            <Fact label="Interview venue" value={INTERVIEW_VENUE} />
             <Fact label="Reviewed" value={formatDate(request.reviewedAt)} />
             <Fact
               label="Release date"

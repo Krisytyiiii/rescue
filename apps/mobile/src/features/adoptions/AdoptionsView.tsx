@@ -26,6 +26,7 @@ import {
   formatDate,
   formatDateTime,
   HOUSING_LABEL,
+  INTERVIEW_VENUE,
   personName,
   yesNo,
 } from "./presentation";
@@ -354,6 +355,7 @@ function AdoptionCard({
                   : "Not scheduled"
               }
             />
+            <Fact label="Interview venue" value={INTERVIEW_VENUE} />
             <Fact
               label="Reviewer"
               value={request.reviewer ? personName(request.reviewer) : "Not assigned"}

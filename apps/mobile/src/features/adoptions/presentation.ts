@@ -61,6 +61,9 @@ export const HOUSING_LABEL: Record<HousingType, string> = {
   other: "Other",
 };
 
+/** Fixed venue where adoption meet-and-greets are held. */
+export const INTERVIEW_VENUE = "City Vet Building";
+
 export const FOLLOWUP_METHOD_LABEL: Record<FollowupMethod, string> = {
   in_app: "In-app",
   phone: "Phone call",

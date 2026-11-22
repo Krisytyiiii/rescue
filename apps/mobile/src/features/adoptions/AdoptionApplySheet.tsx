@@ -26,6 +26,7 @@ import {
 } from "@/domain/adoption-applications";
 
 import { adoptableName, HOUSING_TYPE_LABEL } from "./resident-presentation";
+import { INTERVIEW_VENUE } from "./presentation";
 
 const HOUSING_OPTIONS: AdoptionHousingType[] = [
   "house",
@@ -333,8 +334,8 @@ export function AdoptionApplySheet({
             </Pressable>
 
             <Text style={styles.footnote}>
-              The City Vet team reviews every application. They may schedule an
-              interview before approving the adoption.
+              The City Vet team reviews every application. If they schedule an
+              interview, it will be held at {INTERVIEW_VENUE}.
             </Text>
           </ScrollView>
         </View>
